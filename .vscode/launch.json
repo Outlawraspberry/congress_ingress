@@ -1,0 +1,25 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "request": "launch",
+            "name": "Debug insert-task-to-queue.ts",
+            "type": "node",
+            "program": "${workspaceFolder}/supabase/insert-task-to-queue.ts",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "runtimeExecutable": "/nix/store/c6bn1pnbqn1jmr21v98bqq082wmlhhz4-deno-2.2.12/bin/deno",
+            "runtimeArgs": [
+                "run",
+                "--unstable",
+                "--inspect-wait",
+                "--allow-all",
+                "--env-file"
+            ],
+            "attachSimplePort": 9229
+        }
+    ]
+}
