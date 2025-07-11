@@ -1,7 +1,8 @@
 import { createClient, type Session, type User } from '@supabase/supabase-js';
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
+import { type Database } from '../../types/database.types';
 
-export const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+export const supabase = createClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
 	auth: {
 		storage: window.sessionStorage,
 		persistSession: true,
@@ -9,7 +10,10 @@ export const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_K
 	}
 });
 
-export const userStore: { user: User | undefined; session: Session | undefined } = $state({
+export const userStore: {
+	user: User | undefined;
+	session: Session | undefined;
+} = $state({
 	user: undefined,
 	session: undefined
 });
@@ -36,6 +40,7 @@ export async function signIn(email: string, password: string): Promise<void> {
 	if (error != null) {
 		throw error;
 	}
+
 	if (data != null) {
 		userStore.session = data.session;
 		userStore.user = data.user;

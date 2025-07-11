@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { AuthError } from '@supabase/supabase-js';
-	import { signIn } from './db.svelte';
+	import { signIn } from '../supabase/db.svelte';
 	import { Button, Input, Label } from 'flowbite-svelte';
 
 	let email: string = $state('');

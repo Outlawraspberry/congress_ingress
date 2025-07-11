@@ -1,15 +1,16 @@
-<script>
-	import { userStore, signOut } from '$lib/login/db.svelte';
+<script lang="ts">
+	import { goto } from '$app/navigation';
 	import Login from '$lib/login/Login.svelte';
-	import { P, Button } from 'flowbite-svelte';
-
-	let user = userStore;
+	import { signOut, userStore } from '$lib/supabase/db.svelte';
+	import { Button } from 'flowbite-svelte';
 </script>
 
-{#if user.user != null && user.session != null}
-	<P>Logged in!</P>
+{#if userStore.session == null}
+	<Login />
+{:else}
+	Welcome, you can play the game!
 
 	<Button onclick={signOut}>Logout</Button>
-{:else}
-	<Login />
+
+	<Button onclick={() => goto('/game')}>Start the game</Button>
 {/if}
