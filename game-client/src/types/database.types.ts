@@ -27,6 +27,24 @@ export type Database = {
         }
         Relationships: []
       }
+      game: {
+        Row: {
+          id: number
+          state: Database["public"]["Enums"]["game-state"]
+          tick: number
+        }
+        Insert: {
+          id?: number
+          state?: Database["public"]["Enums"]["game-state"]
+          tick: number
+        }
+        Update: {
+          id?: number
+          state?: Database["public"]["Enums"]["game-state"]
+          tick?: number
+        }
+        Relationships: []
+      }
       point: {
         Row: {
           created_at: string
@@ -45,21 +63,6 @@ export type Database = {
           id?: string
           max_health?: number
           name?: string
-        }
-        Relationships: []
-      }
-      public: {
-        Row: {
-          state: Database["public"]["Enums"]["game-state"]
-          tick: number
-        }
-        Insert: {
-          state?: Database["public"]["Enums"]["game-state"]
-          tick: number
-        }
-        Update: {
-          state?: Database["public"]["Enums"]["game-state"]
-          tick?: number
         }
         Relationships: []
       }

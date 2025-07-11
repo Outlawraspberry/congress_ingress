@@ -11,7 +11,7 @@ create table "public"."fraction" (
 
 alter table "public"."fraction" enable row level security;
 
-create table "public"."public" (
+create table "public"."game" (
     "tick" bigint not null,
     "state" "game-state" not null default 'paused'::"game-state"
 );
