@@ -5,6 +5,8 @@ pkgs.mkShell {
   nativeBuildInputs = [
     pkgs.deno
     pkgs.supabase-cli
+    pkgs.yarn
+    pkgs.nodejs_24
   ];
 
   # Runtime libraries needed by your app (GTK, AppIndicator, etc.)
