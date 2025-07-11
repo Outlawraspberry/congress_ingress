@@ -1,14 +1,15 @@
 <script>
 	import { userStore, signOut } from '$lib/login/db.svelte';
 	import Login from '$lib/login/Login.svelte';
+	import { P, Button } from 'flowbite-svelte';
 
 	let user = userStore;
 </script>
 
 {#if user.user != null && user.session != null}
-	Logged in!
+	<P>Logged in!</P>
 
-	<button onclick={signOut}>Logout</button>
+	<Button onclick={signOut}>Logout</Button>
 {:else}
 	<Login />
 {/if}
