@@ -1,5 +1,5 @@
 import { supabase } from '$lib/supabase/db.svelte';
-import type { User } from '../alias';
+import type { User } from '../../../types/alias';
 
 export default {
 	async you(): Promise<User | undefined> {

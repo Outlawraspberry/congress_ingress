@@ -1,4 +1,4 @@
-import type { Game } from '../alias';
+import type { Game } from '../../../types/alias';
 import { supabase } from '../db.svelte';
 
 export default {

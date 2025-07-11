@@ -1,4 +1,4 @@
-import type { Fraction } from '../alias';
+import type { Fraction } from '../../../types/alias';
 import { supabase } from '../db.svelte';
 
 export default {

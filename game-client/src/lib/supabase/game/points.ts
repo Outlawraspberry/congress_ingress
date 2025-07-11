@@ -1,4 +1,4 @@
-import type { Point } from '../alias';
+import type { Point } from '../../../types/alias';
 import { supabase } from '../db.svelte';
 
 export default {

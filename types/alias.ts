@@ -1,4 +1,4 @@
-import type { Database } from '../../types/database.types';
+import type { Database } from './database.types';
 
 export type Fraction = Database['public']['Tables']['fraction']['Row'];
 export type Point = Database['public']['Tables']['point']['Row'];
