@@ -1,2 +1,14 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script>
+	import { userStore, signOut } from '$lib/login/db.svelte';
+	import Login from '$lib/login/Login.svelte';
+
+	let user = userStore;
+</script>
+
+{#if user.user != null && user.session != null}
+	Logged in!
+
+	<button onclick={signOut}>Logout</button>
+{:else}
+	<Login />
+{/if}
