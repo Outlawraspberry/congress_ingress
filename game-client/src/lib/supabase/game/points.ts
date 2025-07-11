@@ -1,8 +1,8 @@
-import type { Database } from '../../../types/database.types';
+import type { Point } from '../alias';
 import { supabase } from '../db.svelte';
 
 export default {
-	async all(): Promise<Array<Database['public']['Tables']['point']['Row']>> {
+	async all(): Promise<Array<Point>> {
 		const { data, error } = await supabase.schema('public').from('point').select('*');
 
 		if (error != null) {

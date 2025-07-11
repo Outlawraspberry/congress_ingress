@@ -1,8 +1,8 @@
-import type { Database } from '../../../types/database.types';
+import type { Fraction } from '../alias';
 import { supabase } from '../db.svelte';
 
 export default {
-	async get(id: string): Promise<Database['public']['Tables']['fraction']['Row'] | undefined> {
+	async get(id: string): Promise<Fraction | undefined> {
 		try {
 			const { data, error } = await supabase
 				.schema('public')
