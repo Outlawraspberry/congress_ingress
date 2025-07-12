@@ -68,21 +68,21 @@ export type Database = {
       }
       tick_point: {
         Row: {
-          acquired_by: string
+          acquired_by: string | null
           created_at: string
           health: number
           point_id: string
           tick: number
         }
         Insert: {
-          acquired_by: string
+          acquired_by?: string | null
           created_at?: string
           health: number
           point_id: string
           tick: number
         }
         Update: {
-          acquired_by?: string
+          acquired_by?: string | null
           created_at?: string
           health?: number
           point_id?: string
@@ -109,13 +109,15 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string
+          id: string
           point: string
           tick: number
           type: Database["public"]["Enums"]["task_type"]
         }
         Insert: {
           created_at?: string
-          created_by?: string
+          created_by: string
+          id?: string
           point: string
           tick: number
           type: Database["public"]["Enums"]["task_type"]
@@ -123,6 +125,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string
+          id?: string
           point?: string
           tick?: number
           type?: Database["public"]["Enums"]["task_type"]
@@ -168,7 +171,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_if_user_already_added_a_task_for_current_tick: {
+        Args: { a_user_id: string }
+        Returns: boolean
+      }
+      does_point_exists: {
+        Args: { a_point_id: string }
+        Returns: boolean
+      }
+      select_point_states_of_current_tick: {
+        Args: Record<PropertyKey, never>
+        Returns: Record<string, unknown>
+      }
+      select_point_states_of_tick: {
+        Args: { a_tick: number }
+        Returns: Record<string, unknown>
+      }
+      select_task_of_current_tick: {
+        Args: Record<PropertyKey, never>
+        Returns: Record<string, unknown>
+      }
     }
     Enums: {
       "game-state": "playing" | "paused"
