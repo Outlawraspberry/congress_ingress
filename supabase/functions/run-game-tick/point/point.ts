@@ -1,36 +1,33 @@
 import { Task } from "../task/task.ts";
 import { attackDamage, repairHeal } from "../../../../types/game-config.ts";
+import { Json } from "../../../../types/database.types.ts";
 
 export class Point {
-  private _acquiredBy: string | undefined;
+  private _acquiredBy: string | null;
   private _maxHealth: number;
   private _health: number;
   private _pointId: string;
 
   constructor(
     args: {
-      acquiredBy?: string;
+      acquiredBy?: string | null;
       maxHealth: number;
       health: number;
       pointId: string;
     },
   ) {
-    this._acquiredBy = args.acquiredBy;
+    this._acquiredBy = args.acquiredBy ?? null;
     this._maxHealth = args.maxHealth;
     this._health = args.health;
     this._pointId = args.pointId;
   }
 
   static fromRecord(
-    record: Record<string, unknown>,
+    record: Json,
   ): { point?: Point; error?: Error } {
-    if (
-      !("acquired_by" in record &&
-        record.acquired_by != null &&
-        typeof record.acquired_by === "string")
-    ) {
+    if (record == null || typeof record !== "object") {
       return {
-        error: new Error('"acquired_by" is not set, or is not a string'),
+        error: new Error("Input has to be of type object"),
       };
     }
 
@@ -54,22 +51,37 @@ export class Point {
 
     if (
       !(
-        "point_id" in record &&
-        record.point_id != null &&
-        typeof record.point_id === "string"
+        "id" in record &&
+        record.id != null &&
+        typeof record.id === "string"
       )
     ) {
-      return { error: new Error('"point_id" is not set, or is not a string') };
+      return { error: new Error('"id" is not set, or is not a string') };
     }
 
-    return {
-      point: new Point({
-        acquiredBy: record.acquired_by,
-        health: record.health,
-        maxHealth: record.max_health,
-        pointId: record.point_id,
-      }),
-    };
+    if (
+      !("acquired_by" in record &&
+        record.acquired_by != null &&
+        typeof record.acquired_by === "string")
+    ) {
+      return {
+        point: new Point({
+          acquiredBy: null,
+          health: record.health,
+          maxHealth: record.max_health,
+          pointId: record.id,
+        }),
+      };
+    } else {
+      return {
+        point: new Point({
+          acquiredBy: record.acquired_by,
+          health: record.health,
+          maxHealth: record.max_health,
+          pointId: record.id,
+        }),
+      };
+    }
   }
 
   simulateTasks(task: Task): void {
@@ -110,12 +122,12 @@ export class Point {
   }
 
   private handleClaim(task: Task) {
-    if (this._acquiredBy === undefined) {
+    if (this._acquiredBy == null) {
       this._acquiredBy = task.created_by.fraction;
     }
   }
 
-  get acquiredBy(): string | undefined {
+  get acquiredBy(): string | null {
     return this._acquiredBy;
   }
 

@@ -11,7 +11,7 @@ describe("Point works when", () => {
       acquired_by: "abc",
       max_health: 255,
       health: 255,
-      point_id: "point",
+      id: "point",
     };
 
     const { point } = Point.fromRecord(record);
@@ -20,7 +20,23 @@ describe("Point works when", () => {
     expect(point?.acquiredBy).toBe(record.acquired_by);
     expect(point?.maxHealth).toBe(record.max_health);
     expect(point?.health).toBe(record.health);
-    expect(point?.pointId).toBe(record.point_id);
+    expect(point?.pointId).toBe(record.id);
+  });
+
+  test("static fromRecord returns a Point instance when all but acquiredBy is filled", () => {
+    const record = {
+      max_health: 255,
+      health: 255,
+      id: "point",
+    };
+
+    const { point } = Point.fromRecord(record);
+
+    expect(point).toBeDefined();
+    expect(point?.acquiredBy).toBe(null);
+    expect(point?.maxHealth).toBe(record.max_health);
+    expect(point?.health).toBe(record.health);
+    expect(point?.pointId).toBe(record.id);
   });
 });
 
@@ -47,14 +63,23 @@ describe("Point task simulate works when", () => {
     acquiredBy?: string | undefined;
     unsetAcquredBy?: boolean;
   } = {}): Point {
-    return new Point({
-      acquiredBy: args.unsetAcquredBy
-        ? undefined
-        : args.acquiredBy ?? fractionA,
+    if (args.unsetAcquredBy) {
+return new Point({
+      acquiredBy: null,
       health: args.health ?? 255,
       maxHealth: args.maxHealth ?? 255,
       pointId,
     });
+    } else {
+
+return new Point({
+      acquiredBy: args.acquiredBy ?? fractionA,
+      health: args.health ?? 255,
+      maxHealth: args.maxHealth ?? 255,
+      pointId,
+    });
+    }
+    
   }
 
   test("attack task damages the point", () => {
@@ -94,7 +119,7 @@ describe("Point task simulate works when", () => {
     point.simulateTasks(task);
 
     expect(point.health).toBe(255);
-    expect(point.acquiredBy).toBe(undefined);
+    expect(point.acquiredBy).toBe(null);
   });
 
   test("attackAdClaim attacks and claims point when health is smaller equal 0", () => {
