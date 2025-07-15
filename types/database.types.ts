@@ -179,17 +179,29 @@ export type Database = {
         Args: { a_point_id: string }
         Returns: boolean
       }
+      get_all_points_for_current_tick: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      get_all_users_for_current_tick: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      get_current_tick: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       select_point_states_of_current_tick: {
         Args: Record<PropertyKey, never>
-        Returns: Record<string, unknown>
+        Returns: Json
       }
       select_point_states_of_tick: {
         Args: { a_tick: number }
-        Returns: Record<string, unknown>
+        Returns: Json
       }
       select_task_of_current_tick: {
         Args: Record<PropertyKey, never>
-        Returns: Record<string, unknown>
+        Returns: Json
       }
     }
     Enums: {
