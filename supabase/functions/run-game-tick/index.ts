@@ -3,6 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { Database } from "../../../types/database.types.ts";
 import { Task, TickPoint } from "../../../types/alias.ts";
 import { Point } from "./point/point.ts";
+import { resolve } from "node:path";
 
 type TaskReduzed = Pick<Task, "type" | "created_by" | "point">;
 
@@ -21,31 +22,56 @@ Deno.serve(async (req: Request) => {
     },
   );
 
-  const { data, error } = await supabaseClient.rpc(
-    "get_all_points_for_current_tick",
-  );
+  const [resultGame, resultAllPoints] = await Promise.all([
+    supabaseClient.from("game").select("*").filter("id", "eq", 1),
+    supabaseClient.rpc(
+      "get_all_points_for_current_tick",
+    ),
+  ]);
 
-  if (error != null) {
-    console.error(error);
-
-    return new Response(JSON.stringify(error), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+  if (resultGame.error != null) {
+    return handleError(resultGame.error);
   }
 
-  if (!Array.isArray(data)) {
-    return new Response("Expected Data is not an array", {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+  const game = resultGame.data[0];
+
+  if (resultAllPoints.error != null) {
+    return handleError(resultAllPoints.error);
   }
 
-  const points = data.map((entry) => Point.fromRecord(entry));
+  if (!Array.isArray(resultAllPoints.data)) {
+    return handleError(new Error("Expected Data is not an array"));
+  }
 
-  console.log(points);
+  const points: Point[] = [];
 
-  return new Response(JSON.stringify(data), {
+  for (const entry of resultAllPoints.data) {
+    const { point, error } = Point.fromRecord(entry);
+    if (error != null) {
+      handleError(error);
+    }
+
+    points.push(point as Point);
+  }
+
+  const nextTick = game.tick + 1;
+
+  const resultinsertNewTickPoint = await supabaseClient.from("tick_point")
+    .insert(points.map((point) => point.toTickPoint(nextTick)));
+
+  if (resultinsertNewTickPoint.error) {
+    return handleError(resultinsertNewTickPoint.error);
+  }
+
+  const resultUpdateGame = await supabaseClient.from("game").update({
+    ...game,
+    tick: nextTick,
+  }).filter("id", "eq", 1);
+  
+  if (resultUpdateGame.error) return handleError(resultUpdateGame.error);
+
+  return new Response(null, {
+    status: 204,
     headers: { "Content-Type": "application/json" },
   });
 });
@@ -64,6 +90,15 @@ function handleAttackAndClaim(task: Task) {}
 function handleRepair(task: Task) {}
 
 function handleClaim(task: Task) {}
+
+function handleError(error: unknown) {
+  console.error(error);
+
+  return new Response(JSON.stringify(error), {
+    status: 500,
+    headers: { "Content-Type": "application/json" },
+  });
+}
 
 /* To invoke locally:
 

@@ -1,6 +1,7 @@
 import { Task } from "../task/task.ts";
 import { attackDamage, repairHeal } from "../../../../types/game-config.ts";
 import { Json } from "../../../../types/database.types.ts";
+import { TickPoint } from "../../../../types/alias.ts";
 
 export class Point {
   private _acquiredBy: string | null;
@@ -82,6 +83,16 @@ export class Point {
         }),
       };
     }
+  }
+
+  toTickPoint(tick: number): TickPoint {
+    return {
+      acquired_by: this._acquiredBy,
+      health: this._health,
+      point_id: this.pointId,
+      tick,
+      created_at: new Date().toISOString(),
+    };
   }
 
   simulateTasks(task: Task): void {

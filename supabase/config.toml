@@ -307,13 +307,13 @@ s3_access_key = "env(S3_ACCESS_KEY)"
 # Configures AWS_SECRET_ACCESS_KEY for S3 bucket
 s3_secret_key = "env(S3_SECRET_KEY)"
 
-[functions.test]
+[functions.run-game-tick]
 enabled = true
 verify_jwt = true
-import_map = "./functions/test/deno.json"
+import_map = "./functions/run-game-tick/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
-entrypoint = "./functions/test/index.ts"
+entrypoint = "./functions/run-game-tick/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
-# static_files = [ "./functions/test/*.html" ]
+# static_files = [ "./functions/run-game-tick/*.html" ]

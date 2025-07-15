@@ -64,22 +64,20 @@ describe("Point task simulate works when", () => {
     unsetAcquredBy?: boolean;
   } = {}): Point {
     if (args.unsetAcquredBy) {
-return new Point({
-      acquiredBy: null,
-      health: args.health ?? 255,
-      maxHealth: args.maxHealth ?? 255,
-      pointId,
-    });
+      return new Point({
+        acquiredBy: null,
+        health: args.health ?? 255,
+        maxHealth: args.maxHealth ?? 255,
+        pointId,
+      });
     } else {
-
-return new Point({
-      acquiredBy: args.acquiredBy ?? fractionA,
-      health: args.health ?? 255,
-      maxHealth: args.maxHealth ?? 255,
-      pointId,
-    });
+      return new Point({
+        acquiredBy: args.acquiredBy ?? fractionA,
+        health: args.health ?? 255,
+        maxHealth: args.maxHealth ?? 255,
+        pointId,
+      });
     }
-    
   }
 
   test("attack task damages the point", () => {
