@@ -153,7 +153,7 @@ $function$
 ;
 
 CREATE OR REPLACE FUNCTION public.get_all_points_for_current_tick()
- RETURNS jsonb
+ RETURNS SETOF RECORD
  LANGUAGE sql
   AS $function$SELECT point.id, point.max_health, tick_point.health, tick_point.acquired_by 
   FROM tick_point
@@ -163,7 +163,7 @@ CREATE OR REPLACE FUNCTION public.get_all_points_for_current_tick()
 ;
 
 CREATE OR REPLACE FUNCTION public.get_all_users_for_current_tick()
- RETURNS jsonb
+ RETURNS SETOF RECORD
  LANGUAGE sql
 AS $function$SELECT * 
 FROM public.user 
@@ -183,7 +183,7 @@ AS $function$SELECT tick from public.game$function$
 ;
 
 CREATE OR REPLACE FUNCTION public.select_point_states_of_current_tick()
- RETURNS jsonb
+ RETURNS SETOF RECORD
  LANGUAGE sql
 AS $function$
 SELECT * FROM public.tick_point WHERE tick=(SELECT tick from public.game)
@@ -191,7 +191,7 @@ $function$
 ;
 
 CREATE OR REPLACE FUNCTION public.select_point_states_of_tick(a_tick bigint)
- RETURNS jsonb
+ RETURNS SETOF RECORD
  LANGUAGE sql
 AS $function$
 SELECT * FROM public.tick_point WHERE tick=a_tick
@@ -199,10 +199,13 @@ $function$
 ;
 
 CREATE OR REPLACE FUNCTION public.select_task_of_current_tick()
- RETURNS jsonb
+ RETURNS SETOF RECORD
  LANGUAGE sql
 AS $function$
-SELECT * FROM public.tick_task WHERE tick=(SELECT tick from public.game)
+select tick_task.created_by, tick_task.point, tick_task.type, public.user.fraction
+from public.tick_task
+inner join public.user
+on public.tick_task.created_by = public.user.id;
 $function$
 ;
 

@@ -1,4 +1,4 @@
-import { Task } from "../task/task.ts";
+import { TaskWithUserFraction } from "../task/task_with_user.ts";
 import { attackDamage, repairHeal } from "../../../../types/game-config.ts";
 import { Json } from "../../../../types/database.types.ts";
 import { TickPoint } from "../../../../types/alias.ts";
@@ -24,7 +24,7 @@ export class Point {
   }
 
   static fromRecord(
-    record: Json,
+    record: Record<string, unknown>,
   ): { point?: Point; error?: Error } {
     if (record == null || typeof record !== "object") {
       return {
@@ -95,7 +95,7 @@ export class Point {
     };
   }
 
-  simulateTasks(task: Task): void {
+  simulateTasks(task: TaskWithUserFraction): void {
     if (task.type === "attack") return this.handleAttack(task);
     if (task.type === "attack_and_claim") {
       return this.handleAttackAndClaim(task);
@@ -104,37 +104,37 @@ export class Point {
     if (task.type === "claim") return this.handleClaim(task);
   }
 
-  private handleAttack(task: Task) {
+  private handleAttack(task: TaskWithUserFraction) {
     if (
-      this._acquiredBy != null && this._acquiredBy != task.created_by.fraction
+      this._acquiredBy != null && this._acquiredBy != task.fraction
     ) {
       this._health -= attackDamage;
     }
   }
 
-  private handleAttackAndClaim(task: Task) {
+  private handleAttackAndClaim(task: TaskWithUserFraction) {
     if (
-      this._acquiredBy != task.created_by.fraction && this.acquiredBy != null
+      this._acquiredBy != task.fraction && this.acquiredBy != null
     ) {
       this.handleAttack(task);
 
       if (this._health <= 0) {
-        this._acquiredBy = task.created_by.fraction;
+        this._acquiredBy = task.fraction;
       }
     }
   }
 
-  private handleRepair(task: Task) {
+  private handleRepair(task: TaskWithUserFraction) {
     if (
-      this._acquiredBy == task.created_by.fraction && this._acquiredBy != null
+      this._acquiredBy == task.fraction && this._acquiredBy != null
     ) {
       this._health = Math.min(this._maxHealth, this.health + repairHeal);
     }
   }
 
-  private handleClaim(task: Task) {
+  private handleClaim(task: TaskWithUserFraction) {
     if (this._acquiredBy == null) {
-      this._acquiredBy = task.created_by.fraction;
+      this._acquiredBy = task.fraction;
     }
   }
 

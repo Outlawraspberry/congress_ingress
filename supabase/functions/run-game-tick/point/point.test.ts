@@ -1,7 +1,7 @@
 import { describe, test } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
 import { Point } from "./point.ts";
-import { Task } from "../task/task.ts";
+import { TaskWithUserFraction } from "../task/task_with_user.ts";
 import { attackDamage, repairHeal } from "../../../../types/game-config.ts";
 import { User } from "../../../../types/alias.ts";
 
@@ -50,11 +50,11 @@ describe("Point task simulate works when", () => {
     name: "SomeName",
   };
 
-  const baseTask: Task = {
-    created_by: userFractionB,
-    id: "123",
+  const baseTask: TaskWithUserFraction = {
+    created_by: userFractionB.id,
     point: pointId,
     type: "attack",
+    fraction: userFractionB.fraction,
   };
 
   function getPoint(args: {
@@ -81,7 +81,7 @@ describe("Point task simulate works when", () => {
   }
 
   test("attack task damages the point", () => {
-    const task: Task = baseTask;
+    const task: TaskWithUserFraction = baseTask;
     const point = getPoint();
 
     point.simulateTasks(task);
@@ -92,7 +92,7 @@ describe("Point task simulate works when", () => {
   test.skip("point can only be attacked by other fraction", () => {});
 
   test("point can only be attacked when claimed", () => {
-    const task: Task = baseTask;
+    const task: TaskWithUserFraction = baseTask;
     const point = getPoint({ unsetAcquredBy: true });
 
     point.simulateTasks(task);
@@ -101,7 +101,10 @@ describe("Point task simulate works when", () => {
   });
 
   test("attackAndClaim task damages the point but doesn't claim when health is over 0", () => {
-    const task: Task = { ...baseTask, type: "attack_and_claim" };
+    const task: TaskWithUserFraction = {
+      ...baseTask,
+      type: "attack_and_claim",
+    };
     const point = getPoint();
 
     point.simulateTasks(task);
@@ -111,7 +114,10 @@ describe("Point task simulate works when", () => {
   });
 
   test("attackAndClaim can only be performed when point is claimed", () => {
-    const task: Task = { ...baseTask, type: "attack_and_claim" };
+    const task: TaskWithUserFraction = {
+      ...baseTask,
+      type: "attack_and_claim",
+    };
     const point = getPoint({ unsetAcquredBy: true });
 
     point.simulateTasks(task);
@@ -121,10 +127,11 @@ describe("Point task simulate works when", () => {
   });
 
   test("attackAdClaim attacks and claims point when health is smaller equal 0", () => {
-    const task: Task = {
+    const task: TaskWithUserFraction = {
       ...baseTask,
       type: "attack_and_claim",
-      created_by: userFractionB,
+      created_by: userFractionB.id,
+      fraction: userFractionB.fraction,
     };
     const point = getPoint({
       acquiredBy: fractionA,
@@ -140,10 +147,11 @@ describe("Point task simulate works when", () => {
   test.skip("attackAndClaim task can only be performed by other fraction", () => {});
 
   test("repair task repairs a damaged point", () => {
-    const task: Task = {
+    const task: TaskWithUserFraction = {
       ...baseTask,
       type: "repair",
-      created_by: userFractionB,
+      created_by: userFractionB.id,
+      fraction: userFractionB.fraction,
     };
     const point = getPoint({ acquiredBy: fractionB, health: 100 });
 
@@ -155,7 +163,7 @@ describe("Point task simulate works when", () => {
   test.skip("repair can only be performed by fraction who claims the point", () => {});
 
   test("repair task repairs damaged point just to max health", () => {
-    const task: Task = { ...baseTask, type: "repair" };
+    const task: TaskWithUserFraction = { ...baseTask, type: "repair" };
     const point = getPoint({
       acquiredBy: fractionA,
       health: 255,
@@ -168,12 +176,15 @@ describe("Point task simulate works when", () => {
   });
 
   test("claim task claims unclaimed point", () => {
-    const task: Task = {
+    const task: TaskWithUserFraction = {
       ...baseTask,
       type: "claim",
-      created_by: userFractionB,
+      created_by: userFractionB.id,
+      fraction: userFractionB.fraction,
     };
     const point = getPoint({ unsetAcquredBy: true });
+
+    expect(point.acquiredBy).toBeNull();
 
     point.simulateTasks(task);
 
@@ -183,10 +194,11 @@ describe("Point task simulate works when", () => {
   });
 
   test("claim task not claims already claimed point", () => {
-    const task: Task = {
+    const task: TaskWithUserFraction = {
       ...baseTask,
       type: "claim",
-      created_by: userFractionB,
+      created_by: userFractionB.id,
+      fraction: userFractionB.fraction,
     };
     const point = getPoint({ acquiredBy: fractionA });
 

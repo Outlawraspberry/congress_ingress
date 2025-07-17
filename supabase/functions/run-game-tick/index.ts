@@ -1,11 +1,10 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { Database } from "../../../types/database.types.ts";
-import { Task, TickPoint } from "../../../types/alias.ts";
-import { Point } from "./point/point.ts";
-import { resolve } from "node:path";
-
-type TaskReduzed = Pick<Task, "type" | "created_by" | "point">;
+import { TaskWithUserFraction } from "./task/task_with_user.ts";
+import { getAllTasks } from "./task/get-tasks.ts";
+import { getAllPoints } from "./point/get-points.ts";
+import { getGame } from "./game/get-game.ts";
 
 Deno.serve(async (req: Request) => {
   const authHeader = req.headers.get("Authorization") ?? "";
@@ -22,42 +21,30 @@ Deno.serve(async (req: Request) => {
     },
   );
 
-  const [resultGame, resultAllPoints] = await Promise.all([
-    supabaseClient.from("game").select("*").filter("id", "eq", 1),
-    supabaseClient.rpc(
-      "get_all_points_for_current_tick",
-    ),
+  const [
+    game,
+    tasks,
+    points,
+  ] = await Promise.all([
+    getGame(supabaseClient),
+    getAllTasks(supabaseClient),
+    getAllPoints(supabaseClient),
   ]);
 
-  if (resultGame.error != null) {
-    return handleError(resultGame.error);
-  }
-
-  const game = resultGame.data[0];
-
-  if (resultAllPoints.error != null) {
-    return handleError(resultAllPoints.error);
-  }
-
-  if (!Array.isArray(resultAllPoints.data)) {
-    return handleError(new Error("Expected Data is not an array"));
-  }
-
-  const points: Point[] = [];
-
-  for (const entry of resultAllPoints.data) {
-    const { point, error } = Point.fromRecord(entry);
-    if (error != null) {
-      handleError(error);
+  for (const point of points) {
+    for (const task of tasks) {
+      if (task.point === point.pointId) {
+        point.simulateTasks(task);
+      }
     }
-
-    points.push(point as Point);
   }
 
   const nextTick = game.tick + 1;
 
+  const updatedPoints = points.map((point) => point.toTickPoint(nextTick));
+
   const resultinsertNewTickPoint = await supabaseClient.from("tick_point")
-    .insert(points.map((point) => point.toTickPoint(nextTick)));
+    .insert(updatedPoints);
 
   if (resultinsertNewTickPoint.error) {
     return handleError(resultinsertNewTickPoint.error);
@@ -67,7 +54,7 @@ Deno.serve(async (req: Request) => {
     ...game,
     tick: nextTick,
   }).filter("id", "eq", 1);
-  
+
   if (resultUpdateGame.error) return handleError(resultUpdateGame.error);
 
   return new Response(null, {
@@ -76,20 +63,20 @@ Deno.serve(async (req: Request) => {
   });
 });
 
-function handleTask(task: Task): void {
+function handleTask(task: TaskWithUserFraction): void {
   if (task.type === "attack") return handleAttack(task);
   if (task.type === "attack_and_claim") return handleAttackAndClaim(task);
   if (task.type === "repair") return handleRepair(task);
   if (task.type === "claim") return handleClaim(task);
 }
 
-function handleAttack(task: Task) {}
+function handleAttack(task: TaskWithUserFraction) {}
 
-function handleAttackAndClaim(task: Task) {}
+function handleAttackAndClaim(task: TaskWithUserFraction) {}
 
-function handleRepair(task: Task) {}
+function handleRepair(task: TaskWithUserFraction) {}
 
-function handleClaim(task: Task) {}
+function handleClaim(task: TaskWithUserFraction) {}
 
 function handleError(error: unknown) {
   console.error(error);
