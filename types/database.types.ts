@@ -191,6 +191,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      select_point_at_current_tick: {
+        Args: { p_point_id: string }
+        Returns: Record<string, unknown>
+      }
       select_point_states_of_current_tick: {
         Args: Record<PropertyKey, never>
         Returns: Record<string, unknown>[]

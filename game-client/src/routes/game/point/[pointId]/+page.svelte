@@ -1,25 +1,43 @@
 <script lang="ts">
 	import { AngleLeftOutline } from 'flowbite-svelte-icons';
-	import { Button, Heading, P } from 'flowbite-svelte';
+	import {
+		Button,
+		Heading,
+		P,
+		Table,
+		TableBody,
+		TableBodyCell,
+		TableBodyRow,
+		TableHead,
+		TableHeadCell
+	} from 'flowbite-svelte';
 	import type { Game, Point, TickPoint } from '../../../../types/alias';
 	import { game } from '$lib/supabase/game/game.svelte';
 	import { onDestroy, onMount, tick } from 'svelte';
 	import { supabase } from '$lib/supabase/db.svelte';
 	import type { RealtimeChannel } from '@supabase/supabase-js';
+	import fraction from '$lib/supabase/fraction/fraction';
 
 	const { data }: { data: { pointId: string; point: Point; game: Game } } = $props();
 
-    let fractionName = $state("Unclaimed")
+	let fractionName = $state('Unclaimed');
 	let tickPoint: TickPoint | null = $state(null);
 	let realtimeChannel: RealtimeChannel | undefined = undefined;
+	let histroy: {
+		tick: number;
+		health: number;
+		acquired_by: string | null;
+	}[] = $state([]);
 
-    $effect(() => {
-        if (tickPoint?.acquired_by) {
-           supabase.from("fraction").select("name").filter("id", "eq", tickPoint?.acquired_by).then(res => {
-                if (res.data) fractionName = res.data[0].name;
-            });
-        } else {fractionName = "Unclaimed"}
-    })
+	$effect(() => {
+		if (tickPoint?.acquired_by) {
+			fraction.getName(tickPoint.acquired_by).then((name) => {
+				if (name) fractionName = name;
+			});
+		} else {
+			fractionName = 'Unclaimed';
+		}
+	});
 
 	onDestroy(() => {
 		realtimeChannel?.unsubscribe();
@@ -38,12 +56,28 @@
 			.channel(`point_channel_${data.pointId}`)
 			.on(
 				'postgres_changes',
-				{ event: 'INSERT', schema: 'public', table: 'tick_point', filter: `point_id=eq.${data.pointId}` },
+				{
+					event: 'INSERT',
+					schema: 'public',
+					table: 'tick_point',
+					filter: `point_id=eq.${data.pointId}`
+				},
 				(payload) => {
-                    tickPoint = payload.new as TickPoint;
+					tickPoint = payload.new as TickPoint;
 				}
 			)
 			.subscribe();
+
+		const historyResult = await supabase
+			.from('tick_point')
+			.select('tick, health, acquired_by')
+			.filter('point_id', 'eq', data.pointId)
+			.filter('tick', 'lte', game.game?.tick)
+			.limit(100);
+
+		if (historyResult.error) throw historyResult.error;
+
+		histroy = historyResult.data;
 	});
 </script>
 
@@ -55,3 +89,28 @@
 
 <P>Acquired by: {fractionName}</P>
 <P>Health: {tickPoint?.health} / {data.point.max_health}</P>
+
+<Heading tag="h2">History</Heading>
+
+<Table>
+	<TableHead>
+		<TableHeadCell>Tick</TableHeadCell>
+		<TableHeadCell>Health</TableHeadCell>
+		<TableHeadCell>Acquired by</TableHeadCell>
+	</TableHead>
+	<TableBody>
+		{#each histroy as entry}
+			<TableBodyRow>
+				<TableBodyCell>{entry.tick}</TableBodyCell>
+				<TableBodyCell>{entry.health}</TableBodyCell>
+				<TableBodyCell
+					>{#if entry.acquired_by}
+						{entry.acquired_by}
+					{:else}
+						None
+					{/if}</TableBodyCell
+				>
+			</TableBodyRow>
+		{/each}
+	</TableBody>
+</Table>
