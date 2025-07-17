@@ -2,6 +2,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import '../app.css';
 	import { destroy, init } from '$lib/supabase/game/game.svelte';
+	import { DarkMode } from 'flowbite-svelte';
 
 	let { children } = $props();
 
@@ -16,4 +17,8 @@
 	});
 </script>
 
+<DarkMode/>
+
 {@render children()}
+
+
