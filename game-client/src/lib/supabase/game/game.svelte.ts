@@ -12,12 +12,11 @@ export async function init(): Promise<void> {
 	}
 
 	realtimeChannel = supabase
-		.channel('custom-update-channel')
+		.channel('game_channel')
 		.on(
 			'postgres_changes',
 			{ event: 'UPDATE', schema: 'public', table: 'game', filter: 'id=eq.1' },
 			(payload) => {
-				console.log('update', payload);
 				if (game.game != null) {
 					if ('state' in payload.new) {
 						game.game.state = payload.new.state;
@@ -29,8 +28,6 @@ export async function init(): Promise<void> {
 			}
 		)
 		.subscribe();
-
-	console.log(realtimeChannel);
 }
 
 export async function destroy(): Promise<void> {
