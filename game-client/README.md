@@ -36,7 +36,3 @@ npm run build
 You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
-
-## Generate new database types
-
-`supabase gen types typescript --local --schema game --schema public > src/types/database.types.ts`
