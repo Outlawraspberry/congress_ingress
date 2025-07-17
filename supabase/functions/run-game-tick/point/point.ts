@@ -120,6 +120,7 @@ export class Point {
 
       if (this._health <= 0) {
         this._acquiredBy = task.fraction;
+        this._health = this._maxHealth;
       }
     }
   }

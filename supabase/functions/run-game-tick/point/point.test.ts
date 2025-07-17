@@ -140,7 +140,7 @@ describe("Point task simulate works when", () => {
 
     point.simulateTasks(task);
 
-    expect(point.health).toBe(-1);
+    expect(point.health).toBe(point.maxHealth);
     expect(point.acquiredBy).toBe(fractionB);
   });
 
@@ -153,7 +153,11 @@ describe("Point task simulate works when", () => {
       created_by: userFractionB.id,
       fraction: userFractionB.fraction,
     };
-    const point = getPoint({ acquiredBy: fractionB, health: 100 });
+    const point = getPoint({
+      acquiredBy: fractionB,
+      health: 100,
+      maxHealth: 255,
+    });
 
     point.simulateTasks(task);
 

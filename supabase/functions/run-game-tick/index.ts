@@ -1,7 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { Database } from "../../../types/database.types.ts";
-import { TaskWithUserFraction } from "./task/task_with_user.ts";
 import { getAllTasks } from "./task/get-tasks.ts";
 import { getAllPoints } from "./point/get-points.ts";
 import { getGame } from "./game/get-game.ts";
@@ -63,20 +62,6 @@ Deno.serve(async (req: Request) => {
   });
 });
 
-function handleTask(task: TaskWithUserFraction): void {
-  if (task.type === "attack") return handleAttack(task);
-  if (task.type === "attack_and_claim") return handleAttackAndClaim(task);
-  if (task.type === "repair") return handleRepair(task);
-  if (task.type === "claim") return handleClaim(task);
-}
-
-function handleAttack(task: TaskWithUserFraction) {}
-
-function handleAttackAndClaim(task: TaskWithUserFraction) {}
-
-function handleRepair(task: TaskWithUserFraction) {}
-
-function handleClaim(task: TaskWithUserFraction) {}
 
 function handleError(error: unknown) {
   console.error(error);
