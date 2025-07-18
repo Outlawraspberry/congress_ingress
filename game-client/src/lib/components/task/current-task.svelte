@@ -1,12 +1,25 @@
 <script lang="ts">
 	import { userTaskTick } from '$lib/supabase/tick_task/tick-task.svelte';
-	import { Heading, P } from 'flowbite-svelte';
+	import { P } from 'flowbite-svelte';
+
+	const taskTypeTranslated = $derived.by(() => {
+		if (userTaskTick.task?.type === "attack") {
+			return "Attack";
+		} else if (userTaskTick.task?.type === "attack_and_claim") {
+			return "Attack and Claim";
+		} else if (userTaskTick.task?.type === "claim") {
+			return "Claim";
+		} else if (userTaskTick.task?.type === "repair") {
+			return "Repair";
+		} else {
+			return "No Task"
+		}
+	})
 </script>
 
-<Heading tag="h3">Your current task</Heading>
-
-{#if userTaskTick.task != null}
-	<P>You want to {userTaskTick.task.type} {userTaskTick.task.point.name}</P>
-{:else}
-	<P>You haven't placed an action yet!</P>
-{/if}
+Task: 
+	{#if userTaskTick.task != null}
+		{taskTypeTranslated} {userTaskTick.task.point.name}
+	{:else}
+		{taskTypeTranslated}
+	{/if}
