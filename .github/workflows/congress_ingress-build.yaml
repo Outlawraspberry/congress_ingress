@@ -38,7 +38,7 @@ jobs:
         - name: Write .env file for SvelteKit
           run: |
             echo "PUBLIC_SUPABASE_URL=${{ secrets.PUBLIC_SUPABASE_URL }}" >> .env
-            echo "PUBLIC_SUPABASE_ANON_KEY=${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}" >> ./game-client/.env
+            echo "PUBLIC_SUPABASE_ANON_KEY=${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}" >> .env
 
         - name: Run install
           uses: borales/actions-yarn@v4
