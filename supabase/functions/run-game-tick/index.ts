@@ -16,7 +16,7 @@ Deno.serve(async (req: Request) => {
   const authHeader = req.headers.get("Authorization") ?? "";
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-  const isAuthenticated = authHeader === serviceRoleKey
+  const isAuthenticated = authHeader.split(" ")[1] === serviceRoleKey
     ? true
     : await isUserAuthenticated(authHeader);
 
@@ -29,7 +29,7 @@ Deno.serve(async (req: Request) => {
 
   const supabaseClient: SupabaseClient<Database> = createClient<Database>(
     Deno.env.get("SUPABASE_URL") ?? "",
-    serviceRoleKey ?? "",
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   );
 
   const [
@@ -41,6 +41,10 @@ Deno.serve(async (req: Request) => {
     getAllTasks(supabaseClient),
     getAllPoints(supabaseClient),
   ]);
+
+  if (game.state === "paused") {
+    return new Response(null, {status: 200, "statusText": "Game is paused!"})
+  }
 
   for (const point of points) {
     for (const task of tasks) {
@@ -70,7 +74,7 @@ Deno.serve(async (req: Request) => {
 
   return new Response(null, {
     status: 204,
-    headers: { ...corsHeaders, },
+    headers: { ...corsHeaders },
   });
 });
 
