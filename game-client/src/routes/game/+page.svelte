@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { Button, Heading, P } from 'flowbite-svelte';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { supabase } from '$lib/supabase/db.svelte';
 	import type { RealtimeChannel } from '@supabase/supabase-js';
-	import type { User, Fraction, Game, Point } from '../../types/alias';
-	import { destroy, game } from '$lib/supabase/game/game.svelte';
+	import type { User, Fraction, Point } from '../../types/alias';
+	import TaskOverview from '$lib/components/task/task-overview.svelte';
+	import { game } from '$lib/supabase/game/game.svelte';
+
 
 	const {
 		data
@@ -18,10 +20,6 @@
 	let realtimeChannel: RealtimeChannel | undefined = undefined;
 
 	let points: Point[] = $state([]);
-
-	onDestroy(() => {
-		destroy();
-	});
 
 	onMount(async () => {
 		const { data, error } = await supabase.from('point').select('*');

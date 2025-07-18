@@ -1,46 +1,43 @@
 <script lang="ts">
-  import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, DarkMode } from "flowbite-svelte";
-	import CurrentTask from "./task/current-task.svelte";
-	import RunTick from "./run-tick.svelte";
-	import user from "$lib/supabase/user/user";
-	import { onMount } from "svelte";
-	import type { User } from "../../types/alias";
-	import { userStore } from "$lib/supabase/db.svelte";
-    
-    let you: User | undefined = $state(undefined)
+	import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, DarkMode } from 'flowbite-svelte';
+	import CurrentTask from './task/current-task.svelte';
+	import RunTick from './run-tick.svelte';
+	import user from '$lib/supabase/user/user';
+	import { onMount } from 'svelte';
+	import type { User } from '../../types/alias';
+	import { userStore } from '$lib/supabase/db.svelte';
 
-    onMount(async () => {
-        you = await user.you();
-    })
+	let you: User | undefined = $state(undefined);
 
-    $effect(() => {
-        if (userStore.user != null) 
+	onMount(async () => {
+		you = await user.you();
+	});
 
-        user.you().then((user => {
-            you = user;
-        }));
-    })
+	$effect(() => {
+		if (userStore.user != null)
+			user.you().then((user) => {
+				you = user;
+			});
+	});
 </script>
 
 <header>
-    <Navbar>
-        <NavBrand href="/">Home</NavBrand>
-        
-        <NavUl>
-            <NavLi href="/game">Game</NavLi>
-            {#if you != null}<NavLi><CurrentTask /></NavLi>{/if}
-            
-            <DarkMode />
-        </NavUl>
+	<Navbar>
+		<NavBrand href="/">Home</NavBrand>
 
-        <div class="flex md:order-2 items-center">
-            <NavHamburger />
+		<NavUl>
+			<NavLi href="/game">Game</NavLi>
+			{#if you != null}<NavLi><CurrentTask /></NavLi>{/if}
 
-            {#if ( you != null && you.role === "admin")}
-                <RunTick />
-            {/if}
-        </div>
+			<DarkMode />
+		</NavUl>
 
-    </Navbar>
+		<div class="flex items-center md:order-2">
+			<NavHamburger />
+
+			{#if you != null && you.role === 'admin'}
+				<RunTick />
+			{/if}
+		</div>
+	</Navbar>
 </header>
-
