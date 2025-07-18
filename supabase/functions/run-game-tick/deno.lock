@@ -8,6 +8,15 @@
     "jsr:@std/internal@^1.0.8": "1.0.9",
     "jsr:@std/testing@*": "1.0.14",
     "jsr:@supabase/functions-js@*": "2.4.5",
+    "jsr:@supabase/supabase-js@2": "2.52.0",
+    "npm:@supabase/auth-js@2.70.0": "2.70.0",
+    "npm:@supabase/auth-js@2.71.1": "2.71.1",
+    "npm:@supabase/functions-js@*": "2.4.5",
+    "npm:@supabase/functions-js@2.4.5": "2.4.5",
+    "npm:@supabase/node-fetch@2.6.15": "2.6.15",
+    "npm:@supabase/postgrest-js@1.19.4": "1.19.4",
+    "npm:@supabase/realtime-js@2.11.15": "2.11.15_ws@8.18.3",
+    "npm:@supabase/storage-js@2.7.1": "2.7.1",
     "npm:@supabase/supabase-js@2": "2.50.3",
     "npm:@types/node@*": "22.12.0",
     "npm:openai@^4.52.5": "4.104.0"
@@ -38,11 +47,28 @@
     },
     "@supabase/functions-js@2.4.5": {
       "integrity": "ead2df253fe0c3b0b682c5f25076978ab62c10afff4d04222451a90ba512c394"
+    },
+    "@supabase/supabase-js@2.52.0": {
+      "integrity": "56a51fa0838f5014ead2450a6c4351db4a0510f118dea17239824c92e8888e0c",
+      "dependencies": [
+        "npm:@supabase/auth-js@2.71.1",
+        "npm:@supabase/functions-js@2.4.5",
+        "npm:@supabase/node-fetch",
+        "npm:@supabase/postgrest-js",
+        "npm:@supabase/realtime-js",
+        "npm:@supabase/storage-js"
+      ]
     }
   },
   "npm": {
     "@supabase/auth-js@2.70.0": {
       "integrity": "sha512-BaAK/tOAZFJtzF1sE3gJ2FwTjLf4ky3PSvcvLGEgEmO4BSBkwWKu8l67rLLIBZPDnCyV7Owk2uPyKHa0kj5QGg==",
+      "dependencies": [
+        "@supabase/node-fetch"
+      ]
+    },
+    "@supabase/auth-js@2.71.1": {
+      "integrity": "sha512-mMIQHBRc+SKpZFRB2qtupuzulaUhFYupNyxqDj5Jp/LyPvcWvjaJzZzObv6URtL/O6lPxkanASnotGtNpS3H2Q==",
       "dependencies": [
         "@supabase/node-fetch"
       ]
@@ -84,7 +110,7 @@
     "@supabase/supabase-js@2.50.3": {
       "integrity": "sha512-Ld42AbfSXKnbCE2ObRvrGC5wj9OrfTOzswQZg0OcGQGx+QqcWYN/IqsLqrt4gCFrD57URbNRfGESSWzchzKAuQ==",
       "dependencies": [
-        "@supabase/auth-js",
+        "@supabase/auth-js@2.70.0",
         "@supabase/functions-js",
         "@supabase/node-fetch",
         "@supabase/postgrest-js",
