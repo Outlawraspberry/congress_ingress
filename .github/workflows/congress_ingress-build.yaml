@@ -22,11 +22,6 @@ jobs:
       name: build congress_ingress
       runs-on: ubuntu-latest
       steps:
-        - name: Write .env file for SvelteKit
-          run: |
-            echo "PUBLIC_SUPABASE_URL=${{ secrets.PUBLIC_SUPABASE_URL }}" >> .env
-            echo "PUBLIC_SUPABASE_ANON_KEY=${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}" >> ./game-client/.env
-
         - name: checkout
           uses: actions/checkout@v4
           with:
@@ -39,6 +34,11 @@ jobs:
           uses: actions/setup-node@v4
           with:
             node-version: v22.x
+        
+        - name: Write .env file for SvelteKit
+          run: |
+            echo "PUBLIC_SUPABASE_URL=${{ secrets.PUBLIC_SUPABASE_URL }}" >> .env
+            echo "PUBLIC_SUPABASE_ANON_KEY=${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}" >> ./game-client/.env
 
         - name: Run install
           uses: borales/actions-yarn@v4
