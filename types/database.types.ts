@@ -109,7 +109,6 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string
-          id: string
           point: string
           tick: number
           type: Database["public"]["Enums"]["task_type"]
@@ -117,7 +116,6 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by: string
-          id?: string
           point: string
           tick: number
           type: Database["public"]["Enums"]["task_type"]
@@ -125,7 +123,6 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string
-          id?: string
           point?: string
           tick?: number
           type?: Database["public"]["Enums"]["task_type"]

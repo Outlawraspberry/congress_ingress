@@ -17,10 +17,9 @@
 	import { supabase, userStore } from '$lib/supabase/db.svelte';
 	import type { RealtimeChannel } from '@supabase/supabase-js';
 	import fraction from '$lib/supabase/fraction/fraction';
-	import TaskOverview from '$lib/components/create-task/task-overview.svelte';
+	import TaskOverview from '$lib/components/task/task-overview.svelte';
 	import user from '$lib/supabase/user/user';
-	import { userTaskTick } from '$lib/supabase/tick_task/tick-task.svelte';
-	import CurrentTask from '$lib/components/current-task.svelte';
+	import CurrentTask from '$lib/components/task/current-task.svelte';
 
 	const { data }: { data: { pointId: string; point: Point; game: Game } } = $props();
 
@@ -73,16 +72,16 @@
 			)
 			.subscribe();
 
-		 const historyResult = await supabase
-		 	.from('tick_point')
-		 	.select('tick, health, acquired_by')
-		 	.filter('point_id', 'eq', data.pointId)
-		 	.filter('tick', 'lte', game.game?.tick)
-		 	.limit(100);
+		const historyResult = await supabase
+			.from('tick_point')
+			.select('tick, health, acquired_by')
+			.filter('point_id', 'eq', data.pointId)
+			.filter('tick', 'lte', game.game?.tick)
+			.limit(100);
 
 		if (historyResult.error) throw historyResult.error;
 
-		 histroy = historyResult.data;
+		histroy = historyResult.data;
 
 		you = await user.you();
 	});
@@ -102,7 +101,7 @@
 <Heading tag="h2">History</Heading>
 
 {#if tickPoint != null && you != null}
-	<TaskOverview currentTickPoint={tickPoint} user={you}></TaskOverview>
+	<TaskOverview currentTickPoint={tickPoint} user={you} chosenPoint={data.point}></TaskOverview>
 {/if}
 
 <Table>

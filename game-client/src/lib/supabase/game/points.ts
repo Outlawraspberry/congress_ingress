@@ -20,15 +20,12 @@ export default {
 	async getPointName(pointId: string): Promise<string> {
 		let name = nameCache.get(pointId);
 
-		console.log('Name', name, pointId);
-
 		if (name == null) {
 			const { data, error } = await supabase
 				.from('point')
 				.select('name')
 				.filter('id', 'eq', pointId);
 
-			console.log(data);
 			if (error != null) throw error;
 			else if (data != null && data.length > 0) {
 				name = data[0].name;
@@ -38,7 +35,7 @@ export default {
 				throw new Error(`No name for point ${pointId}`);
 			}
 		}
-		
+
 		return name;
 	}
 };

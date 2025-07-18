@@ -9,7 +9,7 @@ export const userTaskTick: {
 		| {
 				point: { name: string };
 				type: TaskType;
-                tick: number;
+				tick: number;
 		  }
 		| undefined;
 } = $state({ task: undefined });
@@ -38,8 +38,11 @@ export async function init(): Promise<void> {
 			},
 			async (payload) => {
 				console.log('insert', payload);
-                userTaskTick.task = {point: {name: await points.getPointName(payload.new.point)}, type: payload.new.type, tick: payload.new.tick}
-				
+				userTaskTick.task = {
+					point: { name: await points.getPointName(payload.new.point) },
+					type: payload.new.type,
+					tick: payload.new.tick
+				};
 			}
 		)
 		.on(
@@ -51,14 +54,18 @@ export async function init(): Promise<void> {
 				filter: `created_by=eq.${userStore.user?.id}`
 			},
 			async (payload) => {
-                userTaskTick.task = {point: {name: await points.getPointName(payload.new.point)}, type: payload.new.type, tick: payload.new.tick};				
+				userTaskTick.task = {
+					point: { name: await points.getPointName(payload.new.point) },
+					type: payload.new.type,
+					tick: payload.new.tick
+				};
 			}
 		)
 		.subscribe();
 
-        gameWritable.subscribe((game) => {
-            if (userTaskTick.task?.tick != game?.tick) {
-                userTaskTick.task = undefined;
-            }
-        })
+	gameWritable.subscribe((game) => {
+		if (userTaskTick.task?.tick != game?.tick) {
+			userTaskTick.task = undefined;
+		}
+	});
 }
