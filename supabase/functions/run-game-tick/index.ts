@@ -1,23 +1,35 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { Database } from "../../../types/database.types.ts";
 import { getAllTasks } from "./task/get-tasks.ts";
 import { getAllPoints } from "./point/get-points.ts";
 import { getGame } from "./game/get-game.ts";
+import { corsHeaders } from "../cors.ts";
+import { handleError } from "./error.ts";
+import { isUserAuthenticated } from "./authentication.ts";
 
 Deno.serve(async (req: Request) => {
-  const authHeader = req.headers.get("Authorization") ?? "";
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
 
-  const supabaseClient = createClient<Database>(
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+  const isAuthenticated = authHeader === serviceRoleKey
+    ? true
+    : await isUserAuthenticated(authHeader);
+
+  if (!isAuthenticated) {
+    return handleError(
+      new Error("You are not allowed to perform this action!"),
+      403,
+    );
+  }
+
+  const supabaseClient: SupabaseClient<Database> = createClient<Database>(
     Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-    {
-      global: {
-        headers: {
-          Authorization: authHeader,
-        },
-      },
-    },
+    serviceRoleKey ?? "",
   );
 
   const [
@@ -58,19 +70,9 @@ Deno.serve(async (req: Request) => {
 
   return new Response(null, {
     status: 204,
-    headers: { "Content-Type": "application/json" },
+    headers: { ...corsHeaders, },
   });
 });
-
-
-function handleError(error: unknown) {
-  console.error(error);
-
-  return new Response(JSON.stringify(error), {
-    status: 500,
-    headers: { "Content-Type": "application/json" },
-  });
-}
 
 /* To invoke locally:
 
