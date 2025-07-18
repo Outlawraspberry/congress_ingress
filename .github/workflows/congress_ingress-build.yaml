@@ -26,6 +26,26 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: 'recursive'
+        
+      - name: Checkout LFS objects
+        run: git lfs checkout
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: v22.x
+
+      - name: Run install
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: install 
+          dir: game-client
+
+     - name: Build production bundle
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: build
+          dir: 'game-client'
 
 # Please do not touch the following action
       - name: Store deployment content
