@@ -142,16 +142,19 @@ export type Database = {
           fraction: string
           id: string
           name: string
+          role: Database["public"]["Enums"]["role"]
         }
         Insert: {
           fraction: string
           id: string
           name?: string
+          role?: Database["public"]["Enums"]["role"]
         }
         Update: {
           fraction?: string
           id?: string
           name?: string
+          role?: Database["public"]["Enums"]["role"]
         }
         Relationships: [
           {
@@ -207,6 +210,7 @@ export type Database = {
     }
     Enums: {
       "game-state": "playing" | "paused"
+      role: "user" | "admin"
       task_type: "attack" | "attack_and_claim" | "repair" | "claim"
     }
     CompositeTypes: {
@@ -324,6 +328,7 @@ export const Constants = {
   public: {
     Enums: {
       "game-state": ["playing", "paused"],
+      role: ["user", "admin"],
       task_type: ["attack", "attack_and_claim", "repair", "claim"],
     },
   },
