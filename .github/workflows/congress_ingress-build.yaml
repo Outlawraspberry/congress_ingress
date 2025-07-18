@@ -17,45 +17,45 @@ env:
   DEPLOYMENT_FOLDER: ./game-client/dist
 
 jobs:
-# Please do not rename this job
-  build-project:
-    name: build congress_ingress
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
-        
-      - name: Checkout LFS objects
-        run: git lfs checkout
+  # Please do not rename this job
+    build:
+      name: build congress_ingress
+      runs-on: ubuntu-latest
+      steps:
+        - name: checkout
+          uses: actions/checkout@v4
+          with:
+            submodules: 'recursive'
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: v22.x
+        - name: Checkout LFS objects
+          run: git lfs checkout
 
-      - name: Run install
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: install 
-          dir: game-client
+        - name: Setup Node
+          uses: actions/setup-node@v4
+          with:
+            node-version: v22.x
 
-     - name: Build production bundle
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: build
-          dir: 'game-client'
+        - name: Run install
+          uses: borales/actions-yarn@v4
+          with:
+            cmd: install 
+            dir: game-client
 
-# Please do not touch the following action
-      - name: Store deployment content
-        uses: ionos-deploy-now/artifact-action@v1
-        with:
-          api-key: ${{ secrets.IONOS_API_KEY }}
-          service-host: api-eu.ionos.space
-          project-id: d7f288bc-74b2-4644-a301-b526d3067f74
-          branch-id: ${{ inputs.branch-id }}
-          version: ${{ github.sha }}
-          folder: ${{ env.DEPLOYMENT_FOLDER }}
-          config-file: .deploy-now/congress_ingress/config.yaml
-          action: upload
+        - name: Build production bundle
+          uses: borales/actions-yarn@v4
+          with:
+            cmd: build
+            dir: 'game-client'
+
+    # Please do not touch the following action
+        - name: Store deployment content
+          uses: ionos-deploy-now/artifact-action@v1
+          with:
+            api-key: ${{ secrets.IONOS_API_KEY }}
+            service-host: api-eu.ionos.space
+            project-id: d7f288bc-74b2-4644-a301-b526d3067f74
+            branch-id: ${{ inputs.branch-id }}
+            version: ${{ github.sha }}
+            folder: ${{ env.DEPLOYMENT_FOLDER }}
+            config-file: .deploy-now/congress_ingress/config.yaml
+            action: upload
