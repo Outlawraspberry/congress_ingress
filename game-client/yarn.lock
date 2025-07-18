@@ -622,10 +622,10 @@
   resolved "https://registry.npmjs.org/@sveltejs/acorn-typescript/-/acorn-typescript-1.0.5.tgz"
   integrity sha512-IwQk4yfwLdibDlrXVE04jTZYlLnwsTT2PIOQQGNLWfjavGifnk1JD1LcZjZaBTRcxZu2FfPfNLOE04DSu9lqtQ==
 
-"@sveltejs/adapter-auto@^6.0.0":
-  version "6.0.1"
-  resolved "https://registry.npmjs.org/@sveltejs/adapter-auto/-/adapter-auto-6.0.1.tgz"
-  integrity sha512-mcWud3pYGPWM2Pphdj8G9Qiq24nZ8L4LB7coCUckUEy5Y7wOWGJ/enaZ4AtJTcSm5dNK1rIkBRoqt+ae4zlxcQ==
+"@sveltejs/adapter-static@^3.0.8":
+  version "3.0.8"
+  resolved "https://registry.yarnpkg.com/@sveltejs/adapter-static/-/adapter-static-3.0.8.tgz#f23ee99a9678dbaec58b79d183bc3defbfe99f1a"
+  integrity sha512-YaDrquRpZwfcXbnlDsSrBQNCChVOT9MGuSg+dMAyfsAa1SmiAhrA5jUYUiIMC59G92kIbY/AaQOWcBdq+lh+zg==
 
 "@sveltejs/kit@^2.22.0":
   version "2.22.5"
@@ -1240,7 +1240,7 @@ chownr@^3.0.0:
 
 clsx@^2.1.1:
   version "2.1.1"
-  resolved "https://registry.npmjs.org/clsx/-/clsx-2.1.1.tgz"
+  resolved "https://registry.yarnpkg.com/clsx/-/clsx-2.1.1.tgz#eed397c9fd8bd882bfb18deab7102049a2f32999"
   integrity sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==
 
 color-convert@^2.0.1:
