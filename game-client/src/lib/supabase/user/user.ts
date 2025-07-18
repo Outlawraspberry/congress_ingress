@@ -5,7 +5,6 @@ export default {
 	async you(): Promise<User | undefined> {
 		const { data, error } = await supabase.schema('public').from('user').select('*');
 
-		console.log(data, error);
 		if (error != null) {
 			throw error;
 		}

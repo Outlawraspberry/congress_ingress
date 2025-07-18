@@ -1,14 +1,19 @@
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { type Game } from '../../../types/alias';
 import { supabase } from '../db.svelte';
+import { writable, type Writable } from 'svelte/store';
+import type { G } from 'vitest/dist/chunks/reporters.d.BFLkQcL6.js';
 
 export const game: { game: Game | null } = $state({ game: null });
+
+export const gameWritable: Writable<Game | null> = writable(null);
 
 let realtimeChannel: RealtimeChannel | undefined = undefined;
 
 export async function init(): Promise<void> {
 	if (game.game == null) {
 		game.game = await getGame();
+		gameWritable.set(game.game);
 	}
 
 	realtimeChannel = supabase
@@ -24,6 +29,8 @@ export async function init(): Promise<void> {
 					if ('tick' in payload.new) {
 						game.game.tick = payload.new.tick;
 					}
+
+					gameWritable.set(game.game);
 				}
 			}
 		)

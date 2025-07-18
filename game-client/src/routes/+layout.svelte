@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import '../app.css';
-	import { destroy, init } from '$lib/supabase/game/game.svelte';
+	import { destroy, game, init as gameInit } from '$lib/supabase/game/game.svelte';
 	import { DarkMode } from 'flowbite-svelte';
+	import { init as tickTaskInit } from '$lib/supabase/tick_task/tick-task.svelte';
 
 	let { children } = $props();
 
-	onMount(() => {
-		init();
-		console.log('init');
+	onMount(async () => {
+		await gameInit();
+		await tickTaskInit();
 	});
 
 	onDestroy(() => {
@@ -17,8 +18,6 @@
 	});
 </script>
 
-<DarkMode/>
+<DarkMode />
 
 {@render children()}
-
-
