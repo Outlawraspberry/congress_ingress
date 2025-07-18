@@ -39,6 +39,7 @@ export async function init(): Promise<void> {
 
 export async function destroy(): Promise<void> {
 	realtimeChannel?.unsubscribe();
+	game.game = null;
 }
 
 async function getGame(): Promise<Game> {

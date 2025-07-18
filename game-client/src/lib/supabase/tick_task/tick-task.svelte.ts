@@ -1,3 +1,4 @@
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { type TaskType, type TickTask } from '../../../../../types/alias';
 import { supabase, userStore } from '../db.svelte';
 import { game, gameWritable } from '../game/game.svelte';
@@ -14,6 +15,8 @@ export const userTaskTick: {
 		| undefined;
 } = $state({ task: undefined });
 
+let realtimeChannel: RealtimeChannel | undefined;
+
 export async function init(): Promise<void> {
 	const { data, error } = await supabase
 		.from('tick_task')
@@ -26,7 +29,7 @@ export async function init(): Promise<void> {
 	userTaskTick.task = data[0];
 	console.log(`created_by=eq.${userStore.user?.id}`);
 
-	supabase
+	realtimeChannel = supabase
 		.channel(`your-task-${userStore.user?.id}`)
 		.on(
 			'postgres_changes',
@@ -68,4 +71,9 @@ export async function init(): Promise<void> {
 			userTaskTick.task = undefined;
 		}
 	});
+}
+
+export function destroy(): void {
+	realtimeChannel?.unsubscribe();
+	userTaskTick.task = undefined;
 }
