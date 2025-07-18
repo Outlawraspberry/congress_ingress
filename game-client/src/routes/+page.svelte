@@ -2,15 +2,20 @@
 	import { goto } from '$app/navigation';
 	import Login from '$lib/login/Login.svelte';
 	import { signOut, userStore } from '$lib/supabase/db.svelte';
-	import { Button } from 'flowbite-svelte';
+	import { Button, P } from 'flowbite-svelte';
 </script>
 
-{#if userStore.session == null}
-	<Login />
-{:else}
-	Welcome, you can play the game!
+<section class="my-5">
+	{#if userStore.session == null}
+		<Login />
+	{:else}
+		<P class="text-center">Welcome, you can play the game!</P>
 
-	<Button onclick={signOut}>Logout</Button>
+		<section class="my-5 flex justify-center gap-5">
+			<Button onclick={() => goto('/game')}>Start the game</Button>
+			
+			<Button onclick={signOut}>Logout</Button>
+		</section>
 
-	<Button onclick={() => goto('/game')}>Start the game</Button>
-{/if}
+	{/if}
+</section>

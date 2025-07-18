@@ -23,4 +23,6 @@
 
 <Header></Header>
 
-{@render children()}
+<div class="container mx-auto">
+	{@render children()}
+</div>

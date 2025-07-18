@@ -77,6 +77,9 @@
 			.select('tick, health, acquired_by')
 			.filter('point_id', 'eq', data.pointId)
 			.filter('tick', 'lte', game.game?.tick)
+			.order('tick', {
+				ascending: false
+			})
 			.limit(100);
 
 		if (historyResult.error) throw historyResult.error;
@@ -87,42 +90,45 @@
 	});
 </script>
 
-<Button href="/game"><AngleLeftOutline></AngleLeftOutline></Button>
+<Heading class="text-center" tag="h1">{data.point.name}</Heading>
 
-<Heading tag="h1">{data.point.name}</Heading>
+<section class="my-5">
+	<P class="text-center">Acquired by: {fractionName}</P>
+	<P class="text-center">Health: {tickPoint?.health} / {data.point.max_health}</P>
+</section>
 
-<P>{game.game?.tick}</P>
+<section class="container my-5 flex justify-center">
+	{#if tickPoint != null && you != null}
+		<TaskOverview currentTickPoint={tickPoint} user={you} chosenPoint={data.point}></TaskOverview>
+	{/if}
+</section>
 
-<P>Acquired by: {fractionName}</P>
-<P>Health: {tickPoint?.health} / {data.point.max_health}</P>
+{#if you?.role === "admin"}
+	
+<section class="my-5">
+	<Heading tag="h2" class="text-center">History</Heading>
 
-<CurrentTask></CurrentTask>
-
-<Heading tag="h2">History</Heading>
-
-{#if tickPoint != null && you != null}
-	<TaskOverview currentTickPoint={tickPoint} user={you} chosenPoint={data.point}></TaskOverview>
+	<Table>
+		<TableHead>
+			<TableHeadCell>Tick</TableHeadCell>
+			<TableHeadCell>Health</TableHeadCell>
+			<TableHeadCell>Acquired by</TableHeadCell>
+		</TableHead>
+		<TableBody>
+			{#each histroy as entry}
+				<TableBodyRow>
+					<TableBodyCell>{entry.tick}</TableBodyCell>
+					<TableBodyCell>{entry.health}</TableBodyCell>
+					<TableBodyCell
+						>{#if entry.acquired_by}
+							{entry.acquired_by}
+						{:else}
+							None
+						{/if}</TableBodyCell
+					>
+				</TableBodyRow>
+			{/each}
+		</TableBody>
+	</Table>
+</section>
 {/if}
-
-<Table>
-	<TableHead>
-		<TableHeadCell>Tick</TableHeadCell>
-		<TableHeadCell>Health</TableHeadCell>
-		<TableHeadCell>Acquired by</TableHeadCell>
-	</TableHead>
-	<TableBody>
-		{#each histroy as entry}
-			<TableBodyRow>
-				<TableBodyCell>{entry.tick}</TableBodyCell>
-				<TableBodyCell>{entry.health}</TableBodyCell>
-				<TableBodyCell
-					>{#if entry.acquired_by}
-						{entry.acquired_by}
-					{:else}
-						None
-					{/if}</TableBodyCell
-				>
-			</TableBodyRow>
-		{/each}
-	</TableBody>
-</Table>

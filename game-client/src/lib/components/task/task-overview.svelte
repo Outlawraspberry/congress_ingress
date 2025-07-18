@@ -52,7 +52,7 @@
 	}
 </script>
 
-<section>
+<section class="flex justify-center gap-5">
 	{#each possibleTasks as task}
 		<Button onclick={() => upsertTask(task)}>
 			{#if task == 'attack'}

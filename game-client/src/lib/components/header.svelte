@@ -6,6 +6,8 @@
 	import { onMount } from 'svelte';
 	import type { User } from '../../types/alias';
 	import { userStore } from '$lib/supabase/db.svelte';
+	import { game } from '$lib/supabase/game/game.svelte';
+	import { HomeOutline } from 'flowbite-svelte-icons';
 
 	let you: User | undefined = $state(undefined);
 
@@ -23,21 +25,26 @@
 
 <header>
 	<Navbar>
-		<NavBrand href="/">Home</NavBrand>
+		<NavBrand href="/"><HomeOutline /></NavBrand>
+
+		<div class="flex justify-center">
+			{#if you != null}<CurrentTask /> |{/if}
+			Tick: {game.game?.tick}
+			
+		</div>
 
 		<NavUl>
 			<NavLi href="/game">Game</NavLi>
-			{#if you != null}<NavLi><CurrentTask /></NavLi>{/if}
 
 			<DarkMode />
 		</NavUl>
 
-		<div class="flex items-center md:order-2">
-			<NavHamburger />
-
+		<div class="flex items-center md:order-2">		
 			{#if you != null && you.role === 'admin'}
 				<RunTick />
 			{/if}
+
+			<NavHamburger />
 		</div>
 	</Navbar>
 </header>

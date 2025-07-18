@@ -7,7 +7,6 @@
 	import TaskOverview from '$lib/components/task/task-overview.svelte';
 	import { game } from '$lib/supabase/game/game.svelte';
 
-
 	const {
 		data
 	}: {
@@ -30,25 +29,28 @@
 	});
 </script>
 
-<Heading tag="h1">Game</Heading>
+<Heading class="text-center" tag="h1">Game</Heading>
 
-<P>Welcome {data.user.name}.</P>
-<P>Your fraction {data.fraction.name}.</P>
+<section class="my-5">
+	<P class="text-center">Welcome {data.user.name}</P>
+	<P class="text-center">Your fraction {data.fraction.name}</P>
 
-<P
-	>The game is: {#if game.game?.state === 'paused'}
-		Paused
-	{:else}
-		Running
-	{/if}</P
->
-<P>Games current tick: {game.game?.tick}</P>
+	<P class="text-center"
+		>The game is: {#if game.game?.state === 'paused'}
+			Paused
+		{:else}
+			Running
+		{/if}</P
+	>
+	<P class="text-center">Games current tick: {game.game?.tick}</P>
+</section>
 
-<ul class="flex">
-	{#each points as point (point.id)}
-		<li class="m-1 border-1 p-1">
-			<P>{point.name}</P>
-			<Button href={`/game/point/${point.id}`}>Open</Button>
-		</li>
-	{/each}
-</ul>
+<section class="my-5">
+	<ul class="flex justify-center gap-5">
+		{#each points as point (point.id)}
+			<li class="">
+				<Button href={`/game/point/${point.id}`}>{point.name}</Button>
+			</li>
+		{/each}
+	</ul>
+</section>
