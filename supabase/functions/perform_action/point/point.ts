@@ -1,5 +1,5 @@
 import { attackDamage, repairHeal } from "../../../../types/game-config.ts";
-import { UserGameData } from "../../../../types/alias.ts";
+import { TaskType, UserGameData } from "../../../../types/alias.ts";
 import { Action } from "../action/action.ts";
 
 export class Point {
@@ -85,6 +85,10 @@ export class Point {
   }
 
   simulateTasks(task: Action, user: UserGameData): void {
+    console.log(
+      `User ${user.user_id}} tries to ${task.type} on ${this.pointId}`,
+    );
+
     if (task.type === "attack") return this.handleAttack(user);
     if (task.type === "attack_and_claim") {
       return this.handleAttackAndClaim(user);
@@ -94,38 +98,80 @@ export class Point {
   }
 
   private handleAttack(user: UserGameData) {
-    if (
-      this._acquiredBy != null && this._acquiredBy != user.faction_id
-    ) {
-      this._health -= attackDamage;
+    if (this._acquiredBy == null) {
+      this.throwIsNotAcquired(user, "attack");
     }
+    if (this._acquiredBy == user.faction_id) {
+      this.throwIsInSameFaction(user, "attack");
+    }
+
+    this._health -= attackDamage;
+    console.log(
+      `User ${user.user_id}} attacked ${this.pointId}`,
+    );
   }
 
   private handleAttackAndClaim(user: UserGameData) {
-    if (
-      this._acquiredBy != user.faction_id && this.acquiredBy != null
-    ) {
-      this.handleAttack(user);
+    if (this._acquiredBy == null) {
+      this.throwIsNotAcquired(user, "attack_and_claim");
+    }
+    if (this._acquiredBy == user.faction_id) {
+      this.throwIsInSameFaction(user, "attack_and_claim");
+    }
 
-      if (this._health <= 0) {
-        this._acquiredBy = user.faction_id;
-        this._health = this._maxHealth;
-      }
+    this.handleAttack(user);
+
+    if (this._health <= 0) {
+      this._acquiredBy = user.faction_id;
+      this._health = this._maxHealth;
+
+      console.log(
+        `User ${user.user_id}} attacked and claimed ${this.pointId}`,
+      );
     }
   }
 
   private handleRepair(user: UserGameData) {
-    if (
-      this._acquiredBy == user.faction_id && this._acquiredBy != null
-    ) {
-      this._health = Math.min(this._maxHealth, this.health + repairHeal);
+    if (this._acquiredBy == null) {
+      this.throwIsNotAcquired(user, "attack_and_claim");
     }
+    if (this._acquiredBy == user.faction_id) {
+      this.throwIsInOtherFaction(user, "attack_and_claim");
+    }
+
+    this._health = Math.min(this._maxHealth, this.health + repairHeal);
+    console.log(
+      `User ${user.user_id}} repaired ${this.pointId}`,
+    );
   }
 
   private handleClaim(user: UserGameData) {
-    if (this._acquiredBy == null) {
-      this._acquiredBy = user.faction_id;
+    if (this._acquiredBy != null) {
+      this.throwIsInOtherFaction(user, "claim");
     }
+
+    this._acquiredBy = user.faction_id;
+    console.log(
+      `User ${user.user_id}} claimed ${this.pointId}`,
+    );
+  }
+
+  private throwIsNotAcquired(user: UserGameData, type: TaskType): void {
+    throw new Error(
+      `User ${user.user_id} cannot ${type} the point ${this.pointId} because the point is not claimed!`,
+    );
+  }
+
+  private throwIsInSameFaction(user: UserGameData, type: TaskType): void {
+    throw new Error(
+      `User ${user.user_id}} cannot ${type} point ${this.pointId} because he is in the same faction`,
+    );
+  }
+
+  private throwIsInOtherFaction(user: UserGameData, type: TaskType): void {
+    throw new Error(
+      `User ${user.user_id}} cannot ${type} point ${this.pointId} because he is in another faction`,
+    );
   }
 
   get acquiredBy(): string | null {

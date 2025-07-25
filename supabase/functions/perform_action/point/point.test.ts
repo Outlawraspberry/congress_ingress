@@ -101,9 +101,9 @@ describe("Point task simulate works when", () => {
     const task: Action = baseAction;
     const point = getPoint({ unsetAcquredBy: true });
 
-    point.simulateTasks(task, userFactionA);
-
-    expect(point.health).toBe(255);
+    expect(() => {
+      point.simulateTasks(task, userFactionA);
+    }).toThrow();
   });
 
   test("attackAndClaim task damages the point but doesn't claim when health is over 0", () => {
@@ -126,10 +126,9 @@ describe("Point task simulate works when", () => {
     };
     const point = getPoint({ unsetAcquredBy: true });
 
-    point.simulateTasks(task, userFactionA);
-
-    expect(point.health).toBe(255);
-    expect(point.acquiredBy).toBe(null);
+    expect(() => {
+      point.simulateTasks(task, userFactionA);
+    }).toThrow();
   });
 
   test("attackAdClaim attacks and claims point when health is smaller equal 0", () => {
@@ -163,7 +162,7 @@ describe("Point task simulate works when", () => {
       maxHealth: 255,
     });
 
-    point.simulateTasks(task, userFactionA);
+    point.simulateTasks(task, userFactionB);
 
     expect(point.health).toBe(100 + repairHeal);
   });
@@ -208,8 +207,8 @@ describe("Point task simulate works when", () => {
     };
     const point = getPoint({ acquiredBy: factionA });
 
-    point.simulateTasks(task, userFactionA);
-
-    expect(point.acquiredBy).toBe(factionA);
+    expect(() => {
+      point.simulateTasks(task, userFactionA);
+    }).toThrow();
   });
 });

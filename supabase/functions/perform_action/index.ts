@@ -17,7 +17,8 @@ Deno.serve(async (req) => {
   }
 
   const authHeader = req.headers.get("Authorization") ?? "";
-  const supabaseClient: SupabaseClient<Database> = createClient<Database>(
+
+  let supabaseClient: SupabaseClient<Database> = createClient<Database>(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_ANON_KEY") ?? "",
     {
@@ -54,22 +55,25 @@ Deno.serve(async (req) => {
 
   point.simulateTasks(action, userGameData);
 
+  supabaseClient = createClient<Database>(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+  );
   const [updatePoint, insertPointArchive] = await Promise.all([
     supabaseClient.from("point").update({
       acquired_by: point.acquiredBy,
       health: point.health,
     }).filter("id", "eq", point.pointId),
-    supabaseClient.from("point_tick_archive").insert({
-      point_id: point.pointId,
-      acquired_by: point.acquiredBy,
-      created_at: new Date().toISOString(),
-      health: point.health,
+    supabaseClient.from("actions").insert({
+      created_by: userGameData.user_id,
+      point: point.pointId,
+      type: action.type,
     }),
   ]);
 
-  if (updatePoint.error) return error.handleError(updatePoint.error);
+  if (updatePoint.error) return error.handleError(updatePoint.error, 400);
   if (insertPointArchive.error) {
-    return error.handleError(insertPointArchive.error);
+    return error.handleError(insertPointArchive.error, 400);
   }
 
   return new Response(
