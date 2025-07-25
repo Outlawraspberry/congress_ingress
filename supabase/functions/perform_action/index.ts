@@ -10,6 +10,8 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../types/database.types.ts";
 import { error } from "@shared";
 import { getPoint } from "./point/get-points.ts";
+import { UserGameData } from "../../../types/alias.ts";
+import { userActionCooldownInSeconds } from "../../../types/game-config.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -51,7 +53,23 @@ Deno.serve(async (req) => {
     return error.handleError(userGameDataResponse.error, 403);
   }
 
-  const userGameData = userGameDataResponse.data[0];
+  const userGameData: UserGameData = userGameDataResponse.data[0];
+  const now = new Date();
+
+  if (userGameData.last_action != null) {
+    const lastAction = Date.parse(userGameData.last_action);
+
+    if (
+      Math.abs(lastAction - now.getTime()) <
+        userActionCooldownInSeconds * 1000
+    ) {
+      return error.handleError(
+        new Error(
+          `You are not allowed to perform the action, because you already have create an action in the last ${userActionCooldownInSeconds} seconds `,
+        ),
+      );
+    }
+  }
 
   point.simulateTasks(action, userGameData);
 
@@ -59,20 +77,31 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
   );
-  const [updatePoint, insertPointArchive] = await Promise.all([
-    supabaseClient.from("point").update({
-      acquired_by: point.acquiredBy,
-      health: point.health,
-    }).filter("id", "eq", point.pointId),
-    supabaseClient.from("actions").insert({
-      created_by: userGameData.user_id,
-      point: point.pointId,
-      type: action.type,
-    }),
-  ]);
+  const [updatePoint, insertPointArchive, userGameDataUpdateResult] =
+    await Promise.all([
+      supabaseClient.from("point").update({
+        acquired_by: point.acquiredBy,
+        health: point.health,
+      }).filter("id", "eq", point.pointId),
+      supabaseClient.from("actions").insert({
+        created_by: userGameData.user_id,
+        point: point.pointId,
+        type: action.type,
+      }),
+      supabaseClient.from("user_game_data").update({
+        last_action: now.toISOString(),
+      }).filter(
+        "user_id",
+        "eq",
+        userGameData.user_id,
+      ),
+    ]);
 
   if (updatePoint.error) return error.handleError(updatePoint.error, 400);
   if (insertPointArchive.error) {
+    return error.handleError(insertPointArchive.error, 400);
+  }
+  if (userGameDataUpdateResult.error) {
     return error.handleError(insertPointArchive.error, 400);
   }
 
