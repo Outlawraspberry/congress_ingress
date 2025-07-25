@@ -159,17 +159,17 @@ export type Database = {
       }
       user_game_data: {
         Row: {
-          faction_id: string | null
+          faction_id: string
           last_action: string | null
           user_id: string
         }
         Insert: {
-          faction_id?: string | null
+          faction_id: string
           last_action?: string | null
           user_id?: string
         }
         Update: {
-          faction_id?: string | null
+          faction_id?: string
           last_action?: string | null
           user_id?: string
         }
@@ -221,6 +221,10 @@ export type Database = {
       check_if_user_already_added_a_task_for_current_tick: {
         Args: { a_user_id: string }
         Returns: boolean
+      }
+      create_point_archive_snapshot: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       does_point_exists: {
         Args: { a_point_id: string }
