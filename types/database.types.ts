@@ -9,7 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      fraction: {
+      actions: {
+        Row: {
+          created_at: string
+          created_by: string
+          point: string
+          type: Database["public"]["Enums"]["task_type"]
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          point: string
+          type: Database["public"]["Enums"]["task_type"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          point?: string
+          type?: Database["public"]["Enums"]["task_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tick_task_point_fkey"
+            columns: ["point"]
+            isOneToOne: false
+            referencedRelation: "point"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      faction: {
         Row: {
           created_at: string
           id: string
@@ -31,69 +60,77 @@ export type Database = {
         Row: {
           id: number
           state: Database["public"]["Enums"]["game-state"]
-          tick: number
         }
         Insert: {
           id?: number
           state?: Database["public"]["Enums"]["game-state"]
-          tick: number
         }
         Update: {
           id?: number
           state?: Database["public"]["Enums"]["game-state"]
-          tick?: number
         }
         Relationships: []
       }
       point: {
         Row: {
+          acquired_by: string | null
           created_at: string
+          health: number
           id: string
           max_health: number
           name: string
         }
         Insert: {
+          acquired_by?: string | null
           created_at?: string
+          health?: number
           id?: string
           max_health?: number
           name: string
         }
         Update: {
+          acquired_by?: string | null
           created_at?: string
+          health?: number
           id?: string
           max_health?: number
           name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "point_acquired_by_fkey"
+            columns: ["acquired_by"]
+            isOneToOne: false
+            referencedRelation: "faction"
+            referencedColumns: ["id"]
+          },
+        ]
       }
-      tick_point: {
+      point_tick_archive: {
         Row: {
           acquired_by: string | null
           created_at: string
-          health: number
+          health: number | null
           point_id: string
-          tick: number
         }
         Insert: {
           acquired_by?: string | null
           created_at?: string
-          health: number
+          health?: number | null
           point_id: string
-          tick: number
         }
         Update: {
           acquired_by?: string | null
           created_at?: string
-          health?: number
+          health?: number | null
           point_id?: string
-          tick?: number
         }
         Relationships: [
           {
             foreignKeyName: "tick_point_acquired_by_fkey"
             columns: ["acquired_by"]
             isOneToOne: false
-            referencedRelation: "fraction"
+            referencedRelation: "faction"
             referencedColumns: ["id"]
           },
           {
@@ -105,63 +142,73 @@ export type Database = {
           },
         ]
       }
-      tick_task: {
+      user: {
         Row: {
-          created_at: string
-          created_by: string
-          point: string
-          tick: number
-          type: Database["public"]["Enums"]["task_type"]
+          id: string
+          name: string
         }
         Insert: {
-          created_at?: string
-          created_by: string
-          point: string
-          tick: number
-          type: Database["public"]["Enums"]["task_type"]
+          id: string
+          name?: string
         }
         Update: {
-          created_at?: string
-          created_by?: string
-          point?: string
-          tick?: number
-          type?: Database["public"]["Enums"]["task_type"]
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      user_game_data: {
+        Row: {
+          faction_id: string | null
+          last_action: string | null
+          user_id: string
+        }
+        Insert: {
+          faction_id?: string | null
+          last_action?: string | null
+          user_id?: string
+        }
+        Update: {
+          faction_id?: string | null
+          last_action?: string | null
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "tick_task_point_fkey"
-            columns: ["point"]
+            foreignKeyName: "user_game_data_faction_id_fkey"
+            columns: ["faction_id"]
             isOneToOne: false
-            referencedRelation: "point"
+            referencedRelation: "faction"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_game_data_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user"
             referencedColumns: ["id"]
           },
         ]
       }
-      user: {
+      user_role: {
         Row: {
-          fraction: string
-          id: string
-          name: string
           role: Database["public"]["Enums"]["role"]
+          user_id: string
         }
         Insert: {
-          fraction: string
-          id: string
-          name?: string
           role?: Database["public"]["Enums"]["role"]
+          user_id?: string
         }
         Update: {
-          fraction?: string
-          id?: string
-          name?: string
           role?: Database["public"]["Enums"]["role"]
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "user_fraction_fkey"
-            columns: ["fraction"]
-            isOneToOne: false
-            referencedRelation: "fraction"
+            foreignKeyName: "user_role_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user"
             referencedColumns: ["id"]
           },
         ]
@@ -210,6 +257,7 @@ export type Database = {
     }
     Enums: {
       "game-state": "playing" | "paused"
+      "puzzle-type": "math"
       role: "user" | "admin"
       task_type: "attack" | "attack_and_claim" | "repair" | "claim"
     }
@@ -328,6 +376,7 @@ export const Constants = {
   public: {
     Enums: {
       "game-state": ["playing", "paused"],
+      "puzzle-type": ["math"],
       role: ["user", "admin"],
       task_type: ["attack", "attack_and_claim", "repair", "claim"],
     },
