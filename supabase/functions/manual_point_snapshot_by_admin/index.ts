@@ -18,9 +18,10 @@ Deno.serve(async (req) => {
   const authHeader = req.headers.get("Authorization") ?? "";
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
-  const isAuthenticated = authHeader.split(" ")[1] === serviceRoleKey
-    ? true
-    : await isUserAuthenticated(authHeader);
+  const isAuthenticated =
+    authHeader.split(" ")[1] === serviceRoleKey
+      ? true
+      : await isUserAuthenticated(authHeader);
 
   if (!isAuthenticated) {
     return new Response(undefined, {
@@ -38,10 +39,10 @@ Deno.serve(async (req) => {
 
   if (result.error != null) error.handleError(result.error);
 
-  return new Response(
-    undefined,
-    { status: 204, headers: { "Content-Type": "application/json" } },
-  );
+  return new Response(undefined, {
+    status: 204,
+    headers: { ...corsHeaders },
+  });
 });
 
 /* To invoke locally:
