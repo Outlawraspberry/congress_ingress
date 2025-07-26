@@ -8,23 +8,22 @@ export class Point {
   private _health: number;
   private _pointId: string;
 
-  constructor(
-    args: {
-      acquiredBy?: string | null;
-      maxHealth: number;
-      health: number;
-      pointId: string;
-    },
-  ) {
+  constructor(args: {
+    acquiredBy?: string | null;
+    maxHealth: number;
+    health: number;
+    pointId: string;
+  }) {
     this._acquiredBy = args.acquiredBy ?? null;
     this._maxHealth = args.maxHealth;
     this._health = args.health;
     this._pointId = args.pointId;
   }
 
-  static fromRecord(
-    record: Record<string, unknown>,
-  ): { point?: Point; error?: Error } {
+  static fromRecord(record: Record<string, unknown>): {
+    point?: Point;
+    error?: Error;
+  } {
     if (record == null || typeof record !== "object") {
       return {
         error: new Error("Input has to be of type object"),
@@ -32,9 +31,11 @@ export class Point {
     }
 
     if (
-      !("max_health" in record &&
+      !(
+        "max_health" in record &&
         record.max_health != null &&
-        typeof record.max_health === "number")
+        typeof record.max_health === "number"
+      )
     ) {
       return {
         error: new Error('"max_health" is not set, or is not a number'),
@@ -42,27 +43,27 @@ export class Point {
     }
 
     if (
-      !("health" in record &&
+      !(
+        "health" in record &&
         record.health != null &&
-        typeof record.health === "number")
+        typeof record.health === "number"
+      )
     ) {
       return { error: new Error('"health" is not set, or is not a number') };
     }
 
     if (
-      !(
-        "id" in record &&
-        record.id != null &&
-        typeof record.id === "string"
-      )
+      !("id" in record && record.id != null && typeof record.id === "string")
     ) {
       return { error: new Error('"id" is not set, or is not a string') };
     }
 
     if (
-      !("acquired_by" in record &&
+      !(
+        "acquired_by" in record &&
         record.acquired_by != null &&
-        typeof record.acquired_by === "string")
+        typeof record.acquired_by === "string"
+      )
     ) {
       return {
         point: new Point({
@@ -106,9 +107,7 @@ export class Point {
     }
 
     this._health -= attackDamage;
-    console.log(
-      `User ${user.user_id}} attacked ${this.pointId}`,
-    );
+    console.log(`User ${user.user_id}} attacked ${this.pointId}`);
   }
 
   private handleAttackAndClaim(user: UserGameData) {
@@ -125,24 +124,20 @@ export class Point {
       this._acquiredBy = user.faction_id;
       this._health = this._maxHealth;
 
-      console.log(
-        `User ${user.user_id}} attacked and claimed ${this.pointId}`,
-      );
+      console.log(`User ${user.user_id}} attacked and claimed ${this.pointId}`);
     }
   }
 
   private handleRepair(user: UserGameData) {
     if (this._acquiredBy == null) {
-      this.throwIsNotAcquired(user, "attack_and_claim");
+      this.throwIsNotAcquired(user, "repair");
     }
-    if (this._acquiredBy == user.faction_id) {
-      this.throwIsInOtherFaction(user, "attack_and_claim");
+    if (this._acquiredBy != user.faction_id) {
+      this.throwIsInOtherFaction(user, "repair");
     }
 
     this._health = Math.min(this._maxHealth, this.health + repairHeal);
-    console.log(
-      `User ${user.user_id}} repaired ${this.pointId}`,
-    );
+    console.log(`User ${user.user_id}} repaired ${this.pointId}`);
   }
 
   private handleClaim(user: UserGameData) {
@@ -151,9 +146,7 @@ export class Point {
     }
 
     this._acquiredBy = user.faction_id;
-    console.log(
-      `User ${user.user_id}} claimed ${this.pointId}`,
-    );
+    console.log(`User ${user.user_id}} claimed ${this.pointId}`);
   }
 
   private throwIsNotAcquired(user: UserGameData, type: TaskType): void {
@@ -170,7 +163,7 @@ export class Point {
 
   private throwIsInOtherFaction(user: UserGameData, type: TaskType): void {
     throw new Error(
-      `User ${user.user_id}} cannot ${type} point ${this.pointId} because he is in another faction`,
+      `User ${user.user_id}} cannot ${type} point ${this.pointId} because he is in faction ${user.faction_id}, but the point is acquired by ${this._acquiredBy}`,
     );
   }
 

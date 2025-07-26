@@ -1,49 +1,42 @@
 <script lang="ts">
-	import { Button } from 'flowbite-svelte';
-	import type { Point, TaskType, TickPoint, TickTask, User } from '../../../types/alias';
-	import { supabase } from '$lib/supabase/db.svelte';
+	import { supabase, userStore } from '$lib/supabase/db.svelte';
 	import { game } from '$lib/supabase/game/game.svelte';
+	import { Button } from 'flowbite-svelte';
+	import type { TaskType } from '../../../types/alias';
+	import type { PointState } from '$lib/supabase/game/points.svelte';
+	import { user } from '$lib/supabase/user/user.svelte';
 
 	const {
-		user,
-		currentTickPoint = $bindable(),
 		chosenPoint
 	}: {
-		currentTickPoint: TickPoint;
-		user: User;
-		chosenPoint: Point;
+		chosenPoint: PointState;
 	} = $props();
 
 	const possibleTasks: TaskType[] = $derived.by(() => {
-		const tasks: TaskType[] = [];
-
-		if (currentTickPoint.acquired_by == null) {
+		if (chosenPoint.state.point?.acquired_by == null) {
 			return ['claim'];
 		}
 
-		if (currentTickPoint.acquired_by === user.fraction) {
+		if (chosenPoint.state.point?.acquired_by === user.user?.faction) {
 			return ['repair'];
 		}
 
-		if (currentTickPoint.acquired_by !== user.fraction) {
+		if (chosenPoint.state.point?.acquired_by !== user.user?.faction) {
 			return ['attack', 'attack_and_claim'];
 		}
 
 		return [];
 	});
 
-	async function upsertTask(type: TaskType): Promise<void> {
+	async function preformAction(type: TaskType): Promise<void> {
 		if (game.game != null) {
-			const { error } = await supabase
-				.from('tick_task')
-				.upsert({
-					created_by: user.id,
-					point: chosenPoint.id,
-					tick: game.game?.tick,
-					type,
-					created_at: new Date().toISOString()
-				})
-				.filter('created_by', 'eq', user.id);
+			const { error } = await supabase.functions.invoke('perform_action', {
+				body: {
+					user: userStore.user!.id,
+					point: chosenPoint.state.point?.id,
+					type: type
+				}
+			});
 
 			if (error != null) {
 				throw error;
@@ -53,8 +46,8 @@
 </script>
 
 <section class="flex justify-center gap-5">
-	{#each possibleTasks as task}
-		<Button onclick={() => upsertTask(task)}>
+	{#each possibleTasks as task (task)}
+		<Button onclick={() => preformAction(task)} disabled={!user.user?.canUseAction}>
 			{#if task == 'attack'}
 				Attack
 			{:else if task === 'attack_and_claim'}

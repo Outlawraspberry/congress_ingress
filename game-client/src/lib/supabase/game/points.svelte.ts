@@ -28,26 +28,29 @@ export class PointState {
 
 		this.state.point = data[0];
 
-		this.realtimeChannel = supabase.channel(`point-${this.pointId}-update`).on(
-			'postgres_changes',
-			{
-				event: 'UPDATE',
-				schema: 'public',
-				table: 'point',
-				filter: `id:eq.${this.pointId}`
-			},
-			(payload) => {
-				if (payload.new != null && this.state.point != null) {
-					if (payload.new.acquired_by != null) {
-						this.state.point.acquired_by = payload.new.acquired_by;
-					}
+		this.realtimeChannel = supabase
+			.channel(`point-${this.pointId}-update`)
+			.on(
+				'postgres_changes',
+				{
+					event: '*',
+					schema: 'public',
+					table: 'point',
+					filter: `id=eq.${this.pointId}`
+				},
+				(payload) => {
+					if (payload.new != null && this.state.point != null) {
+						if ('acquired_by' in payload.new && payload.new.acquired_by != null) {
+							this.state.point.acquired_by = payload.new.acquired_by;
+						}
 
-					if (payload.new.health != null) {
-						this.state.point.health = payload.new.health;
+						if ('health' in payload.new && payload.new.health != null) {
+							this.state.point.health = payload.new.health;
+						}
 					}
 				}
-			}
-		);
+			)
+			.subscribe();
 	}
 
 	destroy(): void {
