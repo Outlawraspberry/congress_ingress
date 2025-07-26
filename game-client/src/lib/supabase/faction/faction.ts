@@ -1,19 +1,19 @@
-import type { Fraction } from '../../../types/alias';
+import type { Faction } from '../../../types/alias';
 import { supabase } from '../db.svelte';
 
-const fetchedFractions: Map<string, Fraction> = new Map();
+const fetchedFactions: Map<string, Faction> = new Map();
 const fetchedNames: Map<string, string> = new Map();
 
 export default {
-	async get(id: string): Promise<Fraction | undefined> {
+	async get(id: string): Promise<Faction | undefined> {
 		try {
-			let fraction = fetchedFractions.get(id);
+			let fraction = fetchedFactions.get(id);
 
 			if (fraction != null) return fraction;
 
 			const { data, error } = await supabase
 				.schema('public')
-				.from('fraction')
+				.from('faction')
 				.select('*')
 				.filter('id', 'eq', id);
 
@@ -23,7 +23,7 @@ export default {
 
 			if (data != null) {
 				fraction = data[0];
-				fetchedFractions.set(id, fraction);
+				fetchedFactions.set(id, fraction);
 				return fraction;
 			}
 		} catch {
@@ -37,7 +37,7 @@ export default {
 
 			if (name != null) return name;
 
-			const { data, error } = await supabase.from('fraction').select('name').filter('id', 'eq', id);
+			const { data, error } = await supabase.from('faction').select('name').filter('id', 'eq', id);
 
 			if (error != null) {
 				throw error;

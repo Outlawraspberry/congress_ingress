@@ -1,6 +1,7 @@
 import { createClient, type Session, type User } from '@supabase/supabase-js';
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
 import { type Database } from '../../types/database.types';
+import { init as userInit, destroy as userDestroy } from './user/user.svelte';
 
 export const supabase = createClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
 	auth: {
@@ -17,8 +18,6 @@ export const userStore: {
 	user: undefined,
 	session: undefined
 });
-
-await init();
 
 export async function init() {
 	const [userResponse, sessionResponse] = await Promise.all([
@@ -44,6 +43,7 @@ export async function signIn(email: string, password: string): Promise<void> {
 	if (data != null) {
 		userStore.session = data.session;
 		userStore.user = data.user;
+		await userInit();
 	}
 }
 export function signOut() {
@@ -51,6 +51,7 @@ export function signOut() {
 
 	userStore.user = undefined;
 	userStore.session = undefined;
+	userDestroy();
 
 	window.sessionStorage.clear();
 

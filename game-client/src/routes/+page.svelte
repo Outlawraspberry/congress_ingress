@@ -13,9 +13,12 @@
 
 		<section class="my-5 flex justify-center gap-5">
 			<Button onclick={() => goto('/game')}>Start the game</Button>
-			
-			<Button onclick={signOut}>Logout</Button>
-		</section>
 
+			<Button
+				onclick={() => {
+					signOut();
+				}}>Logout</Button
+			>
+		</section>
 	{/if}
 </section>

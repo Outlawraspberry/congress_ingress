@@ -1,27 +1,25 @@
 <script lang="ts">
+	import { supabase } from '$lib/supabase/db.svelte';
+	import { game } from '$lib/supabase/game/game.svelte';
 	import { Button, Heading, P } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
-	import { supabase } from '$lib/supabase/db.svelte';
-	import type { RealtimeChannel } from '@supabase/supabase-js';
-	import type { User, Fraction, Point } from '../../types/alias';
-	import TaskOverview from '$lib/components/task/task-overview.svelte';
-	import { game } from '$lib/supabase/game/game.svelte';
+	import type { Faction, Point, User } from '../../types/alias';
 
 	const {
 		data
 	}: {
 		data: {
 			user: User;
-			fraction: Fraction;
+			fraction: Faction;
 		};
 	} = $props();
 
-	let realtimeChannel: RealtimeChannel | undefined = undefined;
-
-	let points: Point[] = $state([]);
+	let points: Pick<Point, 'id' | 'name'>[] = $state([]);
 
 	onMount(async () => {
 		const { data, error } = await supabase.from('point').select('*');
+
+		if (error != null) throw error;
 
 		if (data != null) {
 			points = data;
@@ -42,7 +40,6 @@
 			Running
 		{/if}</P
 	>
-	<P class="text-center">Games current tick: {game.game?.tick}</P>
 </section>
 
 <section class="my-5">

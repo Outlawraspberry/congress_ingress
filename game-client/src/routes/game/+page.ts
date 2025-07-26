@@ -1,6 +1,6 @@
 import { userStore } from '$lib/supabase/db.svelte';
-import fractionMod from '$lib/supabase/fraction/fraction';
-import userMod from '$lib/supabase/user/user';
+import factionMod from '$lib/supabase/faction/faction';
+import { user } from '$lib/supabase/user/user.svelte';
 import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 
@@ -9,14 +9,11 @@ export const load: PageLoad = async () => {
 		redirect(308, '/');
 	}
 
-	const user = await userMod.you();
-	if (user == null) {
-		throw new Error(`User ${userStore.user.id} not found`);
-	}
+	if (user.user == null) throw new Error('No user');
 
-	const fraction = await fractionMod.get(user.fraction);
+	const fraction = await factionMod.get(user.user.faction);
 	if (fraction == null) {
-		throw new Error(`Fraction ${user.fraction} not found`);
+		throw new Error(`Fraction ${user.user?.faction} not found`);
 	}
 
 	return {
