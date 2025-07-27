@@ -142,6 +142,74 @@ export type Database = {
           },
         ]
       }
+      puzzle: {
+        Row: {
+          created_at: string
+          id: string
+          task: Json
+          type: Database["public"]["Enums"]["puzzle-type"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          task: Json
+          type: Database["public"]["Enums"]["puzzle-type"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          task?: Json
+          type?: Database["public"]["Enums"]["puzzle-type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "puzzle_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      puzzle_result: {
+        Row: {
+          created_at: string
+          id: string
+          resultr: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          resultr: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          resultr?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "puzzle_result_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "puzzle"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "puzzle_result_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user: {
         Row: {
           id: string
