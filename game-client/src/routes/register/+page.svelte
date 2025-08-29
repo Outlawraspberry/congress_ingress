@@ -1,0 +1,34 @@
+<script>
+	import { Label, Input, Checkbox, Button, Heading, A, P } from 'flowbite-svelte';
+	import { Register, Section } from 'flowbite-svelte-blocks';
+</script>
+
+<Section name="register">
+	<Register href="/">
+		{#snippet top()}{/snippet}
+		<div class="space-y-4 p-6 sm:p-8 md:space-y-6">
+			<form class="flex flex-col space-y-6" action="/">
+				<Heading tag="h3">Create and account</Heading>
+				<Label>
+					<span>Your email</span>
+					<Input type="email" name="email" placeholder="name@company.com" required />
+				</Label>
+				<Label>
+					<span>Your password</span>
+					<Input type="password" name="password" placeholder="•••••" required />
+				</Label>
+				<Label>
+					<span>Confirm password</span>
+					<Input type="password" name="confirm-password" placeholder="•••••" required />
+				</Label>
+				<div class="flex items-start">
+					<Checkbox>
+						I accept the <A href="/">Terms and Conditions</A>
+					</Checkbox>
+				</div>
+				<Button type="submit" class="w-full1">Create an account</Button>
+				<P>Already have an account? <A href="/">Login here</A></P>
+			</form>
+		</div>
+	</Register>
+</Section>

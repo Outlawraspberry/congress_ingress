@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { AuthError } from '@supabase/supabase-js';
+	import { A, Alert, Button, Heading, Input, Label, P } from 'flowbite-svelte';
+	import { Register, Section } from 'flowbite-svelte-blocks';
 	import { signIn } from '../supabase/db.svelte';
-	import { Button, Input, Label } from 'flowbite-svelte';
 
 	let email: string = $state('');
 	let password: string = $state('');
@@ -19,28 +20,45 @@
 	}
 </script>
 
-<div class="container">
-	<h1>Sign in</h1>
+<Section name="login">
+	<Register href="/">
+		{#snippet top()}{/snippet}
+		<div class="space-y-4 p-6 sm:p-8 md:space-y-6">
+			<form class="flex flex-col space-y-6" onsubmit={submit}>
+				<Heading tag="h3">Change Password</Heading>
+				<Label class="space-y-2">
+					<span>Your email</span>
+					<Input
+						type="email"
+						name="email"
+						placeholder="name@company.com"
+						bind:value={email}
+						required
+					/>
+				</Label>
+				<Label class="space-y-2">
+					<span>Your password</span>
+					<Input
+						type="password"
+						name="password"
+						placeholder="•••••"
+						bind:value={password}
+						required
+					/>
+				</Label>
+				<Button type="submit" class="w-full1">Sign in</Button>
+				<P>Have you forget your password. <A href="/">No problem, just reset it?</A></P>
 
-	<form onsubmit={submit}>
-		<div class="mb-6">
-			<Label for="email" class="mb-2">Email address</Label>
-			<Input
-				type="email"
-				id="email"
-				placeholder="john.doe@company.com"
-				bind:value={email}
-				required
-			/>
+				<P>
+					Don’t have an account yet? <A
+						href="/register"
+						class="text-primary-600 dark:text-primary-500 font-medium hover:underline">Sign up</A
+					>
+				</P>
+			</form>
+			{#if error}
+				<Alert>{error.message}</Alert>
+			{/if}
 		</div>
-		<div class="mb-6">
-			<Label for="password" class="mb-2">Password</Label>
-			<Input type="password" id="password" placeholder="•••••••••" bind:value={password} required />
-		</div>
-
-		<Button type="submit">Login</Button>
-	</form>
-	{#if error}
-		{error.message}
-	{/if}
-</div>
+	</Register>
+</Section>
