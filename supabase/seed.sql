@@ -4,12 +4,12 @@ VALUES
     (1, 'paused'::"game-state");
 
 INSERT INTO
-    public.fraction (name)
+    public.faction (name)
 VALUES
     ('Faction A');
 
 INSERT INTO
-    public.fraction (name)
+    public.faction (name)
 VALUES
     ('Faction B');
 
