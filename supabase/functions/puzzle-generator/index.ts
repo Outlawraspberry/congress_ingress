@@ -8,8 +8,6 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../types/database.types.ts";
 import { MathGenerator } from "../shared/puzzle/math-generator/math-generator.ts";
 
-console.log("Hello from Functions!");
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -32,11 +30,12 @@ Deno.serve(async (req) => {
   );
 
   const { error, data } = await supabaseClient.auth.getUser();
-  if (error != null)
+  if (error != null) {
     return new Response(JSON.stringify(error), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+  }
 
   const puzzle = new MathGenerator().generate();
 
@@ -49,8 +48,9 @@ Deno.serve(async (req) => {
     })
     .select();
 
-  if (insertPuzzleResult.error != null)
+  if (insertPuzzleResult.error != null) {
     return createErrorResponse(insertPuzzleResult.error);
+  }
 
   const insertPuzzleResultResult = await supabaseClient
     .from("puzzle_result")
@@ -60,8 +60,9 @@ Deno.serve(async (req) => {
       id: insertPuzzleResult.data[0].id ?? "",
     });
 
-  if (insertPuzzleResultResult.error != null)
+  if (insertPuzzleResultResult.error != null) {
     return createErrorResponse(insertPuzzleResultResult.error);
+  }
 
   return new Response(JSON.stringify({ type: "math", task: puzzle.puzzle }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },

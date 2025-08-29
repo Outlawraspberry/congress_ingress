@@ -1,25 +1,24 @@
 INSERT INTO
-    public.game (id, state, tick)
+    public.game (id, state)
 VALUES
-    (1, 'paused'::"game-state", 1);
+    (1, 'paused'::"game-state");
 
 INSERT INTO
     public.fraction (name)
 VALUES
-    ('Fraction A');
+    ('Faction A');
 
 INSERT INTO
     public.fraction (name)
 VALUES
-    ('Fraction B');
+    ('Faction B');
 
-INSERT INTO 
+INSERT INTO
     public.point (max_health, name)
 VALUES
   (255, 'Point A');
 
-INSERT INTO 
+INSERT INTO
     public.point (max_health, name)
 VALUES
   (255, 'Point B');
-

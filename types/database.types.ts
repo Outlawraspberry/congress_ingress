@@ -146,21 +146,27 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          solved: boolean
           task: Json
+          timeout: boolean
           type: Database["public"]["Enums"]["puzzle-type"]
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
+          solved?: boolean
           task: Json
+          timeout?: boolean
           type: Database["public"]["Enums"]["puzzle-type"]
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
+          solved?: boolean
           task?: Json
+          timeout?: boolean
           type?: Database["public"]["Enums"]["puzzle-type"]
           user_id?: string
         }
@@ -178,19 +184,19 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          resultr: Json
+          result: Json
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
-          resultr: Json
+          result: Json
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
-          resultr?: Json
+          result?: Json
           user_id?: string
         }
         Relationships: [

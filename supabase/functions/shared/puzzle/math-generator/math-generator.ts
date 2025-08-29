@@ -42,7 +42,9 @@ export class MathGenerator implements PuzzleGenerator {
       )
     ) {
       throw new Error(
-        `operator is not in puzzle or is not a string or not one of "${MathGenerator.validOperators.join(", ")}"`,
+        `operator is not in puzzle or is not a string or not one of "${
+          MathGenerator.validOperators.join(", ")
+        }"`,
       );
     }
 

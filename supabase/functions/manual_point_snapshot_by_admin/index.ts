@@ -18,10 +18,9 @@ Deno.serve(async (req) => {
   const authHeader = req.headers.get("Authorization") ?? "";
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
-  const isAuthenticated =
-    authHeader.split(" ")[1] === serviceRoleKey
-      ? true
-      : await isUserAuthenticated(authHeader);
+  const isAuthenticated = authHeader.split(" ")[1] === serviceRoleKey
+    ? true
+    : await isUserAuthenticated(authHeader);
 
   if (!isAuthenticated) {
     return new Response(undefined, {

@@ -10,4 +10,6 @@ export type Role = Database["public"]["Enums"]["role"];
 export type Game = Database["public"]["Tables"]["game"]["Row"];
 export type TaskType = Database["public"]["Enums"]["task_type"];
 
+export type Puzzle = Database["public"]["Tables"]["puzzle"];
+export type PuzzleResult = Database["public"]["Tables"]["puzzle_result"];
 export type PuzzleType = Database["public"]["Enums"]["puzzle-type"];
