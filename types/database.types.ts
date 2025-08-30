@@ -314,6 +314,10 @@ export type Database = {
         Args: { a_point_id: string }
         Returns: boolean
       }
+      does_username_exists: {
+        Args: { a_username: string }
+        Returns: boolean
+      }
       get_all_points_for_current_tick: {
         Args: Record<PropertyKey, never>
         Returns: Record<string, unknown>[]

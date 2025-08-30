@@ -1,33 +1,44 @@
 <script lang="ts">
-	import { supabase } from '$lib/supabase/db.svelte';
-	import type { AuthError } from '@supabase/supabase-js';
+	import { goto } from '$app/navigation';
+	import { signInAnonymously, supabase } from '$lib/supabase/db.svelte';
+	import { AuthError } from '@supabase/supabase-js';
 	import { Label, Input, Checkbox, Button, Heading, A, P, Alert, Select } from 'flowbite-svelte';
 	import { Register, Section } from 'flowbite-svelte-blocks';
 
 	const { data }: { data: { factions: { value: string; name: string }[] } } = $props();
 
-	console.log(data.factions);
-
 	let nickname = $state('');
 	let faction = $state('');
+	let usernameExists = $state(false);
 	let errorMessage: AuthError | undefined = $state(undefined);
 
-	async function onsubmit(): Promise<void> {
-		errorMessage = undefined;
-		const { data, error } = await supabase.auth.signInAnonymously({
-			options: {
-				data: {
-					display_name: nickname,
-					faction_id: faction
-				}
-			}
+	async function doesUsernameExists(): Promise<boolean> {
+		const { data, error } = await supabase.rpc('does_username_exists', {
+			a_username: nickname
 		});
 
 		if (error != null) {
-			errorMessage = error;
+			throw error;
 		}
 
-		console.log(data);
+		return data == true;
+	}
+
+	async function onCheckUsername(): Promise<void> {
+		usernameExists = await doesUsernameExists();
+	}
+
+	async function onsubmit(): Promise<void> {
+		try {
+			await signInAnonymously(nickname, faction);
+			goto('/');
+		} catch (error) {
+			if (error instanceof AuthError) {
+				errorMessage = error;
+			} else {
+				throw error;
+			}
+		}
 	}
 </script>
 
@@ -44,26 +55,32 @@
 						name="username"
 						placeholder="aNickname<3"
 						bind:value={nickname}
+						onInput={onCheckUsername}
 						required
 					/>
 				</Label>
 				<Label>
 					Select a faction
-					<Select class="mt-2" items={data.factions} bind:value={faction} />
+					<Select class="mt-2" items={data.factions} bind:value={faction} required />
 				</Label>
 				<div class="flex items-start">
-					<Checkbox>
+					<Checkbox required>
 						I accept the <A href="/">Terms and Conditions</A>
 					</Checkbox>
 				</div>
-				<Button type="submit" class="w-full1">Create an account</Button>
+
+				<Button type="submit" class="w-full1" disabled={usernameExists}>Create an account</Button>
 				<P>You want more stability, <A href="/register/anonymous">register with your email</A></P>
 				<P>Already have an account? <A href="/">Login here</A></P>
 			</form>
+
+			{#if usernameExists}
+				<Alert>The username "{nickname}" is already chosen. 🫣</Alert>
+			{/if}
+
+			{#if errorMessage}
+				<Alert>{errorMessage.message}</Alert>
+			{/if}
 		</div>
 	</Register>
-
-	{#if errorMessage}
-		<Alert>{errorMessage.message}</Alert>
-	{/if}
 </Section>
