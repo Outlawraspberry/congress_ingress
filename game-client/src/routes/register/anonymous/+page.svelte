@@ -70,7 +70,7 @@
 				</div>
 
 				<Button type="submit" class="w-full1" disabled={usernameExists}>Create an account</Button>
-				<P>You want more stability, <A href="/register/anonymous">register with your email</A></P>
+				<P>You want more stability, <A href="/register/email">register with your email</A></P>
 				<P>Already have an account? <A href="/">Login here</A></P>
 			</form>
 
