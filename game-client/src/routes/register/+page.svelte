@@ -1,34 +1,29 @@
 <script>
-	import { Label, Input, Checkbox, Button, Heading, A, P } from 'flowbite-svelte';
-	import { Register, Section } from 'flowbite-svelte-blocks';
+	import { A, Card, Heading, P } from 'flowbite-svelte';
 </script>
 
-<Section name="register">
-	<Register href="/">
-		{#snippet top()}{/snippet}
-		<div class="space-y-4 p-6 sm:p-8 md:space-y-6">
-			<form class="flex flex-col space-y-6" action="/">
-				<Heading tag="h3">Create and account</Heading>
-				<Label>
-					<span>Your email</span>
-					<Input type="email" name="email" placeholder="name@company.com" required />
-				</Label>
-				<Label>
-					<span>Your password</span>
-					<Input type="password" name="password" placeholder="•••••" required />
-				</Label>
-				<Label>
-					<span>Confirm password</span>
-					<Input type="password" name="confirm-password" placeholder="•••••" required />
-				</Label>
-				<div class="flex items-start">
-					<Checkbox>
-						I accept the <A href="/">Terms and Conditions</A>
-					</Checkbox>
-				</div>
-				<Button type="submit" class="w-full1">Create an account</Button>
-				<P>Already have an account? <A href="/">Login here</A></P>
-			</form>
-		</div>
-	</Register>
-</Section>
+<Heading class="text-center" tag="h2">Registration</Heading>
+
+<section class="my-5 flex flex-col flex-wrap items-center justify-center gap-5 md:flex-row">
+	<A href="/register/anonymous">
+		<Card class="p-5">
+			<Heading tag="h3">Anonymous</Heading>
+			<P>
+				When you register anonymously, you will be only referenced by your browser session. If it is
+				gone, you have to create a new account.
+			</P>
+			<P>No worries, you can transform your anonymous account into a persistend one later.</P>
+		</Card>
+	</A>
+
+	<P>or</P>
+
+	<A href="/register/email">
+		<Card class="p-5">
+			<Heading tag="h3">With an email</Heading>
+			<P>
+				When you register with an email, you can login and logout every time you want. No data loss.
+			</P>
+		</Card>
+	</A>
+</section>

@@ -14,21 +14,31 @@ export type Database = {
           created_at: string
           created_by: string
           point: string
+          puzzle: string
           type: Database["public"]["Enums"]["task_type"]
         }
         Insert: {
           created_at?: string
           created_by: string
           point: string
+          puzzle: string
           type: Database["public"]["Enums"]["task_type"]
         }
         Update: {
           created_at?: string
           created_by?: string
           point?: string
+          puzzle?: string
           type?: Database["public"]["Enums"]["task_type"]
         }
         Relationships: [
+          {
+            foreignKeyName: "actions_puzzle_fkey"
+            columns: ["puzzle"]
+            isOneToOne: true
+            referencedRelation: "puzzle"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tick_task_point_fkey"
             columns: ["point"]
