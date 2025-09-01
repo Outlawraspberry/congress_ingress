@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { signIn } from '$lib/supabase/db.svelte';
 	import type { AuthError } from '@supabase/supabase-js';
 	import { A, Alert, Button, Heading, Input, Label, P } from 'flowbite-svelte';
 	import { Register, Section } from 'flowbite-svelte-blocks';
-	import { signIn } from '../supabase/db.svelte';
 
 	let email: string = $state('');
 	let password: string = $state('');
@@ -14,6 +15,8 @@
 		try {
 			error = undefined;
 			await signIn(email, password);
+
+			goto('/');
 		} catch (err) {
 			error = err as AuthError;
 		}
@@ -25,7 +28,7 @@
 		{#snippet top()}{/snippet}
 		<div class="space-y-4 p-6 sm:p-8 md:space-y-6">
 			<form class="flex flex-col space-y-6" onsubmit={submit}>
-				<Heading tag="h3">Change Password</Heading>
+				<Heading tag="h3">Login</Heading>
 				<Label class="space-y-2">
 					<span>Your email</span>
 					<Input

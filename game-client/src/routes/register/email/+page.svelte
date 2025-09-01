@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { signInAnonymously, signUp, supabase } from '$lib/supabase/db.svelte';
+	import { signUp, supabase } from '$lib/supabase/db.svelte';
 	import { AuthError } from '@supabase/supabase-js';
-	import { Label, Input, Checkbox, Button, Heading, A, P, Alert, Select } from 'flowbite-svelte';
+	import { A, Alert, Button, Checkbox, Heading, Input, Label, P, Select } from 'flowbite-svelte';
 	import { Register, Section } from 'flowbite-svelte-blocks';
 
 	const { data }: { data: { factions: { value: string; name: string }[] } } = $props();
