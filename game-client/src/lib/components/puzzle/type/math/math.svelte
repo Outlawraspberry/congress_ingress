@@ -16,8 +16,6 @@
 	const task: PuzzleMath = puzzle.task as PuzzleMath;
 </script>
 
-});
-
 <ButtonGroup>
 	<Input
 		size="lg"
