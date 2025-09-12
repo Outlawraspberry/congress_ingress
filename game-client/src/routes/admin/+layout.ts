@@ -1,10 +1,9 @@
 import { userStore } from '$lib/supabase/db.svelte';
 import { user } from '$lib/supabase/user/user.svelte';
 import { redirect } from '@sveltejs/kit';
-import type { PageLoad } from './$types';
+import type { LayoutLoad } from './$types';
 
-export const load: PageLoad = () => {
-	console.log(user.user);
+export const load: LayoutLoad = () => {
 	if (
 		userStore.session == null ||
 		userStore.user == null ||
@@ -12,6 +11,4 @@ export const load: PageLoad = () => {
 	) {
 		redirect(308, '/');
 	}
-
-	return {};
 };
