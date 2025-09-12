@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, Checkbox, Heading } from 'flowbite-svelte';
+	import { Alert, Button, Checkbox, Heading } from 'flowbite-svelte';
 	import type { Puzzle, TaskType } from '../../../../types/alias';
 	import Math from '$lib/components/puzzle/type/math/math.svelte';
 	import { supabase, userStore } from '$lib/supabase/db.svelte';
@@ -11,7 +11,8 @@
 
 	const puzzle: Puzzle['Row'] = $state(data.puzzle);
 
-	let result = '';
+	let result = $state('');
+	let incorrectResult: boolean = $state(false);
 
 	onMount(() => {
 		const searchParams = new URLSearchParams(window.location.search);
@@ -33,6 +34,8 @@
 
 		if (result != null && result != '') {
 			try {
+				incorrectResult = false;
+
 				const {
 					error: puzzleSolveError,
 					data: d,
@@ -47,9 +50,9 @@
 				if (puzzleSolveError != null) {
 					const errorResult: ErrorResult = await resp?.json();
 					if (errorResult.errorCode == ErrorCode.PUZZLE_TIMEOOUT) {
-						console.log('timeout');
+						puzzle.timeout = true;
 					} else if (errorResult.errorCode == ErrorCode.PUZZLE_INVALID_RESULT) {
-						console.log('incorrect result');
+						incorrectResult = true;
 					}
 					return;
 				}
@@ -82,12 +85,34 @@
 <Heading tag="h2">{puzzle.id}</Heading>
 
 <form onsubmit={onSubmit}>
-	<Checkbox bind:checked={puzzle.solved} disabled={true}>Solved</Checkbox>
-	<Checkbox bind:checked={puzzle.timeout} disabled={true}>Timeout</Checkbox>
+	{#if puzzle.solved}
+		<Alert color="green">
+			<span class="font-medium">The puzzle is solved!</span>
+			Congratulations, you've solved the puzzle!
+		</Alert>
+	{/if}
+
+	{#if puzzle.timeout}
+		<Alert color="red">
+			<span class="font-medium">The time for your puzzle is up!</span>
+			You took too long to solve the puzzle. Sorry, you have to try it again! :/
+		</Alert>
+	{/if}
+
+	{#if incorrectResult}
+		<Alert color="red">
+			<span class="font-medium">Incorrect result!</span>
+			{#if result != '42'}
+				Your submitted result was not correct. Please try it again.
+			{:else}
+				42 is the anwser to everything, but not in this case.
+			{/if}
+		</Alert>
+	{/if}
 
 	<Math puzzle={data.puzzle} {onResultChanged}></Math>
 
-	{#if !puzzle.solved}
+	{#if !puzzle.solved && !puzzle.timeout}
 		<Button type="submit">submit</Button>
 	{/if}
 </form>
