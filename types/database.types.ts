@@ -116,6 +116,35 @@ export type Database = {
           },
         ]
       }
+      point_mapping: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          point_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          point_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          point_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "point_mapping_point_id_fkey"
+            columns: ["point_id"]
+            isOneToOne: false
+            referencedRelation: "point"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       point_tick_archive: {
         Row: {
           acquired_by: string | null
@@ -329,6 +358,10 @@ export type Database = {
       get_current_tick: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      get_point_by_mapping: {
+        Args: { a_point_id: string }
+        Returns: Record<string, unknown>
       }
       select_point_at_current_tick: {
         Args: { p_point_id: string }

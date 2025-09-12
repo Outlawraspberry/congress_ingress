@@ -26,6 +26,8 @@ export class PointState {
 
 		if (error != null) throw error;
 
+		if (data.length === 0) throw new Error('Point not found!');
+
 		this.state.point = data[0];
 
 		this.realtimeChannel = supabase

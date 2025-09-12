@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { signOut, userStore } from '$lib/supabase/db.svelte';
+	import { user } from '$lib/supabase/user/user.svelte';
 	import { Alert, Button, P } from 'flowbite-svelte';
 </script>
 
@@ -25,5 +26,8 @@
 				signOut();
 			}}>Logout</Button
 		>
+		{#if user.user != null && user.user.role === 'admin'}
+			<Button href="/admin">Admin Lounge</Button>
+		{/if}
 	</section>
 </section>
