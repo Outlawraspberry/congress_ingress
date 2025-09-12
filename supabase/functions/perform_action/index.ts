@@ -12,6 +12,7 @@ import { error } from "@shared";
 import { getPoint } from "./point/get-points.ts";
 import { UserGameData } from "../../../types/alias.ts";
 import { userActionCooldownInSeconds } from "../../../types/game-config.ts";
+import { ErrorCode } from "../../../types/error-code.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -44,13 +45,16 @@ Deno.serve(async (req) => {
   }
 
   const [userGameDataResponse, point] = await Promise.all([
-    supabaseClient.from("user_game_data")
-      .select("*"),
+    supabaseClient.from("user_game_data").select("*"),
     getPoint(supabaseClient, action.point),
   ]);
 
   if (userGameDataResponse.error != null) {
-    return error.handleError(userGameDataResponse.error, 403);
+    return error.handleError({
+      message: userGameDataResponse.error.message,
+      httpStatus: 403,
+      errorCode: ErrorCode.AUTH_ERROR,
+    });
   }
 
   const userGameData: UserGameData = userGameDataResponse.data[0];
@@ -64,9 +68,12 @@ Deno.serve(async (req) => {
         userActionCooldownInSeconds * 1000
     ) {
       return error.handleError(
-        new Error(
-          `You are not allowed to perform the action, because you already have create an action in the last ${userActionCooldownInSeconds} seconds `,
-        ),
+        {
+          message:
+            `You are not allowed to perform the action, because you already have create an action in the last ${userActionCooldownInSeconds} seconds `,
+          errorCode: ErrorCode.ACTION_COOLDOWN,
+          httpStatus: 400,
+        },
       );
     }
   }
@@ -79,36 +86,50 @@ Deno.serve(async (req) => {
   );
   const [updatePoint, insertPointArchive, userGameDataUpdateResult] =
     await Promise.all([
-      supabaseClient.from("point").update({
-        acquired_by: point.acquiredBy,
-        health: point.health,
-      }).filter("id", "eq", point.pointId),
+      supabaseClient
+        .from("point")
+        .update({
+          acquired_by: point.acquiredBy,
+          health: point.health,
+        })
+        .filter("id", "eq", point.pointId),
       supabaseClient.from("actions").insert({
         created_by: userGameData.user_id,
         point: point.pointId,
         type: action.type,
+        puzzle: action.puzzleId,
       }),
-      supabaseClient.from("user_game_data").update({
-        last_action: now.toISOString(),
-      }).filter(
-        "user_id",
-        "eq",
-        userGameData.user_id,
-      ),
+      supabaseClient
+        .from("user_game_data")
+        .update({
+          last_action: now.toISOString(),
+        })
+        .filter("user_id", "eq", userGameData.user_id),
     ]);
 
-  if (updatePoint.error) return error.handleError(updatePoint.error, 400);
+  if (updatePoint.error) {
+    return error.handleError({
+      message: updatePoint.error.message,
+      httpStatus: 500,
+      errorCode: ErrorCode.INTERNAL_ERROR,
+    });
+  }
   if (insertPointArchive.error) {
-    return error.handleError(insertPointArchive.error, 400);
+    return error.handleError({
+      message: insertPointArchive.error.message,
+      httpStatus: 500,
+      errorCode: ErrorCode.INTERNAL_ERROR,
+    });
   }
   if (userGameDataUpdateResult.error) {
-    return error.handleError(insertPointArchive.error, 400);
+    return error.handleError({
+      message: userGameDataUpdateResult.error.message,
+      httpStatus: 500,
+      errorCode: ErrorCode.INTERNAL_ERROR,
+    });
   }
 
-  return new Response(
-    undefined,
-    { status: 204, headers: { ...corsHeaders } },
-  );
+  return new Response(undefined, { status: 204, headers: { ...corsHeaders } });
 });
 
 /* To invoke locally:

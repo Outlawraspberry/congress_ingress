@@ -1,10 +1,19 @@
+import { ErrorResult } from "../../../types/error-code.ts";
 import { corsHeaders } from "../cors.ts";
 
-export function handleError(error: unknown, status: number = 500) {
-  console.error(error);
+export function handleError(
+  { message, errorCode, httpStatus }: ErrorResult,
+): Response {
+  console.error(message);
 
-  return new Response(JSON.stringify(error), {
-    status: status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  return new Response(
+    JSON.stringify({
+      message,
+      errorCode,
+    }),
+    {
+      status: httpStatus,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    },
+  );
 }

@@ -8,6 +8,16 @@
 
 	let { children } = $props();
 
+	let darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+	window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
+		darkMode = event.matches;
+		document.documentElement.classList.toggle('dark', darkMode);
+	});
+
+	// Optionally: initialize on load
+	document.documentElement.classList.toggle('dark', darkMode);
+
 	onMount(async () => {
 		await supabaseInit();
 		await gameInit();

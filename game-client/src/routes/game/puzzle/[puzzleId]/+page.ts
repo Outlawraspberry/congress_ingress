@@ -1,15 +1,37 @@
+import { goto } from '$app/navigation';
 import { supabase } from '$lib/supabase/db.svelte';
+import type { Puzzle } from '../../../../types/alias';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async ({ params }) => {
-	const { data, error } = await supabase
-		.from('puzzle')
-		.select('*')
-		.filter('id', 'eq', params.puzzleId);
+export const load: PageLoad = async ({ params, url }) => {
+	const puzzleParameter = url.searchParams.get('puzzle');
+	const pointId = url.searchParams.get('pointId');
+	const type = url.searchParams.get('type');
 
-	if (error) throw error;
+	if (pointId == null) {
+		throw new Error('pointId parameter is mandatory, but not provided.');
+	}
 
-	if (data.length === 0) throw new Error(`puzzle "${params.puzzleId}" not found!`);
+	if (type == null) {
+		throw new Error('type parameter is mandatory, but not provided.');
+	}
 
-	return { puzzle: data[0] };
+	let puzzle: Puzzle['Row'];
+
+	if (puzzleParameter) {
+		puzzle = JSON.parse(puzzleParameter);
+	} else {
+		const puzzleResult = await supabase
+			.from('puzzle')
+			.select('*')
+			.filter('id', 'eq', params.puzzleId);
+
+		if (puzzleResult.error) throw puzzleResult.error;
+
+		if (puzzleResult.data.length === 0) throw new Error(`puzzle "${params.puzzleId}" not found!`);
+
+		puzzle = puzzleResult.data[0];
+	}
+
+	return { puzzle, pointId, type };
 };
