@@ -35,4 +35,4 @@ jobs:
       - name: Deploy migrations
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: npx supabase functions  deploy --api
+        run: npx supabase functions  deploy --use-api

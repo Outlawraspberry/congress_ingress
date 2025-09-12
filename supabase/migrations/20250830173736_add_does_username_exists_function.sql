@@ -9,4 +9,4 @@ AS $function$SELECT EXISTS (
 ) AS exists_bool;$function$
 ;
 
--- a comment to test stuff #4
+-- a comment to test stuff #5
