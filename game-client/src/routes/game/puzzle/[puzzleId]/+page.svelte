@@ -5,6 +5,7 @@
 	import { supabase, userStore } from '$lib/supabase/db.svelte';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { ErrorCode, type ErrorResult } from '../../../../../../types/error-code';
 
 	const { data }: { data: { puzzle: Puzzle['Row']; pointId: string; type: TaskType } } = $props();
 
@@ -32,7 +33,11 @@
 
 		if (result != null && result != '') {
 			try {
-				const { error: puzzleSolveError } = await supabase.functions.invoke('puzzle-solve', {
+				const {
+					error: puzzleSolveError,
+					data: d,
+					response: resp
+				} = await supabase.functions.invoke('puzzle-solve', {
 					body: {
 						puzzleId: puzzle.id,
 						result
@@ -40,23 +45,33 @@
 				});
 
 				if (puzzleSolveError != null) {
-					console.log('error', puzzleSolveError);
+					const errorResult: ErrorResult = await resp?.json();
+					if (errorResult.errorCode == ErrorCode.PUZZLE_TIMEOOUT) {
+						console.log('timeout');
+					} else if (errorResult.errorCode == ErrorCode.PUZZLE_INVALID_RESULT) {
+						console.log('incorrect result');
+					}
 					return;
 				}
 				puzzle.solved = true;
 
-				const { error: performActionError } = await supabase.functions.invoke('perform_action', {
-					body: {
-						user: userStore.user?.id,
-						point: data.pointId,
-						type: data.type,
-						puzzleId: puzzle.id
+				const { error: performActionError } = await supabase.functions.invoke<string>(
+					'perform_action',
+					{
+						body: {
+							user: userStore.user?.id,
+							point: data.pointId,
+							type: data.type,
+							puzzleId: puzzle.id
+						}
 					}
-				});
+				);
 
-				if (performActionError != null) throw performActionError;
-
-				goto(`/game/point/${data.pointId}`);
+				if (performActionError != null) {
+					console.log(d, resp);
+				} else {
+					goto(`/game/point/${data.pointId}`);
+				}
 			} catch (e) {
 				if (e) console.error(e);
 			}

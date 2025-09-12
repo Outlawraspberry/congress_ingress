@@ -12,6 +12,7 @@ import { error } from "@shared";
 import { getPoint } from "./point/get-points.ts";
 import { UserGameData } from "../../../types/alias.ts";
 import { userActionCooldownInSeconds } from "../../../types/game-config.ts";
+import { ErrorCode } from "../../../types/error-code.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -49,7 +50,11 @@ Deno.serve(async (req) => {
   ]);
 
   if (userGameDataResponse.error != null) {
-    return error.handleError(userGameDataResponse.error, 403);
+    return error.handleError({
+      message: userGameDataResponse.error.message,
+      httpStatus: 403,
+      errorCode: ErrorCode.AUTH_ERROR,
+    });
   }
 
   const userGameData: UserGameData = userGameDataResponse.data[0];
@@ -60,12 +65,15 @@ Deno.serve(async (req) => {
 
     if (
       Math.abs(lastAction - now.getTime()) <
-      userActionCooldownInSeconds * 1000
+        userActionCooldownInSeconds * 1000
     ) {
       return error.handleError(
-        new Error(
-          `You are not allowed to perform the action, because you already have create an action in the last ${userActionCooldownInSeconds} seconds `,
-        ),
+        {
+          message:
+            `You are not allowed to perform the action, because you already have create an action in the last ${userActionCooldownInSeconds} seconds `,
+          errorCode: ErrorCode.ACTION_COOLDOWN,
+          httpStatus: 400,
+        },
       );
     }
   }
@@ -99,12 +107,26 @@ Deno.serve(async (req) => {
         .filter("user_id", "eq", userGameData.user_id),
     ]);
 
-  if (updatePoint.error) return error.handleError(updatePoint.error, 400);
+  if (updatePoint.error) {
+    return error.handleError({
+      message: updatePoint.error.message,
+      httpStatus: 500,
+      errorCode: ErrorCode.INTERNAL_ERROR,
+    });
+  }
   if (insertPointArchive.error) {
-    return error.handleError(insertPointArchive.error, 400);
+    return error.handleError({
+      message: insertPointArchive.error.message,
+      httpStatus: 500,
+      errorCode: ErrorCode.INTERNAL_ERROR,
+    });
   }
   if (userGameDataUpdateResult.error) {
-    return error.handleError(insertPointArchive.error, 400);
+    return error.handleError({
+      message: userGameDataUpdateResult.error.message,
+      httpStatus: 500,
+      errorCode: ErrorCode.INTERNAL_ERROR,
+    });
   }
 
   return new Response(undefined, { status: 204, headers: { ...corsHeaders } });

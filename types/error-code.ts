@@ -1,0 +1,15 @@
+export const ErrorCode = {
+  PUZZLE_TIMEOOUT: "PUZZLE_TIMEOOUT",
+  PUZZLE_INVALID_RESULT: "PUZZLE_INVALID_RESULT",
+  INVALID_INPUT: "INVALID_INPUT",
+  RESOURCE_NOT_FOUND: "RESOURCE_NOT_FOUND",
+  AUTH_ERROR: "AUTH_ERROR",
+  INTERNAL_ERROR: "INTERNAL_ERROR",
+  ACTION_COOLDOWN: "ACTION_COOLDOWN",
+};
+
+export type ErrorResult = {
+  message: string;
+  errorCode: string;
+  httpStatus: number;
+};
