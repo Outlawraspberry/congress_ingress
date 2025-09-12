@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Button, Card, Heading, P } from 'flowbite-svelte';
-	import type { Point } from '../../../types/alias';
+	import { A, Card, Heading, P } from 'flowbite-svelte';
 	import { Section } from 'flowbite-svelte-blocks';
+	import type { Point } from '../../../types/alias';
 
 	const {
 		data
@@ -20,7 +20,8 @@
 			<Heading tag="h4">{point.name}</Heading>
 			<P>{point.id}</P>
 
-			<Button href={`/game/point/${point.id}?noMappingId=true`}>Visit</Button>
+			<A href={`/admin/point/${point.id}`}>Details</A>
+			<A href={`/game/point/${point.id}?noMappingId=true`}>Game</A>
 		</Card>
 	{/each}
 </Section>
