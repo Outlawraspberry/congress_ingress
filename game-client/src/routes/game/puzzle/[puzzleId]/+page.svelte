@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Alert, Button, Checkbox, Heading } from 'flowbite-svelte';
-	import type { Puzzle, TaskType } from '../../../../types/alias';
+	import { goto } from '$app/navigation';
 	import Math from '$lib/components/puzzle/type/math/math.svelte';
 	import { supabase, userStore } from '$lib/supabase/db.svelte';
+	import { Alert, Button, Heading } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
 	import { ErrorCode, type ErrorResult } from '../../../../../../types/error-code';
+	import type { Puzzle, TaskType } from '../../../../types/alias';
 
 	const { data }: { data: { puzzle: Puzzle['Row']; pointId: string; type: TaskType } } = $props();
 
@@ -13,6 +13,7 @@
 
 	let result = $state('');
 	let incorrectResult: boolean = $state(false);
+	const pointUrl = `/game/point/${data.pointId}`;
 
 	onMount(() => {
 		const searchParams = new URLSearchParams(window.location.search);
@@ -73,7 +74,7 @@
 				if (performActionError != null) {
 					console.log(d, resp);
 				} else {
-					goto(`/game/point/${data.pointId}`);
+					goto(pointUrl);
 				}
 			} catch (e) {
 				if (e) console.error(e);
@@ -82,37 +83,47 @@
 	}
 </script>
 
-<Heading tag="h2">{puzzle.id}</Heading>
+<Heading class="text-center" tag="h2">{puzzle.id}</Heading>
 
-<form onsubmit={onSubmit}>
-	{#if puzzle.solved}
-		<Alert color="green">
-			<span class="font-medium">The puzzle is solved!</span>
-			Congratulations, you've solved the puzzle!
-		</Alert>
-	{/if}
+<form class="container" onsubmit={onSubmit}>
+	<section class="mt-2 mb-2">
+		{#if puzzle.solved}
+			<Alert color="green">
+				<span class="font-medium">The puzzle is solved!</span>
+				Congratulations, you've solved the puzzle!
+			</Alert>
+		{/if}
 
-	{#if puzzle.timeout}
-		<Alert color="red">
-			<span class="font-medium">The time for your puzzle is up!</span>
-			You took too long to solve the puzzle. Sorry, you have to try it again! :/
-		</Alert>
-	{/if}
+		{#if puzzle.timeout}
+			<Alert color="red">
+				<span class="font-medium">The time for your puzzle is up!</span>
+				You took too long to solve the puzzle. Sorry, you have to try it again! :/
+			</Alert>
+		{/if}
 
-	{#if incorrectResult}
-		<Alert color="red">
-			<span class="font-medium">Incorrect result!</span>
-			{#if result != '42'}
-				Your submitted result was not correct. Please try it again.
-			{:else}
-				42 is the anwser to everything, but not in this case.
-			{/if}
-		</Alert>
-	{/if}
+		{#if incorrectResult}
+			<Alert color="red">
+				<span class="font-medium">Incorrect result!</span>
+				{#if result != '42'}
+					Your submitted result was not correct. Please try it again.
+				{:else}
+					42 is the anwser to everything, but not in this case.
+				{/if}
+			</Alert>
+		{/if}
+	</section>
 
-	<Math puzzle={data.puzzle} {onResultChanged}></Math>
+	<section class="mt-2 mb-2 flex justify-center">
+		<Math puzzle={data.puzzle} {onResultChanged}></Math>
 
-	{#if !puzzle.solved && !puzzle.timeout}
-		<Button type="submit">submit</Button>
-	{/if}
+		{#if !puzzle.solved && !puzzle.timeout}
+			<Button type="submit">Submit result</Button>
+		{/if}
+	</section>
 </form>
+
+<section class="container flex justify-center">
+	{#if puzzle.timeout || puzzle.solved}
+		<Button href={pointUrl}>Back to Point</Button>
+	{/if}
+</section>
