@@ -8,3 +8,5 @@ AS $function$SELECT EXISTS (
   SELECT 1 FROM public.user WHERE public.user.name = a_username
 ) AS exists_bool;$function$
 ;
+
+-- a comment to test stuff
