@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
     return createErrorResponse(insertPuzzleResultResult.error);
   }
 
-  return new Response(JSON.stringify({ type: "math", task: puzzle.puzzle }), {
+  return new Response(JSON.stringify(insertPuzzleResult.data[0]), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 });

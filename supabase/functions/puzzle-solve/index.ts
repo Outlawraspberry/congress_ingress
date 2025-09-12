@@ -60,6 +60,7 @@ Deno.serve(async (req) => {
   } catch {
     return error.handleError(
       new Error("The results are not equal, please try it again"),
+      400,
     );
   }
 

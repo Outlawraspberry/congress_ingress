@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { supabase, userStore } from '$lib/supabase/db.svelte';
+	import { goto } from '$app/navigation';
 	import { game } from '$lib/supabase/game/game.svelte';
-	import { Button } from 'flowbite-svelte';
-	import type { TaskType } from '../../../types/alias';
 	import type { PointState } from '$lib/supabase/game/points.svelte';
 	import { user } from '$lib/supabase/user/user.svelte';
+	import { Button } from 'flowbite-svelte';
+	import type { TaskType } from '../../../types/alias';
 
 	const {
 		chosenPoint
@@ -30,17 +30,7 @@
 
 	async function preformAction(type: TaskType): Promise<void> {
 		if (game.game != null) {
-			const { error } = await supabase.functions.invoke('perform_action', {
-				body: {
-					user: userStore.user!.id,
-					point: chosenPoint.state.point?.id,
-					type: type
-				}
-			});
-
-			if (error != null) {
-				throw error;
-			}
+			goto(`/game/puzzle?type=${type}&pointId=${chosenPoint.state.point?.id}`);
 		}
 	}
 </script>

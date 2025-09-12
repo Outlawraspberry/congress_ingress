@@ -1,14 +1,78 @@
 <script lang="ts">
-	import { Checkbox, Heading } from 'flowbite-svelte';
-	import type { Puzzle } from '../../../../types/alias';
+	import { Button, Checkbox, Heading } from 'flowbite-svelte';
+	import type { Puzzle, TaskType } from '../../../../types/alias';
 	import Math from '$lib/components/puzzle/type/math/math.svelte';
+	import { supabase, userStore } from '$lib/supabase/db.svelte';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 
-	const { data }: { data: { puzzle: Puzzle } } = $props();
+	const { data }: { data: { puzzle: Puzzle['Row']; pointId: string; type: TaskType } } = $props();
+
+	const puzzle: Puzzle['Row'] = $state(data.puzzle);
+
+	let result = '';
+
+	onMount(() => {
+		const searchParams = new URLSearchParams(window.location.search);
+		searchParams.delete('puzzle');
+
+		goto(`?${searchParams.toString()}`, {
+			replaceState: true,
+			keepFocus: true,
+			noScroll: true
+		});
+	});
+
+	function onResultChanged(newResult: string): void {
+		result = newResult;
+	}
+
+	async function onSubmit(event: SubmitEvent): Promise<void> {
+		event.preventDefault();
+
+		if (result != null && result != '') {
+			try {
+				const { error: puzzleSolveError } = await supabase.functions.invoke('puzzle-solve', {
+					body: {
+						puzzleId: puzzle.id,
+						result
+					}
+				});
+
+				if (puzzleSolveError != null) {
+					console.log('error', puzzleSolveError);
+					return;
+				}
+				puzzle.solved = true;
+
+				const { error: performActionError } = await supabase.functions.invoke('perform_action', {
+					body: {
+						user: userStore.user?.id,
+						point: data.pointId,
+						type: data.type,
+						puzzleId: puzzle.id
+					}
+				});
+
+				if (performActionError != null) throw performActionError;
+
+				goto(`/game/point/${data.pointId}`);
+			} catch (e) {
+				if (e) console.error(e);
+			}
+		}
+	}
 </script>
 
-<Heading tag="h2">{data.puzzle.id}</Heading>
+<Heading tag="h2">{puzzle.id}</Heading>
 
-<Checkbox checked={data.puzzle.solved} disabled={true}>Solved</Checkbox>
-<Checkbox checked={data.puzzle.timeout} disabled={true}>Timeout</Checkbox>
+<form onsubmit={onSubmit}>
+	<Checkbox bind:checked={puzzle.solved} disabled={true}>Solved</Checkbox>
+	<Checkbox bind:checked={puzzle.timeout} disabled={true}>Timeout</Checkbox>
 
-<Math puzzle={data.puzzle}></Math>
+	<Math puzzle={data.puzzle} {onResultChanged}></Math>
+
+	{#if !puzzle.solved}
+		<Button type="submit">submit</Button>
+	{/if}
+</form>

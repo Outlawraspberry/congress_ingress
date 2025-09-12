@@ -44,8 +44,7 @@ Deno.serve(async (req) => {
   }
 
   const [userGameDataResponse, point] = await Promise.all([
-    supabaseClient.from("user_game_data")
-      .select("*"),
+    supabaseClient.from("user_game_data").select("*"),
     getPoint(supabaseClient, action.point),
   ]);
 
@@ -61,7 +60,7 @@ Deno.serve(async (req) => {
 
     if (
       Math.abs(lastAction - now.getTime()) <
-        userActionCooldownInSeconds * 1000
+      userActionCooldownInSeconds * 1000
     ) {
       return error.handleError(
         new Error(
@@ -79,22 +78,25 @@ Deno.serve(async (req) => {
   );
   const [updatePoint, insertPointArchive, userGameDataUpdateResult] =
     await Promise.all([
-      supabaseClient.from("point").update({
-        acquired_by: point.acquiredBy,
-        health: point.health,
-      }).filter("id", "eq", point.pointId),
+      supabaseClient
+        .from("point")
+        .update({
+          acquired_by: point.acquiredBy,
+          health: point.health,
+        })
+        .filter("id", "eq", point.pointId),
       supabaseClient.from("actions").insert({
         created_by: userGameData.user_id,
         point: point.pointId,
         type: action.type,
+        puzzle: action.puzzleId,
       }),
-      supabaseClient.from("user_game_data").update({
-        last_action: now.toISOString(),
-      }).filter(
-        "user_id",
-        "eq",
-        userGameData.user_id,
-      ),
+      supabaseClient
+        .from("user_game_data")
+        .update({
+          last_action: now.toISOString(),
+        })
+        .filter("user_id", "eq", userGameData.user_id),
     ]);
 
   if (updatePoint.error) return error.handleError(updatePoint.error, 400);
@@ -105,10 +107,7 @@ Deno.serve(async (req) => {
     return error.handleError(insertPointArchive.error, 400);
   }
 
-  return new Response(
-    undefined,
-    { status: 204, headers: { ...corsHeaders } },
-  );
+  return new Response(undefined, { status: 204, headers: { ...corsHeaders } });
 });
 
 /* To invoke locally:

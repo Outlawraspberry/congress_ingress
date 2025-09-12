@@ -1,52 +1,37 @@
 <script lang="ts">
-	import { Button, ButtonGroup, Input, Spinner } from 'flowbite-svelte';
+	import type { PuzzleMath } from '$lib/puzzles/math';
+	import { ButtonGroup, Input } from 'flowbite-svelte';
 	import type { Puzzle } from '../../../../../types/alias';
-	import { supabase } from '$lib/supabase/db.svelte';
 
-	const { puzzle }: { puzzle: Puzzle } = $props();
-	const task: {
-		leftHandle: number;
-		rightHandle: number;
-		operator: string;
-	} = puzzle.task;
+	let result: string = $state('');
 
-	let result: number | undefined = $state();
-	let isSubmittingResult = $state(false);
+	const {
+		puzzle,
+		onResultChanged
+	}: {
+		puzzle: Puzzle['Row'];
+		onResultChanged: (result: string) => void;
+	} = $props();
 
-	async function onSubmit(): Promise<void> {
-		if (result != null) {
-			console.log(result);
-
-			try {
-				const res = await supabase.functions.invoke('puzzle-solve', {
-					body: {
-						puzzleId: puzzle.id,
-						result
-					}
-				});
-				console.log('The result is correct!');
-			} catch (e) {
-				if (e) console.error(e);
-			}
-		}
-	}
+	const task: PuzzleMath = puzzle.task as PuzzleMath;
 </script>
 
-<form class="flex" onsubmit={onSubmit}>
-	<ButtonGroup>
-		<Input
-			size="lg"
-			value={`${task.leftHandle} ${task.operator} ${task.rightHandle} =`}
-			disabled={true}
-		/>
-		<Input size="lg" type="number" bind:value={result} placeholder="Type your result" autofocus />
+});
 
-		<Button type="submit"
-			>{#if isSubmittingResult}
-				<Spinner /> Validating result
-			{:else}
-				Submit Result
-			{/if}</Button
-		>
-	</ButtonGroup>
-</form>
+<ButtonGroup>
+	<Input
+		size="lg"
+		value={`${task.leftHandle} ${task.operator} ${task.rightHandle} =`}
+		disabled={true}
+	/>
+	<Input
+		size="lg"
+		type="number"
+		onchange={() => {
+			onResultChanged(result);
+		}}
+		bind:value={result}
+		placeholder="Type your result"
+		autofocus
+	/>
+</ButtonGroup>
