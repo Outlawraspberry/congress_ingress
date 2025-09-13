@@ -8,7 +8,7 @@ import type { PageLoad } from './$types';
 export const load: PageLoad = async ({ params, parent }) => {
 	await parent();
 
-	if (user.user != null && user.user.role !== 'admin') goto('/game/point');
+	if (user.user != null && user.user.role !== 'admin') goto('/game/point?scannedFromOutside');
 
 	const pointId = await getRealPointId(params.pointId);
 

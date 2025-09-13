@@ -1,12 +1,26 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import PointStats from '$lib/components/point-stats.svelte';
 	import QrCodeScanner from '$lib/components/qr-code-scanner.svelte';
 	import TaskOverview from '$lib/components/task/task-overview.svelte';
 	import { getRealPoint } from '$lib/point/get-point-my-mapping-id.svelte';
 	import type { PointState } from '$lib/supabase/game/points.svelte';
-	import { Button, Heading } from 'flowbite-svelte';
+	import { Alert, Button, Heading } from 'flowbite-svelte';
 	import { Section } from 'flowbite-svelte-blocks';
-	// To use Html5Qrcode (more info below)
+	import { onMount } from 'svelte';
+
+	let scannedFromOutsideApp = page.url.searchParams.has('scannedFromOutside');
+
+	onMount(() => {
+		const searchParams = new URLSearchParams(window.location.search);
+		searchParams.delete('scannedFromOutside');
+		goto(`?${searchParams.toString()}`, {
+			replaceState: true,
+			keepFocus: true,
+			noScroll: true
+		});
+	});
 
 	let selectedPoint: PointState | null = $state(null);
 
@@ -28,6 +42,10 @@
 		}
 	}
 </script>
+
+{#if scannedFromOutsideApp}
+	<Alert dismissable color="yellow">Please scan the QR codes from inside the app.</Alert>
+{/if}
 
 {#if selectedPoint}
 	<Heading class="text-center" tag="h1">{selectedPoint.state.point?.name}</Heading>
