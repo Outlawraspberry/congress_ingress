@@ -3,7 +3,7 @@
 	import { Section } from 'flowbite-svelte-blocks';
 </script>
 
-<Section divClass="my-5 flex justify-center gap-5">
+<Section divClass="my-5 flex justify-center gap-5 flex-wrap">
 	<Card class="p-5">
 		<Heading tag="h4">Game Management</Heading>
 

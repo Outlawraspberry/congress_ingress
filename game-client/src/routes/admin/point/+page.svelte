@@ -15,7 +15,7 @@
 <Section>
 	<Heading class="text-center" tag="h1">Points</Heading>
 
-	<Section divClass="my-5 flex justify-center gap-5">
+	<Section divClass="my-5 flex justify-center gap-5 flex-wrap">
 		{#each data.points as point (point.id)}
 			<Card class="p-5">
 				<Heading tag="h4">{point.name}</Heading>
