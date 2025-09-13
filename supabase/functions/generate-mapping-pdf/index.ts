@@ -25,43 +25,6 @@ const HEADLINE_1_SIZE = 48;
 const HEADLINE_2_SIZE = 32;
 const REM = TEXT_SIZE;
 
-async function fetchImageAsUint8Array(url: string): Promise<Uint8Array> {
-  const res = await fetch(url);
-  const buffer = new Uint8Array(await res.arrayBuffer());
-  return buffer;
-}
-
-function getSupabaseClient(request: Request): SupabaseClient<Database> {
-  const authHeader = request.headers.get("Authorization") ?? "";
-
-  return createClient<Database>(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-    {
-      global: {
-        headers: {
-          Authorization: authHeader,
-        },
-      },
-    },
-  );
-}
-
-async function getPointName(
-  supabase: SupabaseClient<Database>,
-  pointId: string,
-): Promise<string> {
-  const { error, data } = await supabase.from("point").select("name").filter(
-    "id",
-    "eq",
-    pointId,
-  );
-  if (error) throw error;
-  if (data.length == 0) throw new Error("Point not found");
-
-  return data[0].name;
-}
-
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -145,6 +108,43 @@ function drawTextCenter({ font, size, page, y, text }: {
   const x = (pageWidth - textWidth) / 2;
 
   return page.drawText(text, { size: size, x, y });
+}
+
+async function fetchImageAsUint8Array(url: string): Promise<Uint8Array> {
+  const res = await fetch(url);
+  const buffer = new Uint8Array(await res.arrayBuffer());
+  return buffer;
+}
+
+function getSupabaseClient(request: Request): SupabaseClient<Database> {
+  const authHeader = request.headers.get("Authorization") ?? "";
+
+  return createClient<Database>(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+    {
+      global: {
+        headers: {
+          Authorization: authHeader,
+        },
+      },
+    },
+  );
+}
+
+async function getPointName(
+  supabase: SupabaseClient<Database>,
+  pointId: string,
+): Promise<string> {
+  const { error, data } = await supabase.from("point").select("name").filter(
+    "id",
+    "eq",
+    pointId,
+  );
+  if (error) throw error;
+  if (data.length == 0) throw new Error("Point not found");
+
+  return data[0].name;
 }
 
 async function drawQRCode({
