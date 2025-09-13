@@ -1,33 +1,21 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { signOut, userStore } from '$lib/supabase/db.svelte';
 	import { user } from '$lib/supabase/user/user.svelte';
-	import { Alert, Button, P } from 'flowbite-svelte';
+	import { A, Heading, P } from 'flowbite-svelte';
+	import { Section } from 'flowbite-svelte-blocks';
 </script>
 
-<section class="my-5">
-	<P class="text-center">Welcome, you can play the game!</P>
+<Section>
+	<Heading>Game overview</Heading>
 
-	<section class="my-5 flex justify-center gap-5">
-		<Button onclick={() => goto('/game')}>Start the game</Button>
+	{#if user.user == null}
+		<P>
+			Before you can start, please <A href="/register">register</A> or <A href="/login">login</A>
+		</P>
+	{/if}
 
-		{#if userStore.user?.is_anonymous}
-			<Alert color="red">
-				<span class="text-lg font-medium">Attention: Anonymous login!</span>
-				<p>
-					You want to logout from an anonymous session, this means, that you cannot access it again
-					after the logout!
-				</p>
-			</Alert>
-		{/if}
-
-		<Button
-			onclick={() => {
-				signOut();
-			}}>Logout</Button
-		>
-		{#if user.user != null && user.user.role === 'admin'}
-			<Button href="/admin">Admin Lounge</Button>
-		{/if}
-	</section>
-</section>
+	<P class="mt-2">At the moment, there is nothing to see here.</P>
+	<P class="mt-2"
+		>To play the game, you have to look for Congress Quest QR codes. With help of the QR codes, you
+		can play the game!</P
+	>
+</Section>
