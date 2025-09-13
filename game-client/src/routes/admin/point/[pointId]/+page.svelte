@@ -88,9 +88,7 @@
 		<TableHead>
 			<TableHeadCell>Id</TableHeadCell>
 			<TableHeadCell>Is active</TableHeadCell>
-			<TableHeadCell>Deactivate</TableHeadCell>
-			<TableHeadCell>Remove</TableHeadCell>
-			<TableHeadCell>QR Code</TableHeadCell>
+			<TableHeadCell>Actions</TableHeadCell>
 		</TableHead>
 		<TableBody>
 			{#if mappingData.length == 0}
@@ -100,17 +98,22 @@
 				<TableBodyRow>
 					<TableBodyCell>{mapping.id}</TableBodyCell>
 					<TableBodyCell>{mapping.is_active}</TableBodyCell>
-					<TableBodyCell>
+					<TableBodyCell class="flex gap-5">
+						<Button data-sveltekit-preload-data="off" href={`/game/point/${mapping.id}`}
+							>Visit</Button
+						>
+
 						<Button
 							size="xs"
 							onclick={() => {
 								onDeactivate(mapping);
 							}}
 						>
-							Deactivate
+							{mapping.is_active ? 'Deactivate' : 'Activate'}
 						</Button>
-					</TableBodyCell>
-					<TableBodyCell>
+
+						<Button size="xs" onclick={() => onGeneratePDF(mapping.id)}>Generate QR Code</Button>
+
 						<Button
 							size="xs"
 							onclick={() => {
@@ -119,9 +122,6 @@
 						>
 							Remove
 						</Button>
-					</TableBodyCell>
-					<TableBodyCell>
-						<Button size="xs" onclick={() => onGeneratePDF(mapping.id)}>Generate QR Code</Button>
 					</TableBodyCell>
 				</TableBodyRow>
 			{/each}
