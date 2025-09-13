@@ -7,15 +7,18 @@ const nameCache = new Map<string, string>();
 export class PointState {
 	state: {
 		point: Point | null;
+		mappingid: string | null;
 	} = $state({
-		point: null
+		point: null,
+		mappingid: null
 	});
 
 	private pointId: string;
 	private realtimeChannel: RealtimeChannel | null = null;
 
-	constructor(pointId: string) {
+	constructor(pointId: string, mappingId: string) {
 		this.pointId = pointId;
+		this.state.mappingid = mappingId;
 	}
 
 	async init(): Promise<void> {

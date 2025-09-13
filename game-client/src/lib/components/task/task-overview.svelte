@@ -30,7 +30,7 @@
 
 	async function preformAction(type: TaskType): Promise<void> {
 		if (game.game != null) {
-			goto(`/game/puzzle?type=${type}&pointId=${chosenPoint.state.point?.id}`);
+			goto(`/game/puzzle?type=${type}&pointId=${chosenPoint.state.mappingid}`);
 		}
 	}
 </script>

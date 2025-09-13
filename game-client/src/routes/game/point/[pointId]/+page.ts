@@ -21,7 +21,7 @@ export const load: PageLoad = async ({ params, url, parent }) => {
 		return goto('/game/point-not-found');
 	}
 
-	const pointState = new PointState(pointId);
+	const pointState = new PointState(pointId, params.pointId);
 
 	await pointState.init();
 
