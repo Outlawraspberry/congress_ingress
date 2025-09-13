@@ -10,23 +10,8 @@ import {
 } from "https://esm.sh/pdf-lib@1.17.1";
 import { corsHeaders } from "@cors";
 import QRCode from "qrcode";
-import QRCodeStyling from "qr-code-styling";
 
-const QR_STYLE: QRCodeStyling.Options = {
-  width: 300,
-  height: 300,
-  dotsOptions: {
-    color: "#4267b2",
-    type: "rounded",
-  },
-  backgroundOptions: {
-    color: "#e9ebee",
-  },
-  imageOptions: {
-    crossOrigin: "anonymous",
-    margin: 20,
-  },
-};
+const LOGO_URL = "https://outlawraspberry.de/Outlawraspberry_Logo_v4.png";
 
 async function fetchImageAsUint8Array(url: string): Promise<Uint8Array> {
   const res = await fetch(url);
@@ -43,35 +28,18 @@ serve(async (req: Request) => {
     const pdfDoc = await PDFDocument.create();
     const page = pdfDoc.addPage();
 
-    const size = page.getSize();
+    const pageSize = page.getSize();
 
     page.drawText("You can create PDFs!");
 
-    // 2. Fetch logo image as Uint8Array
-    const logoUrl = "https://outlawraspberry.de/Outlawraspberry_Logo_v4.png";
-    const logoBytes = await fetchImageAsUint8Array(logoUrl);
-
-    const qrDataUrl = await QRCode.toDataURL(
-      "https://congressquest.outlawraspberry.de/game/point/bd08342c-bdc8-4378-98b7-cae37c89296d",
-      {
-        errorCorrectionLevel: "H",
-        width: 400,
-        margin: 2,
-        color: { dark: "#000", light: "#FFF" },
-      },
-    );
-    const qrImageBytes = Uint8Array.from(
-      atob(qrDataUrl.split(",")[1]),
-      (c) => c.charCodeAt(0),
-    );
-
-    const qrImage = await pdfDoc.embedPng(qrImageBytes);
-    page.drawImage(qrImage, {
-      x: 100,
-      y: 200,
-      width: 200,
-      height: 200,
+    drawQRCode({
+      doc: pdfDoc,
+      page,
+      pageSize,
+      url: "https://congressquest.outlawraspberry.de",
     });
+
+    const logoBytes = await fetchImageAsUint8Array(LOGO_URL);
 
     // Embed logo image (overlay on QR code)
     const logoImage = await pdfDoc.embedPng(logoBytes);
@@ -102,6 +70,45 @@ serve(async (req: Request) => {
     });
   }
 });
+
+async function drawQRCode({
+  page,
+  doc,
+  url,
+  pageSize,
+}: {
+  pageSize: { width: number; height: number };
+  url: string;
+  page: PDFPage;
+  doc: PDFDocument;
+}): Promise<void> {
+  const qrCodeSize = pageSize.width * .66666;
+  const qrCodeSizeHalf = qrCodeSize / 2;
+
+  const qrDataUrl = await QRCode.toDataURL(
+    url,
+    {
+      errorCorrectionLevel: "H",
+      width: qrCodeSize,
+      margin: 2,
+      color: { dark: "#000", light: "#FFF" },
+    },
+  );
+
+  const qrImageBytes = Uint8Array.from(
+    atob(qrDataUrl.split(",")[1]),
+    (c) => c.charCodeAt(0),
+  );
+
+  const qrImage = await doc.embedPng(qrImageBytes);
+  page.drawImage(qrImage, {
+    x: pageSize.width / 2 - qrCodeSizeHalf,
+    y: pageSize.height / 2 - qrCodeSizeHalf,
+    width: qrCodeSize,
+    height: qrCodeSize,
+  });
+}
+
 /* To invoke locally:
 
   1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)

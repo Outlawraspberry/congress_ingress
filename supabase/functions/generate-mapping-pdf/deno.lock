@@ -15,7 +15,6 @@
     "npm:@supabase/postgrest-js@1.21.4": "1.21.4",
     "npm:@supabase/realtime-js@2.15.5": "2.15.5",
     "npm:@supabase/storage-js@2.12.1": "2.12.1",
-    "npm:qr-code-styling@^1.9.2": "1.9.2",
     "npm:qrcode@^1.5.4": "1.5.4"
   },
   "jsr": {
@@ -196,15 +195,6 @@
     "pngjs@5.0.0": {
       "integrity": "sha512-40QW5YalBNfQo5yRYmiw7Yz6TKKVr3h6970B2YE+3fQpsWcrbj1PzJgxeJ19DRQjhMbKPIuMY8rFaXc8moolVw=="
     },
-    "qr-code-styling@1.9.2": {
-      "integrity": "sha512-RgJaZJ1/RrXJ6N0j7a+pdw3zMBmzZU4VN2dtAZf8ZggCfRB5stEQ3IoDNGaNhYY3nnZKYlYSLl5YkfWN5dPutg==",
-      "dependencies": [
-        "qrcode-generator"
-      ]
-    },
-    "qrcode-generator@1.5.2": {
-      "integrity": "sha512-pItrW0Z9HnDBnFmgiNrY1uxRdri32Uh9EjNYLPVC2zZ3ZRIIEqBoDgm4DkvDwNNDHTK7FNkmr8zAa77BYc9xNw=="
-    },
     "qrcode@1.5.4": {
       "integrity": "sha512-1ca71Zgiu6ORjHqFBDpnSMTR2ReToX4l1Au1VFLyVeBTFavzQnv5JxMFr3ukHVKpSrSA2MCk0lNJSykjUfz7Zg==",
       "dependencies": [
@@ -332,7 +322,6 @@
       "jsr:@std/fs@^1.0.19",
       "jsr:@std/uuid@^1.0.9",
       "jsr:@supabase/supabase-js@^2.52.1",
-      "npm:qr-code-styling@^1.9.2",
       "npm:qrcode@^1.5.4"
     ]
   }

@@ -5,7 +5,6 @@
     "@std/uuid": "jsr:@std/uuid@^1.0.9",
     "@supabase/supabase-js": "jsr:@supabase/supabase-js@^2.52.1",
     "@shared": "../shared/index.ts",
-    "qr-code-styling": "npm:qr-code-styling@^1.9.2",
     "qrcode": "npm:qrcode@^1.5.4"
   }
 }
