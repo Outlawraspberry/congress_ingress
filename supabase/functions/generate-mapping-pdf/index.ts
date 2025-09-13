@@ -2,7 +2,15 @@
 // This function generates a simple PDF with "Hello World" using pdf-lib for Deno compatibility.
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import { PDFDocument, PDFPage } from "https://esm.sh/pdf-lib@1.17.1";
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { Database } from "../../../types/database.types.ts";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import {
+  PDFDocument,
+  PDFFont,
+  PDFPage,
+  StandardFonts,
+} from "https://esm.sh/pdf-lib@1.17.1";
 import { corsHeaders } from "@cors";
 import QRCode from "qrcode";
 
@@ -12,6 +20,10 @@ const LOGO_URL = "https://outlawraspberry.de/Outlawraspberry_Logo_v4.png";
 const QR_CODE_WIDTH_MULTIPLIER = .666;
 const LOGO_SIZE = 50;
 const LOGO_SIZE_HALF = LOGO_SIZE / 2;
+const TEXT_SIZE = 16;
+const HEADLINE_1_SIZE = 48;
+const HEADLINE_2_SIZE = 32;
+const REM = TEXT_SIZE;
 
 async function fetchImageAsUint8Array(url: string): Promise<Uint8Array> {
   const res = await fetch(url);
@@ -19,10 +31,43 @@ async function fetchImageAsUint8Array(url: string): Promise<Uint8Array> {
   return buffer;
 }
 
+function getSupabaseClient(request: Request): SupabaseClient<Database> {
+  const authHeader = request.headers.get("Authorization") ?? "";
+
+  return createClient<Database>(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+    {
+      global: {
+        headers: {
+          Authorization: authHeader,
+        },
+      },
+    },
+  );
+}
+
+async function getPointName(
+  supabase: SupabaseClient<Database>,
+  pointId: string,
+): Promise<string> {
+  const { error, data } = await supabase.from("point").select("name").filter(
+    "id",
+    "eq",
+    pointId,
+  );
+  if (error) throw error;
+  if (data.length == 0) throw new Error("Point not found");
+
+  return data[0].name;
+}
+
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
+
+  const supabaseClient = getSupabaseClient(req);
 
   const { pointId, mappingId }: {
     pointId: string;
@@ -37,14 +82,32 @@ serve(async (req: Request) => {
 
     const pageSize = page.getSize();
 
-    page.drawText("You can create PDFs!");
+    const helveticaFont: PDFFont = await pdfDoc.embedFont(
+      StandardFonts.HelveticaBold,
+    );
 
-    await drawQRCode({
-      doc: pdfDoc,
-      page,
-      pageSize,
-      url,
-    });
+    await Promise.all([
+      drawTextCenter({
+        font: helveticaFont,
+        page,
+        y: pageSize.height - REM - HEADLINE_1_SIZE,
+        size: HEADLINE_1_SIZE,
+        text: "Congress Quest 2025",
+      }),
+      drawTextCenter({
+        font: helveticaFont,
+        page,
+        y: pageSize.height - 2 * REM - HEADLINE_2_SIZE - HEADLINE_1_SIZE,
+        size: HEADLINE_2_SIZE,
+        text: await getPointName(supabaseClient, pointId),
+      }),
+      drawQRCode({
+        doc: pdfDoc,
+        page,
+        pageSize,
+        url,
+      }),
+    ]);
 
     const pdfBytes = await pdfDoc.save();
 
@@ -59,7 +122,6 @@ serve(async (req: Request) => {
       },
     });
   } catch (error) {
-    console.log(error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -69,6 +131,20 @@ serve(async (req: Request) => {
 
 function getPointURL(pointId: string): string {
   return `${BASE_URL}/game/point/${pointId}`;
+}
+
+function drawTextCenter({ font, size, page, y, text }: {
+  y: number;
+  size: number;
+  text: string;
+  page: PDFPage;
+  font: PDFFont;
+}): Promise<void> {
+  const textWidth = font.widthOfTextAtSize(text, size);
+  const pageWidth = page.getWidth();
+  const x = (pageWidth - textWidth) / 2;
+
+  return page.drawText(text, { size: size, x, y });
 }
 
 async function drawQRCode({
@@ -96,8 +172,6 @@ async function drawQRCode({
       color: { dark: "#000", light: "#FFF" },
     },
   );
-
-  console.log(qrDataUrl);
 
   const qrImageBytes = await fetchImageAsUint8Array(qrDataUrl);
   await drawImage({
