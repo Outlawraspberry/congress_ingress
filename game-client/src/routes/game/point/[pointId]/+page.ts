@@ -2,8 +2,13 @@ import { goto } from '$app/navigation';
 import { supabase } from '$lib/supabase/db.svelte';
 import { PointState } from '$lib/supabase/game/points.svelte';
 import type { PageLoad } from './$types';
+import { userStore } from '$lib/supabase/db.svelte';
 
-export const load: PageLoad = async ({ params, url }) => {
+export const load: PageLoad = async ({ params, url, parent }) => {
+	await parent();
+
+	console.log('Page', userStore.user);
+
 	const noMappingParameter = url.searchParams.get('noMappingId') === 'true';
 
 	const pointId = noMappingParameter ? params.pointId : await getRealPointId(params.pointId);

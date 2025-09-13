@@ -1,7 +1,10 @@
 import { supabase } from '$lib/supabase/db.svelte';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async ({ params }) => {
+export const load: PageLoad = async ({ params, parent }) => {
+	await parent();
+	console.log('Page');
+
 	const [pointResponse, mappingResponse] = await Promise.all([
 		await supabase.from('point').select('*').filter('id', 'eq', params.pointId),
 		await supabase.from('point_mapping').select('*').filter('point_id', 'eq', params.pointId)
