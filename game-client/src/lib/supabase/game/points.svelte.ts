@@ -16,7 +16,7 @@ export class PointState {
 	private pointId: string;
 	private realtimeChannel: RealtimeChannel | null = null;
 
-	constructor(pointId: string, mappingId: string) {
+	constructor(pointId: string, mappingId: string | null = null) {
 		this.pointId = pointId;
 		this.state.mappingid = mappingId;
 	}

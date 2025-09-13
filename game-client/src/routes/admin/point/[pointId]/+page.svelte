@@ -3,6 +3,7 @@
 	import {
 		Button,
 		Heading,
+		Hr,
 		Table,
 		TableBody,
 		TableBodyCell,
@@ -12,8 +13,11 @@
 	} from 'flowbite-svelte';
 	import { Section } from 'flowbite-svelte-blocks';
 	import type { Point, PointMapping } from '../../../../types/alias';
+	import PointStats from '$lib/components/point-stats.svelte';
 
-	const { data }: { data: { pointData: Point; mappingData: PointMapping[] } } = $props();
+	const {
+		data
+	}: { data: { pointData: Point; mappingData: PointMapping[]; pointState: PointStats } } = $props();
 
 	let mappingData = $state(data.mappingData);
 
@@ -80,10 +84,16 @@
 	<Heading class="mt-4 mb-4" tag="h1">{data.pointData.name}</Heading>
 	<Heading class="mt-4 mb-4" tag="h2">{data.pointData.id}</Heading>
 
-	<Button onclick={onNewMapping}>Create new</Button>
+	<Section>
+		<Heading class="mt-4 mb-4" tag="h3">Stats</Heading>
+
+		<PointStats point={data.pointState}></PointStats>
+	</Section>
 
 	<Section>
 		<Heading class="mt-4 mb-4" tag="h3">Mappings</Heading>
+
+		<Button class="mt-4 mb-4" onclick={onNewMapping}>Create new Mapping</Button>
 
 		<Table>
 			<TableHead>
@@ -100,8 +110,10 @@
 						<TableBodyCell>{mapping.id}</TableBodyCell>
 						<TableBodyCell>{mapping.is_active}</TableBodyCell>
 						<TableBodyCell class="flex gap-5">
-							<Button data-sveltekit-preload-data="off" href={`/game/point/${mapping.id}`}
-								>Visit</Button
+							<Button
+								data-sveltekit-preload-data="off"
+								href={mapping.is_active ? `/game/point/${mapping.id}` : ''}
+								disabled={!mapping.is_active}>Visit</Button
 							>
 
 							<Button
