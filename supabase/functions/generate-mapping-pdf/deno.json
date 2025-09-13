@@ -1,0 +1,10 @@
+{
+  "imports": {
+    "@cors": "../cors.ts",
+    "@std/fs": "jsr:@std/fs@^1.0.19",
+    "@std/uuid": "jsr:@std/uuid@^1.0.9",
+    "@supabase/supabase-js": "jsr:@supabase/supabase-js@^2.52.1",
+    "@shared": "../shared/index.ts",
+    "qrcode": "npm:qrcode@^1.5.4"
+  }
+}

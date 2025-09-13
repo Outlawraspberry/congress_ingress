@@ -7,15 +7,18 @@ const nameCache = new Map<string, string>();
 export class PointState {
 	state: {
 		point: Point | null;
+		mappingid: string | null;
 	} = $state({
-		point: null
+		point: null,
+		mappingid: null
 	});
 
 	private pointId: string;
 	private realtimeChannel: RealtimeChannel | null = null;
 
-	constructor(pointId: string) {
+	constructor(pointId: string, mappingId: string | null = null) {
 		this.pointId = pointId;
+		this.state.mappingid = mappingId;
 	}
 
 	async init(): Promise<void> {
@@ -25,6 +28,8 @@ export class PointState {
 			.filter('id', 'eq', this.pointId);
 
 		if (error != null) throw error;
+
+		if (data.length === 0) throw new Error('Point not found!');
 
 		this.state.point = data[0];
 

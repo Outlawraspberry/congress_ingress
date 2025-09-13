@@ -61,6 +61,7 @@ describe("Point task simulate works when", () => {
     point: pointId,
     type: "attack",
     user: userFactionB.user_id,
+    puzzleId: userFactionB.user_id,
   };
 
   function getPoint(args: {
