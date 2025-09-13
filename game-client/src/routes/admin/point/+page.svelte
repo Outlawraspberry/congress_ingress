@@ -22,7 +22,6 @@
 				<P>{point.id}</P>
 
 				<A href={`/admin/point/${point.id}`}>Details</A>
-				<A href={`/game/point/${point.id}?noMappingId=true`}>Game</A>
 			</Card>
 		{/each}
 	</Section>

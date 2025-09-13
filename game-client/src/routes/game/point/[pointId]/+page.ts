@@ -3,12 +3,10 @@ import { supabase } from '$lib/supabase/db.svelte';
 import { PointState } from '$lib/supabase/game/points.svelte';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async ({ params, url, parent }) => {
+export const load: PageLoad = async ({ params, parent }) => {
 	await parent();
 
-	const noMappingParameter = url.searchParams.get('noMappingId') === 'true';
-
-	const pointId = noMappingParameter ? params.pointId : await getRealPointId(params.pointId);
+	const pointId = await getRealPointId(params.pointId);
 
 	if (pointId == null) {
 		// FIXME not the best solution, because svelte preloads this by default
