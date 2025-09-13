@@ -12,6 +12,9 @@ import { corsHeaders } from "@cors";
 import QRCode from "qrcode";
 
 const LOGO_URL = "https://outlawraspberry.de/Outlawraspberry_Logo_v4.png";
+const QR_CODE_WIDTH_MULTIPLIER = .666;
+const LOGO_SIZE = 50;
+const LOGO_SIZE_HALF = LOGO_SIZE / 2;
 
 async function fetchImageAsUint8Array(url: string): Promise<Uint8Array> {
   const res = await fetch(url);
@@ -32,22 +35,11 @@ serve(async (req: Request) => {
 
     page.drawText("You can create PDFs!");
 
-    drawQRCode({
+    await drawQRCode({
       doc: pdfDoc,
       page,
       pageSize,
       url: "https://congressquest.outlawraspberry.de",
-    });
-
-    const logoBytes = await fetchImageAsUint8Array(LOGO_URL);
-
-    // Embed logo image (overlay on QR code)
-    const logoImage = await pdfDoc.embedPng(logoBytes);
-    page.drawImage(logoImage, {
-      x: 175,
-      y: 275,
-      width: 50,
-      height: 50,
     });
 
     const pdfBytes = await pdfDoc.save();
@@ -82,8 +74,10 @@ async function drawQRCode({
   page: PDFPage;
   doc: PDFDocument;
 }): Promise<void> {
-  const qrCodeSize = pageSize.width * .66666;
+  const qrCodeSize = pageSize.width * QR_CODE_WIDTH_MULTIPLIER;
   const qrCodeSizeHalf = qrCodeSize / 2;
+  const pageWidthHalf = pageSize.width / 2;
+  const pageHeightHalf = pageSize.height / 2;
 
   const qrDataUrl = await QRCode.toDataURL(
     url,
@@ -95,17 +89,45 @@ async function drawQRCode({
     },
   );
 
-  const qrImageBytes = Uint8Array.from(
-    atob(qrDataUrl.split(",")[1]),
-    (c) => c.charCodeAt(0),
-  );
-
-  const qrImage = await doc.embedPng(qrImageBytes);
-  page.drawImage(qrImage, {
-    x: pageSize.width / 2 - qrCodeSizeHalf,
-    y: pageSize.height / 2 - qrCodeSizeHalf,
+  const qrImageBytes = await fetchImageAsUint8Array(qrDataUrl);
+  await drawImage({
+    doc,
+    page,
+    x: pageWidthHalf - qrCodeSizeHalf,
+    y: pageHeightHalf - qrCodeSizeHalf,
     width: qrCodeSize,
     height: qrCodeSize,
+    imageBytes: qrImageBytes,
+  });
+
+  const logoBytes = await fetchImageAsUint8Array(LOGO_URL);
+  await drawImage({
+    imageBytes: logoBytes,
+    doc,
+    page,
+    x: pageWidthHalf - LOGO_SIZE_HALF,
+    y: pageHeightHalf - LOGO_SIZE_HALF,
+    width: LOGO_SIZE,
+    height: LOGO_SIZE,
+  });
+}
+
+async function drawImage({ imageBytes, x, y, height, width, doc, page }: {
+  imageBytes: Uint8Array;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  doc: PDFDocument;
+  page: PDFPage;
+}): Promise<void> {
+  const logoImage = await doc.embedPng(imageBytes);
+
+  return page.drawImage(logoImage, {
+    x,
+    y,
+    width,
+    height,
   });
 }
 
