@@ -1,10 +1,14 @@
 import { goto } from '$app/navigation';
+import { getRealPointId } from '$lib/point/get-point-my-mapping-id.svelte';
 import { supabase } from '$lib/supabase/db.svelte';
 import { PointState } from '$lib/supabase/game/points.svelte';
+import { user } from '$lib/supabase/user/user.svelte';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params, parent }) => {
 	await parent();
+
+	if (user.user != null && user.user.role !== 'admin') goto('/game/point?scannedFromOutside');
 
 	const pointId = await getRealPointId(params.pointId);
 
@@ -27,19 +31,3 @@ export const load: PageLoad = async ({ params, parent }) => {
 		point: pointState
 	};
 };
-
-async function getRealPointId(mappingId: string): Promise<string | null> {
-	const realMapping = await supabase
-		.from('point_mapping')
-		.select('point_id')
-		.filter('id', 'eq', mappingId)
-		.filter('is_active', 'eq', true);
-
-	if (realMapping.error) throw realMapping.error;
-
-	if (realMapping.data.length === 0) {
-		return null;
-	}
-
-	return realMapping.data[0].point_id;
-}

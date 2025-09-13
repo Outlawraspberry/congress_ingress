@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { user } from '$lib/supabase/user/user.svelte';
-	import { A, Heading, P } from 'flowbite-svelte';
+	import { A, Button, Heading, P } from 'flowbite-svelte';
 	import { Section } from 'flowbite-svelte-blocks';
 </script>
 
@@ -13,9 +13,7 @@
 		</P>
 	{/if}
 
-	<P class="mt-2">At the moment, there is nothing to see here.</P>
-	<P class="mt-2"
-		>To play the game, you have to look for Congress Quest QR codes. With help of the QR codes, you
-		can play the game!</P
-	>
+	<P>Welcome to congress quest 2025! 🥳</P>
+
+	<Button href="/game/point" size="xl">Start the game</Button>
 </Section>
