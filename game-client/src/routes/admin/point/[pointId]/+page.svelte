@@ -50,6 +50,30 @@
 			mappingData.push(...result.data);
 		}
 	}
+
+	async function onGeneratePDF(mappingId: string): Promise<void> {
+		const result = await supabase.functions.invoke('generate-mapping-pdf', {
+			body: {
+				pointId: data.pointData.id,
+				mappingId
+			}
+		});
+
+		const binaryString = atob(result.data);
+		const bytes = new Uint8Array(binaryString.length);
+		for (let i = 0; i < binaryString.length; i++) {
+			bytes[i] = binaryString.charCodeAt(i);
+		}
+		const blob = new Blob([bytes], { type: 'application/pdf' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `mapping_${mappingId}_to_point_${data.pointData.id}.pdf`;
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+		URL.revokeObjectURL(url);
+	}
 </script>
 
 <Heading tag="h1">{data.pointData.name}</Heading>
@@ -97,7 +121,7 @@
 						</Button>
 					</TableBodyCell>
 					<TableBodyCell>
-						<Button size="xs" disabled>Generate QR Code</Button>
+						<Button size="xs" onclick={() => onGeneratePDF(mapping.id)}>Generate QR Code</Button>
 					</TableBodyCell>
 				</TableBodyRow>
 			{/each}

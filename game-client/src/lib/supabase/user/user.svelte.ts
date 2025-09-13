@@ -1,5 +1,5 @@
 import type { RealtimeChannel } from '@supabase/supabase-js';
-import { userActionCooldownInSeconds, type Role } from '../../../types/alias';
+import { type Role, userActionCooldownInSeconds } from '../../../types/alias';
 import { supabase, userStore } from '../db.svelte';
 
 export const user: {
@@ -65,7 +65,6 @@ export async function init(): Promise<void> {
 				table: 'user_game_data',
 				filter: `user_id=eq.${userStore.user.id}`
 			},
-
 			(payload) => {
 				if (payload.new != null && user.user != null && payload.new.last_action != null) {
 					const date = new Date();

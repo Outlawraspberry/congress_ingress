@@ -2,15 +2,12 @@
 // This function generates a simple PDF with "Hello World" using pdf-lib for Deno compatibility.
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import {
-  PDFDocument,
-  PDFPage,
-  rgb,
-  StandardFonts,
-} from "https://esm.sh/pdf-lib@1.17.1";
+import { PDFDocument, PDFPage } from "https://esm.sh/pdf-lib@1.17.1";
 import { corsHeaders } from "@cors";
 import QRCode from "qrcode";
 
+const BASE_URL = Deno.env.get("QR_CODE_BASE_URL") ??
+  "https://congressquest.outlawraspberry.de";
 const LOGO_URL = "https://outlawraspberry.de/Outlawraspberry_Logo_v4.png";
 const QR_CODE_WIDTH_MULTIPLIER = .666;
 const LOGO_SIZE = 50;
@@ -27,6 +24,13 @@ serve(async (req: Request) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  const { pointId, mappingId }: {
+    pointId: string;
+    mappingId: string;
+  } = await req.json();
+
+  const url = getPointURL(mappingId);
+
   try {
     const pdfDoc = await PDFDocument.create();
     const page = pdfDoc.addPage();
@@ -39,7 +43,7 @@ serve(async (req: Request) => {
       doc: pdfDoc,
       page,
       pageSize,
-      url: "https://congressquest.outlawraspberry.de",
+      url,
     });
 
     const pdfBytes = await pdfDoc.save();
@@ -62,6 +66,10 @@ serve(async (req: Request) => {
     });
   }
 });
+
+function getPointURL(pointId: string): string {
+  return `${BASE_URL}/game/point/${pointId}`;
+}
 
 async function drawQRCode({
   page,
@@ -88,6 +96,8 @@ async function drawQRCode({
       color: { dark: "#000", light: "#FFF" },
     },
   );
+
+  console.log(qrDataUrl);
 
   const qrImageBytes = await fetchImageAsUint8Array(qrDataUrl);
   await drawImage({
