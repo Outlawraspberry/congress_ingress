@@ -5,7 +5,7 @@ import { destroy as userDestroy, init as userInit } from './user/user.svelte';
 
 export const supabase = createClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
 	auth: {
-		storage: window.sessionStorage,
+		storage: window.localStorage,
 		persistSession: true,
 		autoRefreshToken: true
 	}
