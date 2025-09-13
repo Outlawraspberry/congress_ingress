@@ -12,16 +12,18 @@
 	} = $props();
 </script>
 
-<Heading class="text-center" tag="h1">Points</Heading>
+<Section>
+	<Heading class="text-center" tag="h1">Points</Heading>
 
-<Section divClass="my-5 flex justify-center gap-5">
-	{#each data.points as point (point.id)}
-		<Card class="p-5">
-			<Heading tag="h4">{point.name}</Heading>
-			<P>{point.id}</P>
+	<Section divClass="my-5 flex justify-center gap-5">
+		{#each data.points as point (point.id)}
+			<Card class="p-5">
+				<Heading tag="h4">{point.name}</Heading>
+				<P>{point.id}</P>
 
-			<A href={`/admin/point/${point.id}`}>Details</A>
-			<A href={`/game/point/${point.id}?noMappingId=true`}>Game</A>
-		</Card>
-	{/each}
+				<A href={`/admin/point/${point.id}`}>Details</A>
+				<A href={`/game/point/${point.id}?noMappingId=true`}>Game</A>
+			</Card>
+		{/each}
+	</Section>
 </Section>

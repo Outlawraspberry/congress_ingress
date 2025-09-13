@@ -76,55 +76,57 @@
 	}
 </script>
 
-<Heading tag="h1">{data.pointData.name}</Heading>
-<Heading tag="h2">{data.pointData.id}</Heading>
-
-<Button onclick={onNewMapping}>Create new</Button>
-
 <Section>
-	<Heading tag="h3">Mappings</Heading>
+	<Heading class="mt-4 mb-4" tag="h1">{data.pointData.name}</Heading>
+	<Heading class="mt-4 mb-4" tag="h2">{data.pointData.id}</Heading>
 
-	<Table>
-		<TableHead>
-			<TableHeadCell>Id</TableHeadCell>
-			<TableHeadCell>Is active</TableHeadCell>
-			<TableHeadCell>Actions</TableHeadCell>
-		</TableHead>
-		<TableBody>
-			{#if mappingData.length == 0}
-				No mappings
-			{/if}
-			{#each mappingData as mapping, i (i)}
-				<TableBodyRow>
-					<TableBodyCell>{mapping.id}</TableBodyCell>
-					<TableBodyCell>{mapping.is_active}</TableBodyCell>
-					<TableBodyCell class="flex gap-5">
-						<Button data-sveltekit-preload-data="off" href={`/game/point/${mapping.id}`}
-							>Visit</Button
-						>
+	<Button onclick={onNewMapping}>Create new</Button>
 
-						<Button
-							size="xs"
-							onclick={() => {
-								onDeactivate(mapping);
-							}}
-						>
-							{mapping.is_active ? 'Deactivate' : 'Activate'}
-						</Button>
+	<Section>
+		<Heading class="mt-4 mb-4" tag="h3">Mappings</Heading>
 
-						<Button size="xs" onclick={() => onGeneratePDF(mapping.id)}>Generate QR Code</Button>
+		<Table>
+			<TableHead>
+				<TableHeadCell>Id</TableHeadCell>
+				<TableHeadCell>Is active</TableHeadCell>
+				<TableHeadCell>Actions</TableHeadCell>
+			</TableHead>
+			<TableBody>
+				{#if mappingData.length == 0}
+					No mappings
+				{/if}
+				{#each mappingData as mapping, i (i)}
+					<TableBodyRow>
+						<TableBodyCell>{mapping.id}</TableBodyCell>
+						<TableBodyCell>{mapping.is_active}</TableBodyCell>
+						<TableBodyCell class="flex gap-5">
+							<Button data-sveltekit-preload-data="off" href={`/game/point/${mapping.id}`}
+								>Visit</Button
+							>
 
-						<Button
-							size="xs"
-							onclick={() => {
-								onRemove(mapping.id);
-							}}
-						>
-							Remove
-						</Button>
-					</TableBodyCell>
-				</TableBodyRow>
-			{/each}
-		</TableBody>
-	</Table>
+							<Button
+								size="xs"
+								onclick={() => {
+									onDeactivate(mapping);
+								}}
+							>
+								{mapping.is_active ? 'Deactivate' : 'Activate'}
+							</Button>
+
+							<Button size="xs" onclick={() => onGeneratePDF(mapping.id)}>Generate QR Code</Button>
+
+							<Button
+								size="xs"
+								onclick={() => {
+									onRemove(mapping.id);
+								}}
+							>
+								Remove
+							</Button>
+						</TableBodyCell>
+					</TableBodyRow>
+				{/each}
+			</TableBody>
+		</Table>
+	</Section>
 </Section>

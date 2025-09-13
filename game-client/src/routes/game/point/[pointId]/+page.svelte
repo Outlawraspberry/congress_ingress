@@ -3,6 +3,7 @@
 	import faction from '$lib/supabase/faction/faction';
 	import type { PointState } from '$lib/supabase/game/points.svelte';
 	import { Heading, P, Progressbar } from 'flowbite-svelte';
+	import { Section } from 'flowbite-svelte-blocks';
 	import { onDestroy } from 'svelte';
 
 	const { data }: { data: { point: PointState } } = $props();
@@ -32,7 +33,7 @@
 
 <Heading class="text-center" tag="h1">{data.point.state.point?.name}</Heading>
 
-<section class="container">
+<Section>
 	<section class="my-5">
 		<P class="text-center">Acquired by: {factionName}</P>
 		<Progressbar {progress} animate={true} size="h-6"></Progressbar>
@@ -44,4 +45,4 @@
 	<section class="container my-5 flex justify-center">
 		<TaskOverview chosenPoint={data.point}></TaskOverview>
 	</section>
-</section>
+</Section>

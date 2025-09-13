@@ -3,7 +3,6 @@ import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params, parent }) => {
 	await parent();
-	console.log('Page');
 
 	const [pointResponse, mappingResponse] = await Promise.all([
 		await supabase.from('point').select('*').filter('id', 'eq', params.pointId),
