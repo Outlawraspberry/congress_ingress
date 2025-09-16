@@ -11,6 +11,6 @@ export const load: LayoutLoad = async ({ parent }) => {
 		userStore.user == null ||
 		(user.user != null && user.user.role !== 'admin')
 	) {
-		redirect(308, '/');
+		redirect(308, '/login?wasRedirected');
 	}
 };

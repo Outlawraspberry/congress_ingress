@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { signIn } from '$lib/supabase/db.svelte';
 	import type { AuthError } from '@supabase/supabase-js';
 	import { A, Alert, Button, Heading, Input, Label, P } from 'flowbite-svelte';
 	import { Register, Section } from 'flowbite-svelte-blocks';
+
+	let wasRedirected = page.url.searchParams.has('wasRedirected');
 
 	let email: string = $state('');
 	let password: string = $state('');
@@ -24,6 +27,10 @@
 </script>
 
 <Section name="login">
+	{#if wasRedirected}
+		<Alert color="green">Please login before playing the game! :)</Alert>
+	{/if}
+
 	<Register href="/">
 		{#snippet top()}{/snippet}
 		<div class="space-y-4 p-6 sm:p-8 md:space-y-6">
