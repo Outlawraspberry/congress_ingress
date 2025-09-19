@@ -5,6 +5,11 @@
 	import QrCodeScanner from '$lib/components/qr-code-scanner.svelte';
 	import TaskOverview from '$lib/components/task/task-overview.svelte';
 	import { getRealPoint } from '$lib/point/get-point-my-mapping-id.svelte';
+	import {
+		destroySelectedPoint,
+		initSelectedPoint,
+		selectedPoint
+	} from '$lib/point/selected-point.svelte';
 	import type { PointState } from '$lib/supabase/game/points.svelte';
 	import { Alert, Button, Heading } from 'flowbite-svelte';
 	import { Section } from 'flowbite-svelte-blocks';
@@ -22,8 +27,6 @@
 		});
 	});
 
-	let selectedPoint: PointState | null = $state(null);
-
 	function onTextFound(decodedText: string) {
 		let cleaned = decodedText.trim();
 		if (decodedText.startsWith('https://congressquest.outlawraspberry.de')) {
@@ -33,12 +36,7 @@
 			);
 
 			const uuid = cleaned.split('/').pop();
-			if (uuid)
-				getRealPoint(uuid)
-					.then((pointState) => {
-						selectedPoint = pointState;
-					})
-					.catch(console.error);
+			if (uuid) initSelectedPoint(uuid);
 		}
 	}
 </script>
@@ -47,21 +45,20 @@
 	<Alert dismissable color="yellow">Please scan the QR codes from inside the app.</Alert>
 {/if}
 
-{#if selectedPoint}
-	<Heading class="text-center" tag="h1">{selectedPoint.state.point?.name}</Heading>
+{#if selectedPoint.selectedPoint}
+	<Heading class="text-center" tag="h1">{selectedPoint.selectedPoint.state.point?.name}</Heading>
 
 	<Button
 		onclick={() => {
-			selectedPoint?.destroy();
-			selectedPoint = null;
+			destroySelectedPoint();
 		}}>Select another point</Button
 	>
 
 	<Section>
-		<PointStats point={selectedPoint}></PointStats>
+		<PointStats point={selectedPoint.selectedPoint}></PointStats>
 
 		<section class="container my-5 flex justify-center">
-			<TaskOverview chosenPoint={selectedPoint}></TaskOverview>
+			<TaskOverview chosenPoint={selectedPoint.selectedPoint}></TaskOverview>
 		</section>
 	</Section>
 {:else}
