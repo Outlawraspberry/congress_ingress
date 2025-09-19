@@ -4,13 +4,11 @@
 	import PointStats from '$lib/components/point-stats.svelte';
 	import QrCodeScanner from '$lib/components/qr-code-scanner.svelte';
 	import TaskOverview from '$lib/components/task/task-overview.svelte';
-	import { getRealPoint } from '$lib/point/get-point-my-mapping-id.svelte';
 	import {
 		destroySelectedPoint,
 		initSelectedPoint,
 		selectedPoint
 	} from '$lib/point/selected-point.svelte';
-	import type { PointState } from '$lib/supabase/game/points.svelte';
 	import { Alert, Button, Heading } from 'flowbite-svelte';
 	import { Section } from 'flowbite-svelte-blocks';
 	import { onMount } from 'svelte';

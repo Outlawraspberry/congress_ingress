@@ -7,8 +7,17 @@ export const selectedPoint: {
 	selectedPoint: null
 });
 
-export async function initSelectedPoint(pointId: string): Promise<void> {
-	selectedPoint.selectedPoint = await getRealPoint(pointId);
+export async function initSelectedPoint(mappingId: string): Promise<PointState | null> {
+	try {
+		selectedPoint.selectedPoint = await getRealPoint(mappingId);
+		if (selectedPoint == null) {
+			return null;
+		}
+	} catch (error) {
+		console.error(error);
+	}
+
+	return selectedPoint.selectedPoint;
 }
 
 export function destroySelectedPoint(): void {
