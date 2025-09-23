@@ -7,6 +7,7 @@
 	import { Register, Section } from 'flowbite-svelte-blocks';
 
 	let wasRedirected = page.url.searchParams.has('wasRedirected');
+	let { data }: { data: { redirectUrl: string } } = $props();
 
 	let email: string = $state('');
 	let password: string = $state('');
@@ -19,7 +20,7 @@
 			error = undefined;
 			await signIn(email, password);
 
-			goto('/');
+			goto(data.redirectUrl);
 		} catch (err) {
 			error = err as AuthError;
 		}

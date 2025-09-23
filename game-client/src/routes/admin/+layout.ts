@@ -3,7 +3,7 @@ import { user } from '$lib/supabase/user/user.svelte';
 import { redirect } from '@sveltejs/kit';
 import type { LayoutLoad } from './$types';
 
-export const load: LayoutLoad = async ({ parent }) => {
+export const load: LayoutLoad = async ({ parent, url }) => {
 	await parent();
 
 	if (
@@ -11,6 +11,6 @@ export const load: LayoutLoad = async ({ parent }) => {
 		userStore.user == null ||
 		(user.user != null && user.user.role !== 'admin')
 	) {
-		redirect(308, '/login?wasRedirected');
+		redirect(308, `/login?wasRedirected&redirectTo=${url}`);
 	}
 };
