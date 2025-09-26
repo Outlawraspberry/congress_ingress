@@ -60,5 +60,16 @@
 		</section>
 	</Section>
 {:else}
-	<QrCodeScanner {onTextFound} />
+	<section class="hero min-h-screen">
+		<div class="hero-body">
+			<p class="mb-6 text-3xl font-bold">Okay, how do I play now?</p>
+
+			<p class="mb-6 w-sm">
+				It's very easy. All over the place, you'll find QRCodes on the wall. Scan them, and you can
+				play!
+			</p>
+
+			<QrCodeScanner {onTextFound} />
+		</div>
+	</section>
 {/if}

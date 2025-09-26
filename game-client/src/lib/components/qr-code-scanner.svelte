@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Alert, Button, P } from 'flowbite-svelte';
-	import { Section } from 'flowbite-svelte-blocks';
+	import { faCamera, faRepeat, faStop } from '@fortawesome/free-solid-svg-icons';
 	import { Html5Qrcode, type CameraDevice } from 'html5-qrcode';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
+	import Fa from 'svelte-fa';
 
 	let { onTextFound: onFoundCode }: { onTextFound: (codeText: string) => void } = $props();
 
@@ -32,6 +32,10 @@
 		}
 
 		isLoadingDevices = false;
+	});
+
+	onDestroy(() => {
+		stopScanning();
 	});
 
 	async function scanQr() {
@@ -73,26 +77,33 @@
 	}
 </script>
 
-<Section divClass="flex justify-center items-center">
-	{#if isScanning}
-		<Button onclick={stopScanning}>Stop scanning</Button>
-	{:else}
-		<Button onclick={startScanning}>Start Scanning</Button>
-	{/if}
+<div bind:this={readerDiv} id="reader" class="mb-6"></div>
 
-	{#if currentDevice == null && isLoadingDevices === false}
-		<Alert color="red">
-			It seems, that you don't have a camera in your devices, or didn't allowed us to use your
-			camera..</Alert
-		>
-	{/if}
-</Section>
+<section class="flex flex-col justify-center">
+	<div class="mb-6 flex flex-wrap justify-center gap-3">
+		{#if isScanning}
+			<button class="btn btn-secondary" onclick={stopScanning}
+				><Fa icon={faStop} />Stop scanning</button
+			>
+		{:else}
+			<button class="btn btn-xl btn-primary" onclick={startScanning}
+				><Fa icon={faCamera} />Start Scanning</button
+			>
+		{/if}
 
-<div bind:this={readerDiv} id="reader"></div>
+		{#if isScanning && currentDevice}
+			<button class="btn" onclick={switchCamera}><Fa icon={faRepeat} />Switch Camera</button>
+		{/if}
+	</div>
 
-<Section divClass="flex justify-center items-center flex-wrap flex-col">
 	{#if isScanning && currentDevice}
-		<P>{currentDevice.label}</P>
-		<Button onclick={switchCamera}>Switch device</Button>
+		<p>Current Camera: {currentDevice.label}</p>
 	{/if}
-</Section>
+</section>
+
+{#if currentDevice == null && isLoadingDevices === false}
+	<div role="alert" class="alert alert-error">
+		It seems, that you don't have a camera in your devices, or didn't allowed us to use your
+		camera..
+	</div>
+{/if}
