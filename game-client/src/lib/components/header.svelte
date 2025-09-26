@@ -6,51 +6,37 @@
 	import { HomeOutline } from 'flowbite-svelte-icons';
 	import RunTick from './run-tick.svelte';
 	import ActionCooldown from './task/action-cooldown.svelte';
+	import { faHome } from '@fortawesome/free-solid-svg-icons';
+	import Fa from 'svelte-fa';
 
 	let activeUrl = $derived(page.url.pathname);
 </script>
 
 <header>
-	<Navbar>
-		<NavBrand href="/"><HomeOutline class="text-black dark:text-white" /></NavBrand>
-
-		{#if page.url.pathname.includes('/game')}
-			<div class="flex justify-center">
-				<ActionCooldown></ActionCooldown>
-			</div>
-		{/if}
-
-		<NavUl {activeUrl}>
-			{#if userStore.user?.is_anonymous}
-				<Alert color="red">
-					<span class="text-lg font-medium">Attention: Anonymous login!</span>
-					<p>
-						You're playing with an anonymous session. When you logout or clear your browser's cache,
-						you will lose your identity and you have to start again
-					</p>
-				</Alert>
-			{/if}
-
-			<NavLi href="/">Home</NavLi>
-
-			{#if user.user != null}
-				{#if user.user.role === 'admin'}
-					<NavLi href="/admin">Admin Lounge</NavLi>
-					<NavLi href="/admin/point">Point Overview</NavLi>
-				{/if}
-				<NavLi data-sveltekit-preload-data="off" href="/logout">Logout</NavLi>
-			{:else}
-				<NavLi href="/login">Login</NavLi>
-				<NavLi href="/register">Register</NavLi>
-			{/if}
-		</NavUl>
-
-		<div class="flex items-center md:order-2">
-			{#if user.user != null && user.user.role === 'admin'}
-				<RunTick />
-			{/if}
-			<DarkMode />
-			<NavHamburger />
+	<div class="navbar bg-base-100 shadow-sm">
+		<div class="flex-1">
+			<a class="btn btn-ghost text-xl" href="/"><Fa icon={faHome} />Home</a>
 		</div>
-	</Navbar>
+
+		<div class="flex-none">
+			<ul class="menu menu-horizontal px-1">
+				{#if user.user == null}
+					<li><a href="/login">Login</a></li>
+					<li><a href="/register">Register</a></li>
+				{:else if user.user.role === 'admin'}
+					<li>
+						<details>
+							<summary>Admin Lounge</summary>
+							<ul class="bg-base-100 rounded-t-none p-2">
+								<li><a href="/admin/">Overview</a></li>
+								<li><a href="/admin/game">Game</a></li>
+								<li><a href="/admin/poing">Points</a></li>
+							</ul>
+						</details>
+					</li>
+					<li><a href="/logout" data-sveltekit-preload-data="off">Logout</a></li>
+				{/if}
+			</ul>
+		</div>
+	</div>
 </header>
