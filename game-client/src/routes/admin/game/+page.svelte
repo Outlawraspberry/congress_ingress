@@ -1,10 +1,13 @@
 <script lang="ts">
+	import Breadcrump from '$lib/components/breadcrump/breadcrump.svelte';
 	import Card from '$lib/components/card.svelte';
 	import { game } from '$lib/supabase/game/game.svelte';
 </script>
 
 <section class="my-5">
 	<h1 class="text-3xl">Game Overview</h1>
+
+	<Breadcrump />
 
 	<Card
 		><p class="text-center">

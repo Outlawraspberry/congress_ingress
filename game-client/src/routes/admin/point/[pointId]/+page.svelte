@@ -3,6 +3,7 @@
 	import type { Point, PointMapping } from '../../../../types/alias';
 	import PointStats from '$lib/components/point-stats.svelte';
 	import { PointState } from '$lib/supabase/game/points.svelte';
+	import Breadcrump from '$lib/components/breadcrump/breadcrump.svelte';
 
 	const {
 		data
@@ -70,9 +71,11 @@
 </script>
 
 <section>
-	<h1 class="mt-4 mb-4 text-3xl">
+	<h1 class="mb-3 text-3xl font-bold">
 		{data.pointData.name} (<span class="mt-4 mb-4 text-2xl">{data.pointData.id}</span>)
 	</h1>
+
+	<Breadcrump />
 
 	<section>
 		<h3 class="mt-4 mb-4 text-xl">Stats</h3>

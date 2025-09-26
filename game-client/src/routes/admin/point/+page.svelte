@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Breadcrump from '$lib/components/breadcrump/breadcrump.svelte';
 	import Card from '$lib/components/card.svelte';
 	import type { Point } from '../../../types/alias';
 
@@ -11,10 +12,12 @@
 	} = $props();
 </script>
 
+<h1 class="mb-3 text-3xl font-bold">Points</h1>
+
+<Breadcrump />
+
 <section class="hero">
 	<div class="hero-content flex-col">
-		<h1 class="text-center text-3xl font-bold">Points</h1>
-
 		<section class="my-5 flex flex-wrap justify-center gap-5">
 			{#each data.points as point (point.id)}
 				<Card>

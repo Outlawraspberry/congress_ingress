@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Breadcrump from '$lib/components/breadcrump/breadcrump.svelte';
 	import Card from '$lib/components/card.svelte';
 </script>
 
@@ -12,20 +13,24 @@
 	</Card>
 {/snippet}
 
+<h1 class="mb-3 text-3xl font-bold">Admin Lounge 🛋️</h1>
+
+<Breadcrump />
+
 <section class="hero">
-	<div class="hero-content flex-wrap justify-center gap-5">
-		<h1 class="mb-6 text-3xl font-bold">Admin Lounge 🛋️</h1>
+	<div class="hero-content flex-col justify-center pt-10">
+		<div class="flex flex-col flex-wrap gap-5">
+			{@render card(
+				'Game Management',
+				'From here, you can manage the state of the game.',
+				'/admin/game'
+			)}
 
-		{@render card(
-			'Game Management',
-			'From here, you can manage the state of the game.',
-			'/admin/game'
-		)}
-
-		{@render card(
-			'Point Management',
-			'From here, you can manage all points of the game.',
-			'/admin/point'
-		)}
+			{@render card(
+				'Point Management',
+				'From here, you can manage all points of the game.',
+				'/admin/point'
+			)}
+		</div>
 	</div>
 </section>
