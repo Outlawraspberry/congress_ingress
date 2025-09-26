@@ -1,23 +1,12 @@
 <script lang="ts">
 	import { supabase } from '$lib/supabase/db.svelte';
-	import {
-		Button,
-		Heading,
-		Hr,
-		Table,
-		TableBody,
-		TableBodyCell,
-		TableBodyRow,
-		TableHead,
-		TableHeadCell
-	} from 'flowbite-svelte';
-	import { Section } from 'flowbite-svelte-blocks';
 	import type { Point, PointMapping } from '../../../../types/alias';
 	import PointStats from '$lib/components/point-stats.svelte';
+	import { PointState } from '$lib/supabase/game/points.svelte';
 
 	const {
 		data
-	}: { data: { pointData: Point; mappingData: PointMapping[]; pointState: PointStats } } = $props();
+	}: { data: { pointData: Point; mappingData: PointMapping[]; pointState: PointState } } = $props();
 
 	let mappingData = $state(data.mappingData);
 
@@ -80,65 +69,73 @@
 	}
 </script>
 
-<Section>
-	<Heading class="mt-4 mb-4" tag="h1">{data.pointData.name}</Heading>
-	<Heading class="mt-4 mb-4" tag="h2">{data.pointData.id}</Heading>
+<section>
+	<h1 class="mt-4 mb-4 text-3xl">
+		{data.pointData.name} (<span class="mt-4 mb-4 text-2xl">{data.pointData.id}</span>)
+	</h1>
 
-	<Section>
-		<Heading class="mt-4 mb-4" tag="h3">Stats</Heading>
+	<section>
+		<h3 class="mt-4 mb-4 text-xl">Stats</h3>
 
 		<PointStats point={data.pointState}></PointStats>
-	</Section>
+	</section>
 
-	<Section>
-		<Heading class="mt-4 mb-4" tag="h3">Mappings</Heading>
+	<section class="">
+		<h3 class="mt-4 mb-4 text-xl">Mappings</h3>
 
-		<Button class="mt-4 mb-4" onclick={onNewMapping}>Create new Mapping</Button>
+		<button class=" btn mt-4 mb-4" onclick={onNewMapping}>Create new Mapping</button>
 
-		<Table>
-			<TableHead>
-				<TableHeadCell>Id</TableHeadCell>
-				<TableHeadCell>Is active</TableHeadCell>
-				<TableHeadCell>Actions</TableHeadCell>
-			</TableHead>
-			<TableBody>
-				{#if mappingData.length == 0}
-					No mappings
-				{/if}
-				{#each mappingData as mapping, i (i)}
-					<TableBodyRow>
-						<TableBodyCell>{mapping.id}</TableBodyCell>
-						<TableBodyCell>{mapping.is_active}</TableBodyCell>
-						<TableBodyCell class="flex gap-5">
-							<Button
-								data-sveltekit-preload-data="off"
-								href={mapping.is_active ? `/game/point/${mapping.id}` : ''}
-								disabled={!mapping.is_active}>Visit</Button
-							>
+		<div class="overflow-x-auto">
+			<table class="table">
+				<thead>
+					<tr>
+						<th>Id</th>
+						<th>Is active</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
 
-							<Button
-								size="xs"
-								onclick={() => {
-									onDeactivate(mapping);
-								}}
-							>
-								{mapping.is_active ? 'Deactivate' : 'Activate'}
-							</Button>
+				<tbody>
+					{#each mappingData as mapping, i (i)}
+						<tr>
+							<td>{mapping.id}</td>
+							<td>{mapping.is_active}</td>
 
-							<Button size="xs" onclick={() => onGeneratePDF(mapping.id)}>Generate QR Code</Button>
+							<td class="flex gap-5">
+								<a
+									class={`btn btn-sm ${!mapping.is_active ? 'btn-disabled' : ''}`}
+									data-sveltekit-preload-data="off"
+									href={mapping.is_active ? `/game/point/${mapping.id}` : ''}
+								>
+									Visit
+								</a>
 
-							<Button
-								size="xs"
-								onclick={() => {
-									onRemove(mapping.id);
-								}}
-							>
-								Remove
-							</Button>
-						</TableBodyCell>
-					</TableBodyRow>
-				{/each}
-			</TableBody>
-		</Table>
-	</Section>
-</Section>
+								<button
+									class="btn btn-sm"
+									onclick={() => {
+										onDeactivate(mapping);
+									}}
+								>
+									{mapping.is_active ? 'Deactivate' : 'Activate'}
+								</button>
+
+								<button class="btn btn-sm" onclick={() => onGeneratePDF(mapping.id)}>
+									Generate QR Code
+								</button>
+
+								<button
+									class="btn btn-sm"
+									onclick={() => {
+										onRemove(mapping.id);
+									}}
+								>
+									Remove
+								</button>
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+	</section>
+</section>

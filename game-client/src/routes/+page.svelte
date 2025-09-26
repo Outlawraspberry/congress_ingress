@@ -17,9 +17,11 @@
 				<a href="/game/point" class="btn btn-primary btn-xl">Get Started</a>
 			{:else}
 				<p class="my-6">But first, please</p>
-				<a href="/login" class="btn btn-primary btn-xl">Login</a>
-				<span class="m-5 font-bold">or</span>
-				<a href="/register" class="btn btn-primary btn-xl">Register</a>
+				<div class="flex justify-center">
+					<a href="/login" class="btn btn-primary btn-xl">Login</a>
+					<div class="divider">OR</div>
+					<a href="/register" class="btn btn-primary btn-xl">Register</a>
+				</div>
 			{/if}
 		</div>
 	</div>

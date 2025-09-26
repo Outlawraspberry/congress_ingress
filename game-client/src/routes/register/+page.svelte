@@ -18,7 +18,7 @@
 				</Card>
 			</a>
 
-			<p class="m-4 text-center text-xl font-bold">or</p>
+			<div class="divider font-bold">OR</div>
 
 			<a href="/register/email">
 				<Card class="p-5">

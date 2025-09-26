@@ -1,22 +1,31 @@
 <script lang="ts">
-	import { Button, Card, Heading, P } from 'flowbite-svelte';
-	import { Section } from 'flowbite-svelte-blocks';
+	import Card from '$lib/components/card.svelte';
 </script>
 
-<Section divClass="my-5 flex justify-center gap-5 flex-wrap">
-	<Card class="p-5">
-		<Heading tag="h4">Game Management</Heading>
+{#snippet card(headline: string, content: string, href: string)}
+	<Card>
+		<h2 class="mb-3 text-2xl font-bold">{headline}</h2>
 
-		<P>From here, you can manage the state of the game.</P>
+		<p class="mb-3">{content}</p>
 
-		<Button class="mt-2" href="/admin/game">Visit</Button>
+		<a class="btn btn-primary mt-2" {href}>Visit</a>
 	</Card>
+{/snippet}
 
-	<Card class="p-5">
-		<Heading tag="h4">Point Management</Heading>
+<section class="hero">
+	<div class="hero-content flex-wrap justify-center gap-5">
+		<h1 class="mb-6 text-3xl font-bold">Admin Lounge 🛋️</h1>
 
-		<P>From here, you can manage all points of the game.</P>
+		{@render card(
+			'Game Management',
+			'From here, you can manage the state of the game.',
+			'/admin/game'
+		)}
 
-		<Button class="mt-2" href="/admin/point">Visit</Button>
-	</Card>
-</Section>
+		{@render card(
+			'Point Management',
+			'From here, you can manage all points of the game.',
+			'/admin/point'
+		)}
+	</div>
+</section>

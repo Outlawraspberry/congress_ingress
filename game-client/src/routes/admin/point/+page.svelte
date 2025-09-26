@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { A, Card, Heading, P } from 'flowbite-svelte';
-	import { Section } from 'flowbite-svelte-blocks';
+	import Card from '$lib/components/card.svelte';
 	import type { Point } from '../../../types/alias';
 
 	const {
@@ -12,17 +11,20 @@
 	} = $props();
 </script>
 
-<Section>
-	<Heading class="text-center" tag="h1">Points</Heading>
+<section class="hero">
+	<div class="hero-content flex-col">
+		<h1 class="text-center text-3xl font-bold">Points</h1>
 
-	<Section divClass="my-5 flex justify-center gap-5 flex-wrap">
-		{#each data.points as point (point.id)}
-			<Card class="p-5">
-				<Heading tag="h4">{point.name}</Heading>
-				<P>{point.id}</P>
+		<section class="my-5 flex flex-wrap justify-center gap-5">
+			{#each data.points as point (point.id)}
+				<Card>
+					<h2 class="mb-3 text-2xl font-bold">{point.name}</h2>
 
-				<A href={`/admin/point/${point.id}`}>Details</A>
-			</Card>
-		{/each}
-	</Section>
-</Section>
+					<p class="mb-3">{point.id}</p>
+
+					<a class="text-primary font-bold" href={`/admin/point/${point.id}`}>Details</a>
+				</Card>
+			{/each}
+		</section>
+	</div>
+</section>
