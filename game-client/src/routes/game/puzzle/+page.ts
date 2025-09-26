@@ -1,15 +1,19 @@
-import { goto } from '$app/navigation';
+import { PuzzleState, selectedPuzzle } from '$lib/puzzle/selected-puzzle.svelte.js';
 import { supabase } from '$lib/supabase/db.svelte';
+import type { TaskType } from '../../../types/alias.js';
 
 export const load = async ({ url }) => {
 	const pointId = url.searchParams.get('pointId');
-	const type = url.searchParams.get('type');
+	const actionType = url.searchParams.get('type');
 
 	if (pointId == null) {
 		throw new Error('pointId parameter is mandatory, but not provided.');
 	}
 
-	if (type == null) {
+	if (
+		actionType == null ||
+		!['attack', 'attack_and_claim', 'repair', 'claim'].includes(actionType)
+	) {
 		throw new Error('type parameter is mandatory, but not provided.');
 	}
 
@@ -17,5 +21,9 @@ export const load = async ({ url }) => {
 
 	if (error) throw error;
 
-	goto(`/game/puzzle/${data.id}?puzzle=${JSON.stringify(data)}&pointId=${pointId}&type=${type}`);
+	selectedPuzzle.selectedPuzzle = new PuzzleState({
+		puzzle: data,
+		actionType: actionType as TaskType,
+		pointId
+	});
 };

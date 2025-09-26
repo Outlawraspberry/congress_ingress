@@ -1,4 +1,4 @@
-import { goto } from '$app/navigation';
+import { page } from '$app/state';
 import { supabase } from '$lib/supabase/db.svelte';
 import type { Puzzle } from '../../../../types/alias';
 import type { PageLoad } from './$types';
