@@ -28,7 +28,7 @@
 
 <Header class="hidden md:block"></Header>
 
-<div class="container mx-auto">
+<div class="container mx-auto w-screen p-6">
 	{@render children()}
 </div>
 

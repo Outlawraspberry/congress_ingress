@@ -3,7 +3,6 @@
 	import { game } from '$lib/supabase/game/game.svelte';
 	import type { PointState } from '$lib/supabase/game/points.svelte';
 	import { user } from '$lib/supabase/user/user.svelte';
-	import { Button } from 'flowbite-svelte';
 	import type { TaskType } from '../../../types/alias';
 
 	const {
@@ -37,7 +36,11 @@
 
 <section class="flex justify-center gap-5">
 	{#each possibleTasks as task (task)}
-		<Button onclick={() => preformAction(task)} disabled={!user.user?.canUseAction}>
+		<button
+			class="btn btn-primary btn-xl"
+			onclick={() => preformAction(task)}
+			disabled={!user.user?.canUseAction}
+		>
 			{#if task == 'attack'}
 				Attack
 			{:else if task === 'attack_and_claim'}
@@ -47,6 +50,6 @@
 			{:else if task === 'repair'}
 				Repair
 			{/if}
-		</Button>
+		</button>
 	{/each}
 </section>

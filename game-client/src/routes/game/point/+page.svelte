@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import Breadcrump from '$lib/components/breadcrump/breadcrump.svelte';
 	import PointStats from '$lib/components/point-stats.svelte';
 	import QrCodeScanner from '$lib/components/qr-code-scanner.svelte';
 	import TaskOverview from '$lib/components/task/task-overview.svelte';
@@ -9,11 +10,8 @@
 		initSelectedPoint,
 		selectedPoint
 	} from '$lib/point/selected-point.svelte';
-	import { Alert, Button, Heading } from 'flowbite-svelte';
-	import { Section } from 'flowbite-svelte-blocks';
+	import { user } from '$lib/supabase/user/user.svelte';
 	import { onMount } from 'svelte';
-
-	let scannedFromOutsideApp = page.url.searchParams.has('scannedFromOutside');
 
 	onMount(() => {
 		const searchParams = new URLSearchParams(window.location.search);
@@ -39,29 +37,63 @@
 	}
 </script>
 
-{#if scannedFromOutsideApp}
-	<Alert dismissable color="yellow">Please scan the QR codes from inside the app.</Alert>
-{/if}
-
 {#if selectedPoint.selectedPoint}
-	<Heading class="text-center" tag="h1">{selectedPoint.selectedPoint.state.point?.name}</Heading>
-
-	<Button
-		onclick={() => {
-			destroySelectedPoint();
-		}}>Select another point</Button
-	>
-
-	<Section>
-		<PointStats point={selectedPoint.selectedPoint}></PointStats>
-
-		<section class="container my-5 flex justify-center">
-			<TaskOverview chosenPoint={selectedPoint.selectedPoint}></TaskOverview>
-		</section>
-	</Section>
+	<h1 class="mb-3 text-3xl font-bold">{selectedPoint.selectedPoint.state.point?.name}</h1>
 {:else}
-	<section class="hero min-h-screen">
-		<div class="hero-body">
+	<h1 class="mb-3 text-3xl font-bold">Play the game</h1>{/if}
+
+<div class="breadcrumbs text-sm">
+	<ul>
+		<li><a href="/">/</a></li>
+		<li>
+			<button
+				onclick={() => {
+					destroySelectedPoint();
+				}}
+			>
+				game
+			</button>
+		</li>
+		{#if selectedPoint.selectedPoint != null}
+			<li>{selectedPoint.selectedPoint.state.point?.name}</li>
+		{/if}
+	</ul>
+</div>
+
+<section class="hero">
+	<div class="hero-content w-full flex-col">
+		{#if selectedPoint.selectedPoint}
+			<section class="w-full">
+				<PointStats class="w-full" point={selectedPoint.selectedPoint}></PointStats>
+
+				{#if user.user?.canUseActionInSeconds}
+					<p class="text-center">
+						In
+						<span class="countdown font-mono text-2xl">
+							<span
+								style={`--value:${user.user.canUseActionInSeconds};`}
+								aria-live="polite"
+								aria-label={user.user.canUseActionInSeconds.toString()}
+								>{user.user.canUseActionInSeconds}</span
+							>
+						</span>
+						seconds, you can do your next action
+					</p>
+				{:else}
+					<section class="container flex justify-center">
+						<TaskOverview chosenPoint={selectedPoint.selectedPoint}></TaskOverview>
+					</section>
+				{/if}
+			</section>
+
+			<button
+				class="btn btn-secondary btn-xl"
+				onclick={() => {
+					destroySelectedPoint();
+				}}
+				>Select another point
+			</button>
+		{:else}
 			<p class="mb-6 text-3xl font-bold">Okay, how do I play now?</p>
 
 			<p class="mb-6 w-sm">
@@ -70,6 +102,6 @@
 			</p>
 
 			<QrCodeScanner {onTextFound} />
-		</div>
-	</section>
-{/if}
+		{/if}
+	</div>
+</section>
