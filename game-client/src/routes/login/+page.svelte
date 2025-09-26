@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import Fieldset from '$lib/components/form/fieldset.svelte';
 	import { signIn } from '$lib/supabase/db.svelte';
 	import type { AuthError } from '@supabase/supabase-js';
-	import { A, Alert, Button, Heading, Input, Label, P } from 'flowbite-svelte';
-	import { Register, Section } from 'flowbite-svelte-blocks';
 
 	let wasRedirected = page.url.searchParams.has('wasRedirected');
 	let { data }: { data: { redirectUrl: string } } = $props();
@@ -36,10 +35,7 @@
 		{/if}
 
 		<form onsubmit={submit}>
-			<fieldset
-				class="fieldset rounded-box dark:bg-base-100 bg-base-200 w-full p-4 sm:w-md"
-				onsubmit={submit}
-			>
+			<Fieldset>
 				<label for="input-email" class="label">Email</label>
 				<input
 					id="input-email"
@@ -74,8 +70,7 @@
 						Sign up
 					</a>
 				</p>
-			</fieldset>
-
+			</Fieldset>
 			{#if error}
 				<div role="alert" class="alert alert-error">{error.message}</div>
 			{/if}
