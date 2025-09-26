@@ -1,10 +1,10 @@
 <script lang="ts">
-	import Header from '$lib/components/header.svelte';
+	import Header from '$lib/components/header/header.svelte';
 	import { destroy as gameDestroy } from '$lib/supabase/game/game.svelte';
 	import { destroy as userDestroy } from '$lib/supabase/user/user.svelte';
 	import { onDestroy, onMount } from 'svelte';
 	import '../app.css';
-	import Dock from '$lib/components/dock.svelte';
+	import Dock from '$lib/components/dock/dock.svelte';
 
 	let { children } = $props();
 

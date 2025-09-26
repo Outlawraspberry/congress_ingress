@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { user } from '$lib/supabase/user/user.svelte';
 	import {
 		faAddressCard,
@@ -9,39 +9,45 @@
 		faUserTie
 	} from '@fortawesome/free-solid-svg-icons';
 	import Fa from 'svelte-fa';
+	import AActiveUrl from './a-active-url.svelte';
+	import { page } from '$app/state';
+
+	const { class: klass }: { class?: string } = $props();
+
+	let activeUrl = $derived(page.url.pathname);
 </script>
 
-<div class="dock {$$restProps.class ?? ''}">
+<div class={`dock ${klass ? klass : ''}`}>
 	{#if user.user != null}
-		<a href="/">
+		<AActiveUrl {activeUrl} href="/">
 			<Fa icon={faHouse} />
 			<span class="dock-label">Home</span>
-		</a>
+		</AActiveUrl>
 
-		<a href="/game/point">
+		<AActiveUrl {activeUrl} href="/game/point">
 			<Fa icon={faGamepad} />
 			<span class="dock-label">Game</span>
-		</a>
+		</AActiveUrl>
 
 		{#if user.user.role === 'admin'}
-			<a href="/admin">
+			<AActiveUrl {activeUrl} href="/admin" setActive={activeUrl.startsWith('/admin')}>
 				<Fa icon={faUserTie} />
 				<span class="dock-label">Admin Lounge</span>
-			</a>
+			</AActiveUrl>
 		{/if}
 
-		<a href="/logout" data-sveltekit-preload-data="off">
+		<AActiveUrl {activeUrl} href="/logout" data-sveltekit-preload-data="off">
 			<Fa icon={faUser} />
 			<span class="dock-label">Logout</span>
-		</a>
+		</AActiveUrl>
 	{:else}
-		<a href="/login">
+		<AActiveUrl {activeUrl} href="/login">
 			<Fa icon={faLockOpen} />
 			<span class="dock-label">Login</span>
-		</a>
-		<a href="/register">
+		</AActiveUrl>
+		<AActiveUrl {activeUrl} href="/register">
 			<Fa icon={faAddressCard} />
 			<span class="dock-label">Register</span>
-		</a>
+		</AActiveUrl>
 	{/if}
 </div>

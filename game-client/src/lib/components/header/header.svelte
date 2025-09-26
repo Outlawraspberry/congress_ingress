@@ -3,6 +3,7 @@
 	import { user } from '$lib/supabase/user/user.svelte';
 	import { faHome } from '@fortawesome/free-solid-svg-icons';
 	import Fa from 'svelte-fa';
+	import LiActiveUrl from './li-active-url.svelte';
 
 	let { class: klass }: { class?: string } = $props();
 
@@ -18,17 +19,17 @@
 		<div class="flex-none">
 			<ul class="menu menu-horizontal px-1">
 				{#if user.user == null}
-					<li><a href="/login">Login</a></li>
-					<li><a href="/register">Register</a></li>
+					<LiActiveUrl href="/login" {activeUrl}>Login</LiActiveUrl>
+					<LiActiveUrl href="/register" {activeUrl}>Register</LiActiveUrl>
 				{:else}
 					{#if user.user.role === 'admin'}
-						<li>
+						<li class={activeUrl.includes('/admin') ? 'font-bold' : ''}>
 							<details>
 								<summary>Admin Lounge</summary>
-								<ul class="bg-base-100 rounded-t-none p-2">
-									<li><a href="/admin/">Overview</a></li>
-									<li><a href="/admin/game">Game</a></li>
-									<li><a href="/admin/poing">Points</a></li>
+								<ul class="bg-base-100 z-10 rounded-t-none p-2">
+									<LiActiveUrl href="/admin" {activeUrl}>Overview</LiActiveUrl>
+									<LiActiveUrl href="/admin/game" {activeUrl}>Game</LiActiveUrl>
+									<LiActiveUrl href="/admin/point" {activeUrl}>Points</LiActiveUrl>
 								</ul>
 							</details>
 						</li>
