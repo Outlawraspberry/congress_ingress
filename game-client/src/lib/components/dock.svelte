@@ -11,7 +11,7 @@
 	import Fa from 'svelte-fa';
 </script>
 
-<div class="dock">
+<div class="dock {$$restProps.class ?? ''}">
 	{#if user.user != null}
 		<a href="/">
 			<Fa icon={faHouse} />

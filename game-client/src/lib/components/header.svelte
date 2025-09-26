@@ -1,18 +1,15 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { userStore } from '$lib/supabase/db.svelte';
 	import { user } from '$lib/supabase/user/user.svelte';
-	import { Alert, DarkMode, Navbar, NavBrand, NavHamburger, NavLi, NavUl } from 'flowbite-svelte';
-	import { HomeOutline } from 'flowbite-svelte-icons';
-	import RunTick from './run-tick.svelte';
-	import ActionCooldown from './task/action-cooldown.svelte';
 	import { faHome } from '@fortawesome/free-solid-svg-icons';
 	import Fa from 'svelte-fa';
+
+	let { class: klass }: { class?: string } = $props();
 
 	let activeUrl = $derived(page.url.pathname);
 </script>
 
-<header>
+<header class={klass ?? ''}>
 	<div class="navbar bg-base-100 shadow-sm">
 		<div class="flex-1">
 			<a class="btn btn-ghost text-xl" href="/"><Fa icon={faHome} />Home</a>

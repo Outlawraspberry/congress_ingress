@@ -26,10 +26,10 @@
 	});
 </script>
 
-<Header></Header>
+<Header class="hidden md:block"></Header>
 
 <div class="container mx-auto">
 	{@render children()}
 </div>
 
-<Dock />
+<Dock class="md:hidden" />
