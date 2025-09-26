@@ -98,6 +98,10 @@
 				<span class="font-medium">The time for your puzzle is up!</span>
 				You took too long to solve the puzzle. Sorry, you have to try it again! :/
 			</Alert>
+		{:else}
+			<P>
+				You have {puzzle.state.secondsUntilTimeout} more seconds
+			</P>
 		{/if}
 
 		{#if incorrectResult}
@@ -112,10 +116,6 @@
 		{/if}
 	</section>
 
-	<P>
-		{puzzle.state.secondsUntilTimeout}
-	</P>
-
 	<section class="mt-2 mb-2 flex justify-center">
 		<Math puzzle={puzzle.state.puzzle} {onResultChanged}></Math>
 
@@ -127,6 +127,6 @@
 
 <section class="container flex justify-center">
 	{#if puzzle.state.puzzle.timeout || puzzle.state.puzzle.solved}
-		<Button href={pointUrl}>Back to Point</Button>
+		<Button href={pointUrl} data-sveltekit-preload-data="off">Back to Point</Button>
 	{/if}
 </section>
