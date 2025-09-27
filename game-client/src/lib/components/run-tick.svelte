@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { supabase } from '$lib/supabase/db.svelte';
 	import { game } from '$lib/supabase/game/game.svelte';
-	import { Button, Spinner } from 'flowbite-svelte';
 
 	let loading = $state(false);
 
@@ -19,10 +18,10 @@
 	}
 </script>
 
-<Button onclick={onClick} disabled={game.game?.state === 'paused'}>
+<button class="btn btn-primary" onclick={onClick} disabled={game.game?.state === 'paused'}>
 	{#if loading}
-		<Spinner size="4" class="mr-4" />Creating snapshot
+		<span class="loading loading-dots loading-md">Creating snapshot</span>
 	{:else}
 		Create point snapshot
 	{/if}
-</Button>
+</button>

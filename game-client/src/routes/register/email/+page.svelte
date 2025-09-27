@@ -52,7 +52,7 @@
 
 <section class="hero">
 	<div class="hero-content flex-col">
-		<h1 class="text-3xl font-bold">Login</h1>
+		<h1 class="text-3xl font-bold">Register EMail</h1>
 
 		<form {onsubmit}>
 			<Fieldset>

@@ -44,9 +44,14 @@
 
 <section class="hero">
 	<div class="hero-content flex-col">
-		<h1 class="text-3xl font-bold">Login</h1>
+		<h1 class="text-3xl font-bold">Register Anonymous</h1>
 
 		<form {onsubmit}>
+			<div role="alert" class="alert alert-warning mb-3 text-2xl font-bold">
+				Please note, when you register anonymous and logout, you'll lose your access to your
+				account! It is better to register with an email!
+			</div>
+
 			<Fieldset>
 				<label for="input-username" class="label">Username</label>
 				<input

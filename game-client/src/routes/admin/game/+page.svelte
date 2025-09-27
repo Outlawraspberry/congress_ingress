@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Breadcrump from '$lib/components/breadcrump/breadcrump.svelte';
 	import Card from '$lib/components/card.svelte';
+	import RunTick from '$lib/components/run-tick.svelte';
 	import { game } from '$lib/supabase/game/game.svelte';
 </script>
 
@@ -9,13 +10,15 @@
 
 	<Breadcrump />
 
-	<Card
-		><p class="text-center">
+	<Card>
+		<p class="mb-3 text-center">
 			The game is: {#if game.game?.state === 'paused'}
 				Paused
 			{:else}
 				Running
 			{/if}
-		</p></Card
-	>
+		</p>
+
+		<RunTick></RunTick>
+	</Card>
 </section>
