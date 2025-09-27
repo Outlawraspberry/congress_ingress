@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import Fieldset from '$lib/components/form/fieldset.svelte';
 	import { signIn } from '$lib/supabase/db.svelte';
 	import type { AuthError } from '@supabase/supabase-js';
-	import { A, Alert, Button, Heading, Input, Label, P } from 'flowbite-svelte';
-	import { Register, Section } from 'flowbite-svelte-blocks';
 
 	let wasRedirected = page.url.searchParams.has('wasRedirected');
 	let { data }: { data: { redirectUrl: string } } = $props();
@@ -27,49 +26,54 @@
 	}
 </script>
 
-<Section name="login">
-	{#if wasRedirected}
-		<Alert color="green">Please login before playing the game! :)</Alert>
-	{/if}
+<section class="hero">
+	<div class="hero-content flex-col">
+		<h1 class="text-3xl font-bold">Login</h1>
 
-	<Register href="/">
-		{#snippet top()}{/snippet}
-		<div class="space-y-4 p-6 sm:p-8 md:space-y-6">
-			<form class="flex flex-col space-y-6" onsubmit={submit}>
-				<Heading tag="h3">Login</Heading>
-				<Label class="space-y-2">
-					<span>Your email</span>
-					<Input
-						type="email"
-						name="email"
-						placeholder="name@company.com"
-						bind:value={email}
-						required
-					/>
-				</Label>
-				<Label class="space-y-2">
-					<span>Your password</span>
-					<Input
-						type="password"
-						name="password"
-						placeholder="•••••"
-						bind:value={password}
-						required
-					/>
-				</Label>
-				<Button type="submit" class="w-full1">Sign in</Button>
-				<P>Have you forget your password. <A href="/">No problem, just reset it?</A></P>
+		{#if wasRedirected}
+			<div role="alert" class="alert alert-success">Please login before playing the game! 😊</div>
+		{/if}
 
-				<P>
-					Don’t have an account yet? <A
-						href="/register"
-						class="text-primary-600 dark:text-primary-500 font-medium hover:underline">Sign up</A
+		<form onsubmit={submit}>
+			<Fieldset>
+				<label for="input-email" class="label">Email</label>
+				<input
+					id="input-email"
+					type="email"
+					class="input w-full"
+					placeholder="Email"
+					autocomplete="on"
+					bind:value={email}
+					required
+				/>
+
+				<label for="input-password" class="label">Password</label>
+				<input
+					id="input-password"
+					type="password"
+					class="input w-full"
+					placeholder="Password"
+					bind:value={password}
+					required
+				/>
+
+				<input type="submit" class="btn btn-primary mt-4" value="Login" />
+
+				<p class="mt-3">
+					Have you forget your password. <a href="/" class="text-primary font-bold"
+						>No problem, just reset it?</a
 					>
-				</P>
-			</form>
+				</p>
+
+				<p class="mt-3">
+					Don’t have an account yet? <a href="/register" class="text-primary font-bold">
+						Sign up
+					</a>
+				</p>
+			</Fieldset>
 			{#if error}
-				<Alert>{error.message}</Alert>
+				<div role="alert" class="alert alert-error">{error.message}</div>
 			{/if}
-		</div>
-	</Register>
-</Section>
+		</form>
+	</div>
+</section>

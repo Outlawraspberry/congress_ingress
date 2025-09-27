@@ -1,29 +1,34 @@
 <script>
-	import { A, Card, Heading, P } from 'flowbite-svelte';
+	import Card from '$lib/components/card.svelte';
 </script>
 
-<Heading class="text-center" tag="h2">Registration</Heading>
+<section class="hero my-5">
+	<div class="hero-content flex-col">
+		<h1 class="text-3xl font-bold">Registration</h1>
 
-<section class="my-5 flex flex-col flex-wrap items-center justify-center gap-5 md:flex-row">
-	<A href="/register/anonymous">
-		<Card class="p-5">
-			<Heading tag="h3">Anonymous</Heading>
-			<P>
-				When you register anonymously, you will be only referenced by your browser session. If it is
-				gone, you have to create a new account.
-			</P>
-			<P>No worries, you can transform your anonymous account into a persistend one later.</P>
-		</Card>
-	</A>
+		<div class="flex w-full flex-col items-center justify-center lg:flex-row">
+			<a href="/register/anonymous">
+				<Card class="p-5">
+					<h2 class="text-xl font-bold">Anonymous</h2>
+					<p>
+						When you register anonymously, you will be only referenced by your browser session. If
+						it is gone, you have to create a new account.
+					</p>
+					<p>No worries, you can transform your anonymous account into a persistend one later.</p>
+				</Card>
+			</a>
 
-	<P>or</P>
+			<div class="divider lg:divider-horizontal font-bold">OR</div>
 
-	<A href="/register/email">
-		<Card class="p-5">
-			<Heading tag="h3">With an email</Heading>
-			<P>
-				When you register with an email, you can login and logout every time you want. No data loss.
-			</P>
-		</Card>
-	</A>
+			<a href="/register/email">
+				<Card class="p-5">
+					<h2 class="text-xl font-bold">With an email</h2>
+					<p>
+						When you register with an email, you can login and logout every time you want. No data
+						loss.
+					</p>
+				</Card>
+			</a>
+		</div>
+	</div>
 </section>
