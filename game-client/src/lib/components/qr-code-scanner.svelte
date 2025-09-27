@@ -77,9 +77,9 @@
 	}
 </script>
 
-<div bind:this={readerDiv} id="reader" class="mb-6"></div>
-
 <section class="flex flex-col justify-center">
+	<div bind:this={readerDiv} id="reader" class="mb-6 w-full"></div>
+
 	<div class="mb-6 flex flex-wrap justify-center gap-3">
 		{#if isScanning}
 			<button class="btn btn-secondary" onclick={stopScanning}
