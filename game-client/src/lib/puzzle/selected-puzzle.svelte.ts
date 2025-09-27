@@ -40,7 +40,7 @@ export class PuzzleState {
 
 	private interval = () => {
 		const now = Date.now();
-		const timeUntilTimeout = this.timeout - now;
+		const timeUntilTimeout = Math.round((this.timeout - now) / 1000);
 
 		if (timeUntilTimeout > 0) {
 			this.state.secondsUntilTimeout = timeUntilTimeout;

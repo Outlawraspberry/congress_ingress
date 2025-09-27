@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { PuzzleMath } from '$lib/puzzles/math';
-	import { ButtonGroup, Input } from 'flowbite-svelte';
 	import type { Puzzle } from '../../../../../types/alias';
 
 	let result: string = $state('');
@@ -16,14 +15,14 @@
 	const task: PuzzleMath = puzzle.task as PuzzleMath;
 </script>
 
-<ButtonGroup>
-	<Input
-		size="lg"
+<div class="join">
+	<input
+		class="join-item"
 		value={`${task.leftHandle} ${task.operator} ${task.rightHandle} =`}
 		disabled={true}
 	/>
-	<Input
-		size="lg"
+	<input
+		class="join-item"
 		type="number"
 		onchange={() => {
 			onResultChanged(result);
@@ -32,4 +31,4 @@
 		placeholder="Type your result"
 		autofocus
 	/>
-</ButtonGroup>
+</div>
