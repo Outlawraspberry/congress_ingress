@@ -1,10 +1,6 @@
 <script>
-	import { Heading, P } from 'flowbite-svelte';
-	import { Section } from 'flowbite-svelte-blocks';
 </script>
 
-<Section>
-	<Heading>The point cannot be found! 🫣</Heading>
+<h1 class="text-3xl font-bold">The point cannot be found! 🫣</h1>
 
-	<P>If you've scanned a QR code, the code may was disabled. Please try it later again.</P>
-</Section>
+<p>If you've scanned a QR code, the code may was disabled. Please try it later again.</p>

@@ -3,8 +3,6 @@
 	import Fieldset from '$lib/components/form/fieldset.svelte';
 	import { signUp, supabase } from '$lib/supabase/db.svelte';
 	import { AuthError } from '@supabase/supabase-js';
-	import { A, Alert, Button, Checkbox, Heading, Input, Label, P, Select } from 'flowbite-svelte';
-	import { Register, Section } from 'flowbite-svelte-blocks';
 
 	const { data }: { data: { factions: { value: string; name: string }[] } } = $props();
 

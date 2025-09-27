@@ -2,7 +2,7 @@
 	import { user } from '$lib/supabase/user/user.svelte';
 </script>
 
-<div class="hero mt-8 min-h-screen">
+<div class="hero mt-8">
 	<div class="hero-content text-center">
 		<div class="max-w-md">
 			<h1 class="text-5xl font-bold">Welcome to Congress Quest</h1>
