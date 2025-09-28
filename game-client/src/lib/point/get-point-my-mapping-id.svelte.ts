@@ -23,6 +23,7 @@ export async function getRealPoint(mappingId: string): Promise<PointState | null
 	if (id) {
 		const pointState = new PointState(id, mappingId);
 		await pointState.init();
+		await pointState.initCurrentUsers();
 		return pointState;
 	}
 

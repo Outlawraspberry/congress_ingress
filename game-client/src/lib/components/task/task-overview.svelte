@@ -11,6 +11,8 @@
 		chosenPoint: PointState;
 	} = $props();
 
+	let activeUsersAtPoint = $derived(chosenPoint.state.currentUsers.length || 0);
+
 	const possibleTasks: TaskType[] = $derived.by(() => {
 		if (chosenPoint.state.point?.acquired_by == null) {
 			return ['claim'];
