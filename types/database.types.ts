@@ -69,14 +69,17 @@ export type Database = {
       game: {
         Row: {
           id: number
+          point_user_kick_timeout_seconds: number
           state: Database["public"]["Enums"]["game-state"]
         }
         Insert: {
           id?: number
+          point_user_kick_timeout_seconds?: number
           state?: Database["public"]["Enums"]["game-state"]
         }
         Update: {
           id?: number
+          point_user_kick_timeout_seconds?: number
           state?: Database["public"]["Enums"]["game-state"]
         }
         Relationships: []
@@ -177,6 +180,39 @@ export type Database = {
             columns: ["point_id"]
             isOneToOne: false
             referencedRelation: "point"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      point_user: {
+        Row: {
+          created_at: string
+          point_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          point_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          point_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "point_user_point_id_fkey"
+            columns: ["point_id"]
+            isOneToOne: false
+            referencedRelation: "point_mapping"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "point_user_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user"
             referencedColumns: ["id"]
           },
         ]
@@ -362,6 +398,10 @@ export type Database = {
       get_point_by_mapping: {
         Args: { a_point_id: string }
         Returns: Record<string, unknown>
+      }
+      kick_users_from_point_user: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       select_point_at_current_tick: {
         Args: { p_point_id: string }
