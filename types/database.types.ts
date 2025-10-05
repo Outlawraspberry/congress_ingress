@@ -68,19 +68,34 @@ export type Database = {
       }
       game: {
         Row: {
+          group_attack_multiplier_per_user: number
+          group_repair_multiplier_per_user: number
           id: number
           point_user_kick_timeout_seconds: number
           state: Database["public"]["Enums"]["game-state"]
+          user_base_damage: number
+          user_base_repair: number
+          user_max_damage: number
         }
         Insert: {
+          group_attack_multiplier_per_user?: number
+          group_repair_multiplier_per_user?: number
           id?: number
           point_user_kick_timeout_seconds?: number
           state?: Database["public"]["Enums"]["game-state"]
+          user_base_damage?: number
+          user_base_repair?: number
+          user_max_damage?: number
         }
         Update: {
+          group_attack_multiplier_per_user?: number
+          group_repair_multiplier_per_user?: number
           id?: number
           point_user_kick_timeout_seconds?: number
           state?: Database["public"]["Enums"]["game-state"]
+          user_base_damage?: number
+          user_base_repair?: number
+          user_max_damage?: number
         }
         Relationships: []
       }
@@ -391,8 +406,20 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Record<string, unknown>[]
       }
+      get_attack_damage_for_point: {
+        Args: { a_mapping_id: string }
+        Returns: number
+      }
+      get_count_of_active_users_at_point: {
+        Args: { a_mapping_id: string }
+        Returns: number
+      }
       get_current_tick: {
         Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_health_of_mapping: {
+        Args: { a_mapping_id: string }
         Returns: number
       }
       get_point_by_mapping: {
@@ -401,6 +428,10 @@ export type Database = {
       }
       kick_users_from_point_user: {
         Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      perform_attack_on_mapping: {
+        Args: { a_mapping_id: string }
         Returns: undefined
       }
       select_point_at_current_tick: {
