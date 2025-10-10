@@ -1,0 +1,29 @@
+meta {
+  name: create_action
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://127.0.0.1:54321/functions/v1/perform_action
+  body: json
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjU0MzIxL2F1dGgvdjEiLCJzdWIiOiJmYTczNTFiNS0yOGIzLTQ2MGUtYjFiYy1jMWQ1YWE0MjZhYTYiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzYwMTAxOTYzLCJpYXQiOjE3NjAwOTgzNjMsImVtYWlsIjoiYmVuamFtaW4uZy5rQHdlYi5kZSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZGlzcGxheV9uYW1lIjoiV2VsdGlpIiwiZW1haWwiOiJiZW5qYW1pbi5nLmtAd2ViLmRlIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZhY3Rpb25faWQiOiIxMmVmMjEwNi01MzRlLTQ5Y2ItYWRlYS1jN2JiOTA5NjJlZTEiLCJwaG9uZV92ZXJpZmllZCI6ZmFsc2UsInN1YiI6ImZhNzM1MWI1LTI4YjMtNDYwZS1iMWJjLWMxZDVhYTQyNmFhNiJ9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzYwMDk4MzYzfV0sInNlc3Npb25faWQiOiI5Mzc5ODk4ZS0yMWMyLTQyMWQtOTUyYS0yYTE4MTM3OGI5OGYiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.3qC2Wzm4OhVGC3v_jGjKuvrzilrw_uChA5ihra0_0gg
+}
+
+body:json {
+  {
+    "user": "{{user_id}}",
+    "point": "{{point_id}}",
+    "type": "attack",
+    "puzzle": "{{puzzle_id}}"
+  }
+}
