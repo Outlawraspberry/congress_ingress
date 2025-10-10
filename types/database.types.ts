@@ -134,35 +134,6 @@ export type Database = {
           },
         ]
       }
-      point_mapping: {
-        Row: {
-          created_at: string
-          id: string
-          is_active: boolean
-          point_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          point_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          point_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "point_mapping_point_id_fkey"
-            columns: ["point_id"]
-            isOneToOne: false
-            referencedRelation: "point"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       point_tick_archive: {
         Row: {
           acquired_by: string | null
@@ -220,7 +191,7 @@ export type Database = {
             foreignKeyName: "point_user_point_id_fkey"
             columns: ["point_id"]
             isOneToOne: false
-            referencedRelation: "point_mapping"
+            referencedRelation: "point"
             referencedColumns: ["id"]
           },
           {
@@ -382,29 +353,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      check_if_user_already_added_a_task_for_current_tick: {
-        Args: { a_user_id: string }
-        Returns: boolean
-      }
       create_point_archive_snapshot: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
-      does_point_exists: {
-        Args: { a_point_id: string }
-        Returns: boolean
-      }
       does_username_exists: {
         Args: { a_username: string }
         Returns: boolean
-      }
-      get_all_points_for_current_tick: {
-        Args: Record<PropertyKey, never>
-        Returns: Record<string, unknown>[]
-      }
-      get_all_users_for_current_tick: {
-        Args: Record<PropertyKey, never>
-        Returns: Record<string, unknown>[]
       }
       get_attack_damage_for_point: {
         Args: { a_mapping_id: string }
@@ -414,41 +369,25 @@ export type Database = {
         Args: { a_mapping_id: string }
         Returns: number
       }
-      get_current_tick: {
-        Args: Record<PropertyKey, never>
+      get_count_of_active_users_at_point_and_faction: {
+        Args: { a_point_id: string; a_faction_id: string }
         Returns: number
       }
-      get_health_of_mapping: {
-        Args: { a_mapping_id: string }
+      get_count_of_active_users_at_point_by_user_id: {
+        Args: { a_user_id: string }
         Returns: number
-      }
-      get_point_by_mapping: {
-        Args: { a_point_id: string }
-        Returns: Record<string, unknown>
       }
       kick_users_from_point_user: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
-      perform_attack_on_mapping: {
-        Args: { a_mapping_id: string }
+      perform_attack_on_point: {
+        Args: { point_id: string }
         Returns: undefined
       }
-      select_point_at_current_tick: {
-        Args: { p_point_id: string }
-        Returns: Record<string, unknown>
-      }
-      select_point_states_of_current_tick: {
-        Args: Record<PropertyKey, never>
-        Returns: Record<string, unknown>[]
-      }
-      select_point_states_of_tick: {
-        Args: { a_tick: number }
-        Returns: Record<string, unknown>[]
-      }
-      select_task_of_current_tick: {
-        Args: Record<PropertyKey, never>
-        Returns: Record<string, unknown>[]
+      user_can_perform_action_on_point: {
+        Args: { point_id: string }
+        Returns: boolean
       }
     }
     Enums: {
