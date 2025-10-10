@@ -25,5 +25,3 @@ WHERE point.id = point_id;$function$
 ;
 
 CREATE TRIGGER run_on_action_was_added AFTER INSERT ON public.actions FOR EACH ROW EXECUTE FUNCTION perform_action();
-
-

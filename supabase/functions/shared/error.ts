@@ -4,8 +4,6 @@ import { corsHeaders } from "../cors.ts";
 export function handleError(
   { message, errorCode, httpStatus }: ErrorResult,
 ): Response {
-  console.error(message);
-
   return new Response(
     JSON.stringify({
       message,
@@ -21,6 +19,8 @@ export function handleError(
 export function errorHandler(e: unknown): Response {
   let content: string;
   let status: number = 500;
+
+  console.error(e);
 
   if (typeof e !== "object" || e == null) {
     return handleError({

@@ -15,6 +15,7 @@ export type Database = {
           created_by: string
           point: string
           puzzle: string
+          strength: number
           type: Database["public"]["Enums"]["task_type"]
         }
         Insert: {
@@ -22,6 +23,7 @@ export type Database = {
           created_by: string
           point: string
           puzzle: string
+          strength: number
           type: Database["public"]["Enums"]["task_type"]
         }
         Update: {
@@ -29,6 +31,7 @@ export type Database = {
           created_by?: string
           point?: string
           puzzle?: string
+          strength?: number
           type?: Database["public"]["Enums"]["task_type"]
         }
         Relationships: [
@@ -298,17 +301,17 @@ export type Database = {
       user_game_data: {
         Row: {
           faction_id: string
-          last_action: string | null
+          last_action: string
           user_id: string
         }
         Insert: {
           faction_id: string
-          last_action?: string | null
+          last_action?: string
           user_id?: string
         }
         Update: {
           faction_id?: string
-          last_action?: string | null
+          last_action?: string
           user_id?: string
         }
         Relationships: [
@@ -372,6 +375,10 @@ export type Database = {
         Args: { a_mapping_id: string }
         Returns: number
       }
+      get_attack_damage_for_point_based_on_faction: {
+        Args: { a_user_id: string }
+        Returns: number
+      }
       get_count_of_active_users_at_point: {
         Args: { a_mapping_id: string }
         Returns: number
@@ -383,6 +390,10 @@ export type Database = {
       get_count_of_active_users_at_point_by_user_id: {
         Args: { a_user_id: string }
         Returns: number
+      }
+      is_puzzle_solved: {
+        Args: { a_puzzle_id: string }
+        Returns: boolean
       }
       kick_users_from_point_user: {
         Args: Record<PropertyKey, never>

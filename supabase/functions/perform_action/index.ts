@@ -54,25 +54,27 @@ async function handle(req: Request): Promise<Response> {
 
   const userId = await getUserId(supabaseClient);
 
+  supabaseClient = createClient<Database>(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+  );
+
   // Will throw an error, so not handled here.
-  await Promise.all([
+  const [_canUser, strengthAtPoint] = await Promise.all([
     canUserPerformAction(
       supabaseClient,
       userId,
       action.point,
     ),
+    getStrengthForCurrentUser(supabaseClient, userId),
   ]);
-
-  supabaseClient = createClient<Database>(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-  );
 
   const response = await supabaseClient.from("actions").insert({
     created_by: userId,
     point: action.point,
     type: action.type,
     puzzle: action.puzzle,
+    strength: strengthAtPoint,
   });
 
   if (response.error) {
@@ -122,6 +124,28 @@ async function canUserPerformAction(
   }
 
   return true;
+}
+
+async function getStrengthForCurrentUser(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+): Promise<number> {
+  const strength = await supabase.rpc(
+    "get_attack_damage_for_point_based_on_faction",
+    {
+      a_user_id: userId,
+    },
+  );
+
+  if (strength.error) {
+    throw {
+      errorCode: ErrorCode.AUTH_ERROR,
+      httpStatus: 401,
+      message: strength.error.message,
+    } as ErrorResult;
+  }
+
+  return strength.data;
 }
 
 /* To invoke locally:
