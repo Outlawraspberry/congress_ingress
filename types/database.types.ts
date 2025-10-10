@@ -75,6 +75,7 @@ export type Database = {
           state: Database["public"]["Enums"]["game-state"]
           user_base_damage: number
           user_base_repair: number
+          user_last_action_timeout_in_seconds: number
           user_max_damage: number
         }
         Insert: {
@@ -85,6 +86,7 @@ export type Database = {
           state?: Database["public"]["Enums"]["game-state"]
           user_base_damage?: number
           user_base_repair?: number
+          user_last_action_timeout_in_seconds?: number
           user_max_damage?: number
         }
         Update: {
@@ -95,6 +97,7 @@ export type Database = {
           state?: Database["public"]["Enums"]["game-state"]
           user_base_damage?: number
           user_base_repair?: number
+          user_last_action_timeout_in_seconds?: number
           user_max_damage?: number
         }
         Relationships: []
@@ -353,6 +356,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_user_perform_action_on_point: {
+        Args: { a_user_id: string; a_poind_id: string }
+        Returns: boolean
+      }
       create_point_archive_snapshot: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -384,10 +391,6 @@ export type Database = {
       perform_attack_on_point: {
         Args: { point_id: string }
         Returns: undefined
-      }
-      user_can_perform_action_on_point: {
-        Args: { point_id: string }
-        Returns: boolean
       }
     }
     Enums: {
