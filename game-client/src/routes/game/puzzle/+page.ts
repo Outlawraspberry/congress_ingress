@@ -1,14 +1,10 @@
+import { selectedPoint } from '$lib/point/selected-point.svelte.js';
 import { PuzzleState, selectedPuzzle } from '$lib/puzzle/selected-puzzle.svelte.js';
 import { supabase } from '$lib/supabase/db.svelte';
 import type { TaskType } from '../../../types/alias.js';
 
 export const load = async ({ url }) => {
-	const pointId = url.searchParams.get('pointId');
 	const actionType = url.searchParams.get('type');
-
-	if (pointId == null) {
-		throw new Error('pointId parameter is mandatory, but not provided.');
-	}
 
 	if (
 		actionType == null ||
@@ -21,9 +17,10 @@ export const load = async ({ url }) => {
 
 	if (error) throw error;
 
+	await selectedPoint.selectedPoint?.initCurrentUsers();
+
 	selectedPuzzle.selectedPuzzle = new PuzzleState({
 		puzzle: data,
-		actionType: actionType as TaskType,
-		pointId
+		actionType: actionType as TaskType
 	});
 };

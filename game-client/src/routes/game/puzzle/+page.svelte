@@ -5,17 +5,17 @@
 	import { supabase, userStore } from '$lib/supabase/db.svelte';
 	import { onMount } from 'svelte';
 	import { ErrorCode, type ErrorResult } from '../../../../../types/error-code';
+	import { selectedPoint } from '$lib/point/selected-point.svelte';
 
 	let result = $state('');
 	let incorrectResult: boolean = $state(false);
 
 	const puzzle = selectedPuzzle.selectedPuzzle!;
-	const pointUrl = `/game/point/${puzzle.state.pointId}`;
+	const pointUrl = `/game/point`;
 
 	onMount(() => {
 		const searchParams = new URLSearchParams(window.location.search);
 		searchParams.delete('puzzle');
-
 		goto(`?${searchParams.toString()}`, {
 			replaceState: true,
 			keepFocus: true,
@@ -61,7 +61,7 @@
 					{
 						body: {
 							user: userStore.user?.id,
-							point: puzzle.state.pointId,
+							point: selectedPoint.selectedPoint!.state.point!.id,
 							type: puzzle.state.actionType,
 							puzzle: puzzle.state.puzzle.id
 						}
@@ -71,7 +71,6 @@
 				if (performActionError != null) {
 					console.log(d, resp);
 				} else {
-					console.log(pointUrl);
 					goto(pointUrl);
 				}
 			} catch (e) {
