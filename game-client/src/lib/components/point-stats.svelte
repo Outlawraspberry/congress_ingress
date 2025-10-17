@@ -8,6 +8,19 @@
 	let factionName = $state('Unclaimed');
 	let activeUsersAtPoint = $derived(point.state.currentUsers.length);
 
+	let currentProgressColor = $derived.by(() => {
+		const health = point.state.point!.health;
+		const maxHealth = point.state.point!.max_health;
+
+		if (health >= maxHealth * 0.9) {
+			return 'progress-success';
+		} else if (health >= maxHealth * 0.3) {
+			return 'progress-warning';
+		}
+
+		return 'progress-error';
+	});
+
 	$effect(() => {
 		if (point.state.point?.acquired_by) {
 			faction.getName(point.state.point.acquired_by).then((name) => {
@@ -29,7 +42,7 @@
 	<progress
 		value={point.state.point?.health}
 		max={point.state.point?.max_health}
-		class="progress progress-info my-3 h-5"
+		class={`progress  my-3 h-5 ${currentProgressColor}`}
 	></progress>
 	<p class="text-center">
 		{point.state.point?.health} / {point.state.point?.max_health}
