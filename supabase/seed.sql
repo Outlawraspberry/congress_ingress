@@ -22,3 +22,8 @@ INSERT INTO
     public.point (max_health, name)
 VALUES
   (255, 'Point B');
+
+INSERT INTO
+    public.puzzle_config (type, timeout)
+VALUES
+    ('math'::'puzzle-type', 10);

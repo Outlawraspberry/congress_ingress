@@ -212,28 +212,28 @@ export type Database = {
       puzzle: {
         Row: {
           created_at: string
+          expires_at: string
           id: string
           solved: boolean
           task: Json
-          timeout: boolean
           type: Database["public"]["Enums"]["puzzle-type"]
           user_id: string
         }
         Insert: {
           created_at?: string
+          expires_at?: string
           id?: string
           solved?: boolean
           task: Json
-          timeout?: boolean
           type: Database["public"]["Enums"]["puzzle-type"]
           user_id: string
         }
         Update: {
           created_at?: string
+          expires_at?: string
           id?: string
           solved?: boolean
           task?: Json
-          timeout?: boolean
           type?: Database["public"]["Enums"]["puzzle-type"]
           user_id?: string
         }
@@ -246,6 +246,21 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      puzzle_config: {
+        Row: {
+          timeout: number
+          type: Database["public"]["Enums"]["puzzle-type"]
+        }
+        Insert: {
+          timeout: number
+          type: Database["public"]["Enums"]["puzzle-type"]
+        }
+        Update: {
+          timeout?: number
+          type?: Database["public"]["Enums"]["puzzle-type"]
+        }
+        Relationships: []
       }
       puzzle_result: {
         Row: {
@@ -390,6 +405,26 @@ export type Database = {
       get_count_of_active_users_at_point_by_user_id: {
         Args: { a_user_id: string }
         Returns: number
+      }
+      get_timeout_for_puzzle: {
+        Args: { a_type: Database["public"]["Enums"]["puzzle-type"] }
+        Returns: number
+      }
+      insert_puzzle: {
+        Args: {
+          a_user_id: string
+          a_task: Json
+          a_type: Database["public"]["Enums"]["puzzle-type"]
+        }
+        Returns: {
+          created_at: string
+          expires_at: string
+          id: string
+          solved: boolean
+          task: Json
+          type: Database["public"]["Enums"]["puzzle-type"]
+          user_id: string
+        }
       }
       is_puzzle_solved: {
         Args: { a_puzzle_id: string }

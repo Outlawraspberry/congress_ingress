@@ -71,7 +71,7 @@ async function handle(req: Request): Promise<Response> {
 
   const puzzleResultResult = await supabaseClient
     .from("puzzle_result")
-    .select("*")
+    .select("id (id, expires_at), user_id, created_at, result")
     .filter("user_id", "eq", userResponse.data.user.id)
     .filter("id", "eq", json.puzzle);
 
@@ -85,25 +85,10 @@ async function handle(req: Request): Promise<Response> {
     });
   }
 
-  const createTime = new Date(puzzleResultResult.data[0].created_at).getTime();
+  const expireTime = new Date(puzzleResultResult.data[0].id.expires_at).getTime();
   const now = Date.now();
 
-  if (now - createTime >= 10000) {
-    const timeoutResult = await supabaseClient
-      .from("puzzle")
-      .update({
-        timeout: true,
-      })
-      .filter("id", "eq", json.puzzle);
-
-    if (timeoutResult.error) {
-      return error.handleError({
-        message: timeoutResult.error.message,
-        httpStatus: 400,
-        errorCode: ErrorCode.PUZZLE_TIMEOOUT,
-      });
-    }
-
+  if (now >= expireTime) {
     return error.handleError({
       message:
         "The time to solve the puzzle is up. Please create a new puzzle.",
