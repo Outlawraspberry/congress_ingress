@@ -15,6 +15,14 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  try {
+    return await handle(req);
+  } catch (e) {
+    return error.errorHandler(e);
+  }
+});
+
+async function handle(req: Request): Promise<Response> {
   const json: unknown = await req.json();
 
   if (json == null || typeof json !== "object") {
@@ -25,7 +33,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  if (!("puzzleId" in json && typeof json.puzzleId === "string")) {
+  if (!("puzzle" in json && typeof json.puzzle === "string")) {
     return error.handleError(
       {
         message: "Puzzle not found",
@@ -65,7 +73,7 @@ Deno.serve(async (req) => {
     .from("puzzle_result")
     .select("*")
     .filter("user_id", "eq", userResponse.data.user.id)
-    .filter("id", "eq", json.puzzleId);
+    .filter("id", "eq", json.puzzle);
 
   if (
     puzzleResultResult.error != null || puzzleResultResult.data.length === 0
@@ -86,7 +94,7 @@ Deno.serve(async (req) => {
       .update({
         timeout: true,
       })
-      .filter("id", "eq", json.puzzleId);
+      .filter("id", "eq", json.puzzle);
 
     if (timeoutResult.error) {
       return error.handleError({
@@ -121,15 +129,15 @@ Deno.serve(async (req) => {
     .update({
       solved: true,
     })
-    .filter("id", "eq", json.puzzleId);
+    .filter("id", "eq", json.puzzle);
 
-  if (updateResult.error != null) return error.handleError(updateResult.error);
+  if (updateResult.error != null) throw updateResult.error;
 
   return new Response(null, {
     headers: corsHeaders,
     status: 204,
   });
-});
+}
 
 /* To invoke locally:
 

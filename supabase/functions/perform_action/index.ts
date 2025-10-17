@@ -17,12 +17,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    await handle(req);
+    return await handle(req);
   } catch (e) {
     return error.errorHandler(e);
   }
-
-  return new Response(undefined, { status: 204, headers: { ...corsHeaders } });
 });
 
 async function handle(req: Request): Promise<Response> {
