@@ -11,8 +11,6 @@
 		chosenPoint: PointState;
 	} = $props();
 
-	let activeUsersAtPoint = $derived(chosenPoint.state.currentUsers.length || 0);
-
 	const possibleTasks: TaskType[] = $derived.by(() => {
 		if (chosenPoint.state.point?.acquired_by == null) {
 			return ['claim'];
@@ -31,7 +29,7 @@
 
 	async function preformAction(type: TaskType): Promise<void> {
 		if (game.game != null) {
-			goto(`/game/puzzle?type=${type}&pointId=${chosenPoint.state.mappingid}`);
+			goto(`/game/puzzle?type=${type}&pointId=${chosenPoint.state.point!.id}`);
 		}
 	}
 </script>

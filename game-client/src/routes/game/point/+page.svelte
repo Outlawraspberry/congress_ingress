@@ -9,7 +9,7 @@
 		selectedPoint
 	} from '$lib/point/selected-point.svelte';
 	import { user } from '$lib/supabase/user/user.svelte';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 
 	onMount(() => {
 		const searchParams = new URLSearchParams(window.location.search);
@@ -19,10 +19,6 @@
 			keepFocus: true,
 			noScroll: true
 		});
-	});
-
-	onDestroy(() => {
-		destroySelectedPoint();
 	});
 
 	function onTextFound(decodedText: string) {

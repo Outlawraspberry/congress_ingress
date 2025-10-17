@@ -1,14 +1,12 @@
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import type { Point } from '../../../types/alias';
 import { supabase, userStore } from '../db.svelte';
-import { user } from '../user/user.svelte';
 
 const nameCache = new Map<string, string>();
 
 export class PointState {
 	state: {
 		point: Point | null;
-		mappingid: string | null;
 		currentUsers: string[];
 		kicked: boolean;
 	} = $state({
@@ -22,9 +20,8 @@ export class PointState {
 	private pointUpdateChannel: RealtimeChannel | null = null;
 	private pointUserUpdateChannel: RealtimeChannel | null = null;
 
-	constructor(pointId: string, mappingId: string | null = null) {
+	constructor(pointId: string) {
 		this.pointId = pointId;
-		this.state.mappingid = mappingId;
 	}
 
 	async init(): Promise<void> {
@@ -78,7 +75,7 @@ export class PointState {
 	}
 
 	private getPointUserUpdateChannel(): RealtimeChannel {
-		return supabase.channel(`point-user-${this.state.mappingid}-update`).on(
+		return supabase.channel(`point-user-${this.state.point!.id}-update`).on(
 			'postgres_changes',
 			{
 				event: '*',
@@ -88,8 +85,8 @@ export class PointState {
 			(payload) => {
 				if (
 					!(
-						('point_id' in payload.new && payload.new.point_id === this.state.mappingid) ||
-						('point_id' in payload.old && payload.old.point_id === this.state.mappingid)
+						('point_id' in payload.new && payload.new.point_id === this.state.point!.id) ||
+						('point_id' in payload.old && payload.old.point_id === this.state.point!.id)
 					)
 				) {
 					return;
@@ -125,10 +122,10 @@ export class PointState {
 		const { error } = await supabase
 			.from('point_user')
 			.upsert({
-				point_id: this.state.mappingid!,
+				point_id: this.state.point!.id!,
 				user_id: userStore.user!.id
 			})
-			.filter('point_id', 'eq', this.state.mappingid);
+			.filter('point_id', 'eq', this.state.point!.id);
 
 		if (error) throw error;
 	}
@@ -152,7 +149,7 @@ export class PointState {
 		const { data, error } = await supabase
 			.from('point_user')
 			.select('user_id')
-			.filter('point_id', 'eq', this.state.mappingid);
+			.filter('point_id', 'eq', this.state.point!.id);
 		if (error) throw error;
 
 		return data.map((d) => d.user_id);

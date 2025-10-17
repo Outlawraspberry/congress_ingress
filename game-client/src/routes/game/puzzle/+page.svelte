@@ -40,7 +40,7 @@
 					response: resp
 				} = await supabase.functions.invoke('puzzle-solve', {
 					body: {
-						puzzleId: puzzle.state.puzzle.id,
+						puzzle: puzzle.state.puzzle.id,
 						result
 					}
 				});
@@ -63,7 +63,7 @@
 							user: userStore.user?.id,
 							point: puzzle.state.pointId,
 							type: puzzle.state.actionType,
-							puzzleId: puzzle.state.puzzle.id
+							puzzle: puzzle.state.puzzle.id
 						}
 					}
 				);
