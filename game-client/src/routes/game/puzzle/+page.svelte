@@ -91,7 +91,7 @@
 			</div>
 		{/if}
 
-		{#if puzzle.state.puzzle.timeout}
+		{#if puzzle.state.isTimeout}
 			<div role="alert" class="alert alert-error" color="red">
 				<p>
 					<span class="font-bold">The time for your puzzle is up!</span>

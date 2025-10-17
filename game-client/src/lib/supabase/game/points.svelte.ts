@@ -11,7 +11,6 @@ export class PointState {
 		kicked: boolean;
 	} = $state({
 		point: null,
-		mappingid: null,
 		currentUsers: [],
 		kicked: false
 	});
