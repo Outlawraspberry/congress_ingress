@@ -1,4 +1,4 @@
-alter table "public"."actions" add column "strength" smallint not null;
+alter table "public"."actions" add column "strength" smallint not null default 10;
 
 alter table "public"."actions" add constraint "actions_strength_check" CHECK ((strength > 0)) not valid;
 

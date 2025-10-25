@@ -7,6 +7,7 @@ pkgs.mkShell {
     pkgs.supabase-cli
     pkgs.yarn
     pkgs.nodejs_24
+    pkgs.postgres-lsp
   ];
 
   # Runtime libraries needed by your app (GTK, AppIndicator, etc.)

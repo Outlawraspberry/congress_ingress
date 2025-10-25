@@ -1,8 +1,13 @@
 drop policy "Enable insert for authenticated users only" on "public"."actions";
 
-alter table "public"."user_game_data" alter column "last_action" set default now();
+UPDATE public.user_game_data
+SET last_action = now()
+WHERE public.user_game_data.last_action IS NULL;
 
 alter table "public"."user_game_data" alter column "last_action" set not null;
+
+alter table "public"."user_game_data" alter column "last_action" set default now();
+
 
 set check_function_bodies = off;
 

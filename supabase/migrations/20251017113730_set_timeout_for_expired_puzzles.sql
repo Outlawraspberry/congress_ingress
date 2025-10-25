@@ -3,6 +3,10 @@ create table "public"."puzzle_config" (
     "timeout" smallint not null
 );
 
+INSERT INTO
+    public.puzzle_config (type, timeout)
+VALUES
+    ('math'::"puzzle-type", 10);
 
 alter table "public"."puzzle_config" enable row level security;
 
