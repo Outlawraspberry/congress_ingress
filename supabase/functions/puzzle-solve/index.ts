@@ -15,6 +15,14 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  try {
+    return await handle(req);
+  } catch (e) {
+    return error.errorHandler(e);
+  }
+});
+
+async function handle(req: Request): Promise<Response> {
   const json: unknown = await req.json();
 
   if (json == null || typeof json !== "object") {
@@ -25,7 +33,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  if (!("puzzleId" in json && typeof json.puzzleId === "string")) {
+  if (!("puzzle" in json && typeof json.puzzle === "string")) {
     return error.handleError(
       {
         message: "Puzzle not found",
@@ -63,9 +71,9 @@ Deno.serve(async (req) => {
 
   const puzzleResultResult = await supabaseClient
     .from("puzzle_result")
-    .select("*")
+    .select("id (id, expires_at), user_id, created_at, result")
     .filter("user_id", "eq", userResponse.data.user.id)
-    .filter("id", "eq", json.puzzleId);
+    .filter("id", "eq", json.puzzle);
 
   if (
     puzzleResultResult.error != null || puzzleResultResult.data.length === 0
@@ -77,25 +85,10 @@ Deno.serve(async (req) => {
     });
   }
 
-  const createTime = new Date(puzzleResultResult.data[0].created_at).getTime();
+  const expireTime = new Date(puzzleResultResult.data[0].id.expires_at).getTime();
   const now = Date.now();
 
-  if (now - createTime >= 10000) {
-    const timeoutResult = await supabaseClient
-      .from("puzzle")
-      .update({
-        timeout: true,
-      })
-      .filter("id", "eq", json.puzzleId);
-
-    if (timeoutResult.error) {
-      return error.handleError({
-        message: timeoutResult.error.message,
-        httpStatus: 400,
-        errorCode: ErrorCode.PUZZLE_TIMEOOUT,
-      });
-    }
-
+  if (now >= expireTime) {
     return error.handleError({
       message:
         "The time to solve the puzzle is up. Please create a new puzzle.",
@@ -121,15 +114,15 @@ Deno.serve(async (req) => {
     .update({
       solved: true,
     })
-    .filter("id", "eq", json.puzzleId);
+    .filter("id", "eq", json.puzzle);
 
-  if (updateResult.error != null) return error.handleError(updateResult.error);
+  if (updateResult.error != null) throw updateResult.error;
 
   return new Response(null, {
     headers: corsHeaders,
     status: 204,
   });
-});
+}
 
 /* To invoke locally:
 

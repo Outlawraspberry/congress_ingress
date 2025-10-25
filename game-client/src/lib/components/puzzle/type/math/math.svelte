@@ -17,18 +17,17 @@
 
 <div class="join">
 	<input
-		class="join-item"
+		class="join-item input"
 		value={`${task.leftHandle} ${task.operator} ${task.rightHandle} =`}
 		disabled={true}
 	/>
 	<input
-		class="join-item"
+		class="join-item input"
 		type="number"
 		onchange={() => {
 			onResultChanged(result);
 		}}
 		bind:value={result}
 		placeholder="Type your result"
-		autofocus
 	/>
 </div>

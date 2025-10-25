@@ -1,5 +1,4 @@
-import type { PointState } from '$lib/supabase/game/points.svelte';
-import { getRealPoint } from './get-point-my-mapping-id.svelte';
+import { PointState } from '$lib/supabase/game/points.svelte';
 
 export const selectedPoint: {
 	selectedPoint: PointState | null;
@@ -7,12 +6,11 @@ export const selectedPoint: {
 	selectedPoint: null
 });
 
-export async function initSelectedPoint(mappingId: string): Promise<PointState | null> {
+export async function initSelectedPoint(id: string): Promise<PointState | null> {
 	try {
-		selectedPoint.selectedPoint = await getRealPoint(mappingId);
-		if (selectedPoint == null) {
-			return null;
-		}
+		selectedPoint.selectedPoint = new PointState(id);
+		await selectedPoint.selectedPoint.init();
+		await selectedPoint.selectedPoint.initCurrentUsers();
 	} catch (error) {
 		console.error(error);
 	}

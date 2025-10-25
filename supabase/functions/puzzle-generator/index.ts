@@ -38,17 +38,14 @@ Deno.serve(async (req) => {
   }
 
   const puzzle = new MathGenerator().generate();
-
-  const insertPuzzleResult = await supabaseClient
-    .from("puzzle")
-    .insert({
-      type: "math",
-      user_id: data.user.id,
-      task: puzzle.puzzle,
-    })
-    .select();
+  const insertPuzzleResult = await supabaseClient.rpc("insert_puzzle", {
+    a_user_id: data.user.id,
+    a_task: puzzle.puzzle,
+    a_type: 'math'
+  })
 
   if (insertPuzzleResult.error != null) {
+    console.error(insertPuzzleResult.error)
     return createErrorResponse(insertPuzzleResult.error);
   }
 
@@ -57,14 +54,14 @@ Deno.serve(async (req) => {
     .insert({
       user_id: data.user.id,
       result: puzzle.result,
-      id: insertPuzzleResult.data[0].id ?? "",
+      id: insertPuzzleResult.data.id ?? "",
     });
 
   if (insertPuzzleResultResult.error != null) {
     return createErrorResponse(insertPuzzleResultResult.error);
   }
 
-  return new Response(JSON.stringify(insertPuzzleResult.data[0]), {
+  return new Response(JSON.stringify(insertPuzzleResult.data), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 });

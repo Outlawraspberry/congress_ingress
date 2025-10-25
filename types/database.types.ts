@@ -15,6 +15,7 @@ export type Database = {
           created_by: string
           point: string
           puzzle: string
+          strength: number
           type: Database["public"]["Enums"]["task_type"]
         }
         Insert: {
@@ -22,6 +23,7 @@ export type Database = {
           created_by: string
           point: string
           puzzle: string
+          strength: number
           type: Database["public"]["Enums"]["task_type"]
         }
         Update: {
@@ -29,6 +31,7 @@ export type Database = {
           created_by?: string
           point?: string
           puzzle?: string
+          strength?: number
           type?: Database["public"]["Enums"]["task_type"]
         }
         Relationships: [
@@ -68,16 +71,37 @@ export type Database = {
       }
       game: {
         Row: {
+          group_attack_multiplier_per_user: number
+          group_repair_multiplier_per_user: number
           id: number
+          point_user_kick_timeout_seconds: number
           state: Database["public"]["Enums"]["game-state"]
+          user_base_damage: number
+          user_base_repair: number
+          user_last_action_timeout_in_seconds: number
+          user_max_damage: number
         }
         Insert: {
+          group_attack_multiplier_per_user?: number
+          group_repair_multiplier_per_user?: number
           id?: number
+          point_user_kick_timeout_seconds?: number
           state?: Database["public"]["Enums"]["game-state"]
+          user_base_damage?: number
+          user_base_repair?: number
+          user_last_action_timeout_in_seconds?: number
+          user_max_damage?: number
         }
         Update: {
+          group_attack_multiplier_per_user?: number
+          group_repair_multiplier_per_user?: number
           id?: number
+          point_user_kick_timeout_seconds?: number
           state?: Database["public"]["Enums"]["game-state"]
+          user_base_damage?: number
+          user_base_repair?: number
+          user_last_action_timeout_in_seconds?: number
+          user_max_damage?: number
         }
         Relationships: []
       }
@@ -112,35 +136,6 @@ export type Database = {
             columns: ["acquired_by"]
             isOneToOne: false
             referencedRelation: "faction"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      point_mapping: {
-        Row: {
-          created_at: string
-          id: string
-          is_active: boolean
-          point_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          point_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          point_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "point_mapping_point_id_fkey"
-            columns: ["point_id"]
-            isOneToOne: false
-            referencedRelation: "point"
             referencedColumns: ["id"]
           },
         ]
@@ -181,31 +176,64 @@ export type Database = {
           },
         ]
       }
+      point_user: {
+        Row: {
+          created_at: string
+          point_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          point_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          point_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "point_user_point_id_fkey"
+            columns: ["point_id"]
+            isOneToOne: false
+            referencedRelation: "point"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "point_user_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       puzzle: {
         Row: {
           created_at: string
+          expires_at: string
           id: string
           solved: boolean
           task: Json
-          timeout: boolean
           type: Database["public"]["Enums"]["puzzle-type"]
           user_id: string
         }
         Insert: {
           created_at?: string
+          expires_at?: string
           id?: string
           solved?: boolean
           task: Json
-          timeout?: boolean
           type: Database["public"]["Enums"]["puzzle-type"]
           user_id: string
         }
         Update: {
           created_at?: string
+          expires_at?: string
           id?: string
           solved?: boolean
           task?: Json
-          timeout?: boolean
           type?: Database["public"]["Enums"]["puzzle-type"]
           user_id?: string
         }
@@ -218,6 +246,21 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      puzzle_config: {
+        Row: {
+          timeout: number
+          type: Database["public"]["Enums"]["puzzle-type"]
+        }
+        Insert: {
+          timeout: number
+          type: Database["public"]["Enums"]["puzzle-type"]
+        }
+        Update: {
+          timeout?: number
+          type?: Database["public"]["Enums"]["puzzle-type"]
+        }
+        Relationships: []
       }
       puzzle_result: {
         Row: {
@@ -273,17 +316,17 @@ export type Database = {
       user_game_data: {
         Row: {
           faction_id: string
-          last_action: string | null
+          last_action: string
           user_id: string
         }
         Insert: {
           faction_id: string
-          last_action?: string | null
+          last_action?: string
           user_id?: string
         }
         Update: {
           faction_id?: string
-          last_action?: string | null
+          last_action?: string
           user_id?: string
         }
         Relationships: [
@@ -331,53 +374,69 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      check_if_user_already_added_a_task_for_current_tick: {
-        Args: { a_user_id: string }
+      can_user_perform_action_on_point: {
+        Args: { a_user_id: string; a_poind_id: string }
         Returns: boolean
       }
       create_point_archive_snapshot: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
-      does_point_exists: {
-        Args: { a_point_id: string }
-        Returns: boolean
-      }
       does_username_exists: {
         Args: { a_username: string }
         Returns: boolean
       }
-      get_all_points_for_current_tick: {
-        Args: Record<PropertyKey, never>
-        Returns: Record<string, unknown>[]
-      }
-      get_all_users_for_current_tick: {
-        Args: Record<PropertyKey, never>
-        Returns: Record<string, unknown>[]
-      }
-      get_current_tick: {
-        Args: Record<PropertyKey, never>
+      get_attack_damage_for_point: {
+        Args: { a_mapping_id: string }
         Returns: number
       }
-      get_point_by_mapping: {
-        Args: { a_point_id: string }
-        Returns: Record<string, unknown>
+      get_attack_damage_for_point_based_on_faction: {
+        Args: { a_user_id: string }
+        Returns: number
       }
-      select_point_at_current_tick: {
-        Args: { p_point_id: string }
-        Returns: Record<string, unknown>
+      get_count_of_active_users_at_point: {
+        Args: { a_mapping_id: string }
+        Returns: number
       }
-      select_point_states_of_current_tick: {
+      get_count_of_active_users_at_point_and_faction: {
+        Args: { a_point_id: string; a_faction_id: string }
+        Returns: number
+      }
+      get_count_of_active_users_at_point_by_user_id: {
+        Args: { a_user_id: string }
+        Returns: number
+      }
+      get_timeout_for_puzzle: {
+        Args: { a_type: Database["public"]["Enums"]["puzzle-type"] }
+        Returns: number
+      }
+      insert_puzzle: {
+        Args: {
+          a_user_id: string
+          a_task: Json
+          a_type: Database["public"]["Enums"]["puzzle-type"]
+        }
+        Returns: {
+          created_at: string
+          expires_at: string
+          id: string
+          solved: boolean
+          task: Json
+          type: Database["public"]["Enums"]["puzzle-type"]
+          user_id: string
+        }
+      }
+      is_puzzle_solved: {
+        Args: { a_puzzle_id: string }
+        Returns: boolean
+      }
+      kick_users_from_point_user: {
         Args: Record<PropertyKey, never>
-        Returns: Record<string, unknown>[]
+        Returns: undefined
       }
-      select_point_states_of_tick: {
-        Args: { a_tick: number }
-        Returns: Record<string, unknown>[]
-      }
-      select_task_of_current_tick: {
-        Args: Record<PropertyKey, never>
-        Returns: Record<string, unknown>[]
+      perform_attack_on_point: {
+        Args: { point_id: string }
+        Returns: undefined
       }
     }
     Enums: {

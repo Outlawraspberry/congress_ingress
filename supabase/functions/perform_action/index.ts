@@ -9,16 +9,21 @@ import { Action, isActionValid } from "./action/action.ts";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../types/database.types.ts";
 import { error } from "@shared";
-import { getPoint } from "./point/get-points.ts";
-import { UserGameData } from "../../../types/alias.ts";
-import { userActionCooldownInSeconds } from "../../../types/game-config.ts";
-import { ErrorCode } from "../../../types/error-code.ts";
+import { ErrorCode, ErrorResult } from "../../../types/error-code.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  try {
+    return await handle(req);
+  } catch (e) {
+    return error.errorHandler(e);
+  }
+});
+
+async function handle(req: Request): Promise<Response> {
   const authHeader = req.headers.get("Authorization") ?? "";
 
   let supabaseClient: SupabaseClient<Database> = createClient<Database>(
@@ -38,99 +43,108 @@ Deno.serve(async (req) => {
   try {
     isActionValid(action);
   } catch (e) {
-    return new Response(JSON.stringify(e), {
+    console.error(e);
+    return new Response(JSON.stringify((e as Error).message), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
-  const [userGameDataResponse, point] = await Promise.all([
-    supabaseClient.from("user_game_data").select("*"),
-    getPoint(supabaseClient, action.point),
-  ]);
-
-  if (userGameDataResponse.error != null) {
-    return error.handleError({
-      message: userGameDataResponse.error.message,
-      httpStatus: 403,
-      errorCode: ErrorCode.AUTH_ERROR,
-    });
-  }
-
-  const userGameData: UserGameData = userGameDataResponse.data[0];
-  const now = new Date();
-
-  if (userGameData.last_action != null) {
-    const lastAction = Date.parse(userGameData.last_action);
-
-    if (
-      Math.abs(lastAction - now.getTime()) <
-        userActionCooldownInSeconds * 1000
-    ) {
-      return error.handleError(
-        {
-          message:
-            `You are not allowed to perform the action, because you already have create an action in the last ${userActionCooldownInSeconds} seconds `,
-          errorCode: ErrorCode.ACTION_COOLDOWN,
-          httpStatus: 400,
-        },
-      );
-    }
-  }
-
-  point.simulateTasks(action, userGameData);
+  const userId = await getUserId(supabaseClient);
 
   supabaseClient = createClient<Database>(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
   );
-  const [updatePoint, insertPointArchive, userGameDataUpdateResult] =
-    await Promise.all([
-      supabaseClient
-        .from("point")
-        .update({
-          acquired_by: point.acquiredBy,
-          health: point.health,
-        })
-        .filter("id", "eq", point.pointId),
-      supabaseClient.from("actions").insert({
-        created_by: userGameData.user_id,
-        point: point.pointId,
-        type: action.type,
-        puzzle: action.puzzleId,
-      }),
-      supabaseClient
-        .from("user_game_data")
-        .update({
-          last_action: now.toISOString(),
-        })
-        .filter("user_id", "eq", userGameData.user_id),
-    ]);
 
-  if (updatePoint.error) {
-    return error.handleError({
-      message: updatePoint.error.message,
+  // Will throw an error, so not handled here.
+  const [_canUser, strengthAtPoint] = await Promise.all([
+    canUserPerformAction(
+      supabaseClient,
+      userId,
+      action.point,
+    ),
+    getStrengthForCurrentUser(supabaseClient, userId),
+  ]);
+
+  const response = await supabaseClient.from("actions").insert({
+    created_by: userId,
+    point: action.point,
+    type: action.type,
+    puzzle: action.puzzle,
+    strength: strengthAtPoint,
+  });
+
+  if (response.error) {
+    throw ({
+      message: response.error.message,
       httpStatus: 500,
       errorCode: ErrorCode.INTERNAL_ERROR,
-    });
-  }
-  if (insertPointArchive.error) {
-    return error.handleError({
-      message: insertPointArchive.error.message,
-      httpStatus: 500,
-      errorCode: ErrorCode.INTERNAL_ERROR,
-    });
-  }
-  if (userGameDataUpdateResult.error) {
-    return error.handleError({
-      message: userGameDataUpdateResult.error.message,
-      httpStatus: 500,
-      errorCode: ErrorCode.INTERNAL_ERROR,
-    });
+    }) as ErrorResult;
   }
 
   return new Response(undefined, { status: 204, headers: { ...corsHeaders } });
-});
+}
+
+async function getUserId(supabase: SupabaseClient<Database>): Promise<string> {
+  const userData = await supabase.auth.getUser();
+
+  if (userData.error) {
+    throw {
+      errorCode: ErrorCode.AUTH_ERROR,
+      httpStatus: 401,
+      message: "Not authorized",
+    } as ErrorResult;
+  }
+
+  return userData.data.user.id;
+}
+
+async function canUserPerformAction(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  pointId: string,
+): Promise<boolean> {
+  const canUserPerform = await supabase.rpc(
+    "can_user_perform_action_on_point",
+    {
+      a_user_id: userId,
+      a_poind_id: pointId,
+    },
+  );
+
+  if (canUserPerform.error) {
+    throw {
+      errorCode: ErrorCode.AUTH_ERROR,
+      httpStatus: 401,
+      message: canUserPerform.error.message,
+    } as ErrorResult;
+  }
+
+  return true;
+}
+
+async function getStrengthForCurrentUser(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+): Promise<number> {
+  const strength = await supabase.rpc(
+    "get_attack_damage_for_point_based_on_faction",
+    {
+      a_user_id: userId,
+    },
+  );
+
+  if (strength.error) {
+    throw {
+      errorCode: ErrorCode.AUTH_ERROR,
+      httpStatus: 401,
+      message: strength.error.message,
+    } as ErrorResult;
+  }
+
+  return strength.data;
+}
 
 /* To invoke locally:
 

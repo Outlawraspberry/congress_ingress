@@ -5,7 +5,7 @@ export interface Action {
   user: string;
   point: string;
   type: Database["public"]["Enums"]["task_type"];
-  puzzleId: string;
+  puzzle: string;
 }
 
 const actions = ["attack", "attack_and_claim", "repair", "claim"];
@@ -47,21 +47,23 @@ export function isActionValid(input: unknown): input is Action {
     )
   ) {
     throw new Error(
-      `Object doesn't have the property type or it is not one of ${actions.join(
-        ", ",
-      )}`,
+      `Object doesn't have the property type or it is not one of ${
+        actions.join(
+          ", ",
+        )
+      }`,
     );
   }
 
   if (
     !(
-      "puzzleId" in input &&
-      typeof input.puzzleId === "string" &&
-      v4.validate(input.puzzleId)
+      "puzzle" in input &&
+      typeof input.puzzle === "string" &&
+      v4.validate(input.puzzle)
     )
   ) {
     throw new Error(
-      'Object doesn\'t have the property "point" or it is not a valid uuid4',
+      'Object doesn\'t have the property "puzzle" or it is not a valid uuid4',
     );
   }
 

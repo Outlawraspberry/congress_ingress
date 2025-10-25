@@ -3,12 +3,12 @@ import type { Puzzle, TaskType } from '../../types/alias';
 export class PuzzleState {
 	private timerId: number | null = null;
 	private timeout: number;
-	private isTimeout: boolean;
 	state: {
 		puzzle: Puzzle['Row'];
 		secondsUntilTimeout: number;
 		actionType: TaskType;
 		pointId: string;
+		isTimeout: boolean;
 	};
 
 	constructor({
@@ -21,18 +21,21 @@ export class PuzzleState {
 		pointId: string;
 	}) {
 		const now = Date.now();
-		this.timeout = Date.parse(puzzle.created_at) + 10000;
+		this.timeout = Date.parse(puzzle.expires_at);
+
+		console.log(now, this.timeout, this.timeout - now);
 
 		this.state = $state({
 			puzzle: puzzle,
 			secondsUntilTimeout: this.timeout - now,
 			actionType,
-			pointId
+			pointId,
+			isTimeout: this.timeout - now <= 0
 		});
 
-		this.isTimeout = this.state.secondsUntilTimeout <= 0;
+		this.state.isTimeout = this.state.secondsUntilTimeout <= 0;
 
-		if (!this.isTimeout) {
+		if (!this.state.isTimeout) {
 			// setInterval is actually a number, not a NodeJs.Timeout
 			this.timerId = setInterval(this.interval, 100) as unknown as number;
 		}
@@ -46,8 +49,7 @@ export class PuzzleState {
 			this.state.secondsUntilTimeout = timeUntilTimeout;
 		} else {
 			this.state.secondsUntilTimeout = 0;
-			this.isTimeout = true;
-			this.state.puzzle.timeout = true;
+			this.state.isTimeout = true;
 
 			if (this.timerId != null) {
 				clearInterval(this.timerId);

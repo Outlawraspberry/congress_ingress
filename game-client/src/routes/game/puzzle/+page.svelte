@@ -5,17 +5,17 @@
 	import { supabase, userStore } from '$lib/supabase/db.svelte';
 	import { onMount } from 'svelte';
 	import { ErrorCode, type ErrorResult } from '../../../../../types/error-code';
+	import { selectedPoint } from '$lib/point/selected-point.svelte';
 
 	let result = $state('');
 	let incorrectResult: boolean = $state(false);
 
 	const puzzle = selectedPuzzle.selectedPuzzle!;
-	const pointUrl = `/game/point/${puzzle.state.pointId}`;
+	const pointUrl = `/game/point`;
 
 	onMount(() => {
 		const searchParams = new URLSearchParams(window.location.search);
 		searchParams.delete('puzzle');
-
 		goto(`?${searchParams.toString()}`, {
 			replaceState: true,
 			keepFocus: true,
@@ -40,7 +40,7 @@
 					response: resp
 				} = await supabase.functions.invoke('puzzle-solve', {
 					body: {
-						puzzleId: puzzle.state.puzzle.id,
+						puzzle: puzzle.state.puzzle.id,
 						result
 					}
 				});
@@ -61,9 +61,9 @@
 					{
 						body: {
 							user: userStore.user?.id,
-							point: puzzle.state.pointId,
+							point: selectedPoint.selectedPoint!.state.point!.id,
 							type: puzzle.state.actionType,
-							puzzleId: puzzle.state.puzzle.id
+							puzzle: puzzle.state.puzzle.id
 						}
 					}
 				);
@@ -71,7 +71,6 @@
 				if (performActionError != null) {
 					console.log(d, resp);
 				} else {
-					console.log(pointUrl);
 					goto(pointUrl);
 				}
 			} catch (e) {
@@ -92,7 +91,7 @@
 			</div>
 		{/if}
 
-		{#if puzzle.state.puzzle.timeout}
+		{#if puzzle.state.isTimeout}
 			<div role="alert" class="alert alert-error" color="red">
 				<p>
 					<span class="font-bold">The time for your puzzle is up!</span>

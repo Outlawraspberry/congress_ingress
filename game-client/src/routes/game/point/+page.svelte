@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
-	import Breadcrump from '$lib/components/breadcrump/breadcrump.svelte';
 	import PointStats from '$lib/components/point-stats.svelte';
 	import QrCodeScanner from '$lib/components/qr-code-scanner.svelte';
 	import TaskOverview from '$lib/components/task/task-overview.svelte';
@@ -79,10 +77,14 @@
 						</span>
 						seconds, you can do your next action
 					</p>
-				{:else}
+				{:else if !selectedPoint.selectedPoint.state.kicked}
 					<section class="container flex justify-center">
 						<TaskOverview chosenPoint={selectedPoint.selectedPoint}></TaskOverview>
 					</section>
+				{:else}
+					<div role="alert" class="alert alert-info">
+						You were kicked because you were at this point for too long without doing nothing!
+					</div>
 				{/if}
 			</section>
 
