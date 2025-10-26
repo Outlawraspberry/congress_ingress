@@ -177,11 +177,10 @@
 
 	{#if gameConfig}
 		<StrengthCalculation
+			class="overflow-scroll"
 			user_max_damage={gameConfig.user_max_damage}
 			user_base_damage={gameConfig.user_base_damage}
 			group_attack_multiplier_per_user={gameConfig.group_attack_multiplier_per_user}
-			user_base_repair={gameConfig.user_base_repair}
-			group_repair_multiplier_per_user={gameConfig.group_repair_multiplier_per_user}
 		/>
 	{/if}
 </section>

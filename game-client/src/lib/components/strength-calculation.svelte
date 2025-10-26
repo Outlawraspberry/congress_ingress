@@ -1,10 +1,16 @@
 <script lang="ts">
-	// Svelte 5: use `export let` for props
-	export let user_max_damage: number = 200;
-	export let user_base_damage: number = 10;
-	export let group_attack_multiplier_per_user: number = 1;
+	let {
+		user_max_damage = 200,
+		user_base_damage = 10,
+		group_attack_multiplier_per_user = 1,
+		...rest
+	}: {
+		user_max_damage: number;
+		user_base_damage: number;
+		group_attack_multiplier_per_user: number;
+	} = $props();
 
-	let number_of_users_at_point = 1;
+	let number_of_users_at_point = $state(1);
 
 	function calculateStrength({
 		groupModifier,
@@ -23,29 +29,33 @@
 		);
 	}
 
-	$: attack_strength = calculateStrength({
-		groupModifier: group_attack_multiplier_per_user,
-		numberOfUsersAtPoint: number_of_users_at_point,
-		userBaseDamage: user_base_damage,
-		userMaxDamage: user_max_damage
-	});
+	let attack_strength = $derived(
+		calculateStrength({
+			groupModifier: group_attack_multiplier_per_user,
+			numberOfUsersAtPoint: number_of_users_at_point,
+			userBaseDamage: user_base_damage,
+			userMaxDamage: user_max_damage
+		})
+	);
 
 	// Calculate attack strength for user counts 1-10
-	$: attackStrengths = Array.from({ length: 10 }, (_, i) => {
-		const users = i + 1;
-		return {
-			users,
-			strength: calculateStrength({
-				groupModifier: group_attack_multiplier_per_user,
-				numberOfUsersAtPoint: users,
-				userBaseDamage: user_base_damage,
-				userMaxDamage: user_max_damage
-			})
-		};
-	});
+	let attackStrengths = $derived(
+		Array.from({ length: 15 }, (_, i) => {
+			const users = i + 1;
+			return {
+				users,
+				strength: calculateStrength({
+					groupModifier: group_attack_multiplier_per_user,
+					numberOfUsersAtPoint: users,
+					userBaseDamage: user_base_damage,
+					userMaxDamage: user_max_damage
+				})
+			};
+		})
+	);
 </script>
 
-<div class="">
+<section {...rest}>
 	<h2>Strength Calculation Simulator</h2>
 	<form class="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
 		<div class="">
@@ -95,4 +105,4 @@
 			{/each}
 		</div>
 	</div>
-</div>
+</section>
