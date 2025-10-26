@@ -6,11 +6,29 @@
 
 	let number_of_users_at_point = 1;
 
-	$: attack_strength = Math.min(
-		user_max_damage,
-		(user_base_damage + (number_of_users_at_point - 1) * group_attack_multiplier_per_user) *
-			number_of_users_at_point
-	);
+	function calculateStrength({
+		groupModifier,
+		numberOfUsersAtPoint,
+		userBaseDamage,
+		userMaxDamage
+	}: {
+		userMaxDamage: number;
+		userBaseDamage: number;
+		numberOfUsersAtPoint: number;
+		groupModifier: number;
+	}): number {
+		return Math.min(
+			userMaxDamage,
+			(userBaseDamage + (numberOfUsersAtPoint - 1) * groupModifier) * numberOfUsersAtPoint
+		);
+	}
+
+	$: attack_strength = calculateStrength({
+		groupModifier: group_attack_multiplier_per_user,
+		numberOfUsersAtPoint: number_of_users_at_point,
+		userBaseDamage: user_base_damage,
+		userMaxDamage: user_max_damage
+	});
 </script>
 
 <div class="">
