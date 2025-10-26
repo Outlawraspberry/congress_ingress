@@ -9,8 +9,10 @@
 	let activeUsersAtPoint = $derived(point.state.currentUsers.length);
 
 	let currentProgressColor = $derived.by(() => {
-		const health = point.state.point!.health;
-		const maxHealth = point.state.point!.max_health;
+		if (point.state.point == null) return 'progress-error';
+
+		const health = point.state.point.health;
+		const maxHealth = point.state.point.max_health;
 
 		if (health >= maxHealth * 0.9) {
 			return 'progress-success';
