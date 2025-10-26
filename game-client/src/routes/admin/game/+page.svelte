@@ -6,6 +6,7 @@
 	import { onMount } from 'svelte';
 	import { type Game } from '../../../types/alias';
 	import Fieldset from '$lib/components/form/fieldset.svelte';
+	import StrengthCalculation from '$lib/components/strength-calculation.svelte';
 
 	let gameConfig: Game | null = null;
 	let loading = true;
@@ -83,7 +84,7 @@
 					<legend class="fieldset-legend">Action Strength</legend>
 
 					<label for="form_config-group-attack-multiplier" class="label">
-						Group Attack Multiplier Per User
+						Group Multiplier Per User
 					</label>
 					<input
 						id="form-config-group-attack-multiplier"
@@ -93,6 +94,8 @@
 						min="1"
 					/>
 
+					<!--
+					Not used at the moment!
 					<label class="label" for="form-config-group-repair-multiplier">
 						Group Repair Multiplier Per User
 					</label>
@@ -101,10 +104,11 @@
 						class="input input-bordered"
 						type="number"
 						bind:value={gameConfig.group_repair_multiplier_per_user}
+						disabled
 						min="1"
-					/>
+					/> -->
 
-					<label class="label" for="form-config-user-base-damage"> User Base Damage </label>
+					<label class="label" for="form-config-user-base-damage"> User Base Strength </label>
 					<input
 						id="form-config-user-base-damage"
 						class="input input-bordered"
@@ -112,6 +116,9 @@
 						bind:value={gameConfig.user_base_damage}
 						min="1"
 					/>
+
+					<!--
+					Not used at the moment!
 
 					<label class="label" for="form-config--user-base-repair"> User Base Repair </label>
 					<input
@@ -121,8 +128,9 @@
 						bind:value={gameConfig.user_base_repair}
 						min="1"
 					/>
+					-->
 
-					<label class="label" for="form-config-user-max-damage"> User Max Damage </label>
+					<label class="label" for="form-config-user-max-damage"> User Max Strength </label>
 					<input
 						id="form-config-user-max-damage"
 						class="input input-bordered"
@@ -166,4 +174,14 @@
 			</form>
 		{/if}
 	</div>
+
+	{#if gameConfig}
+		<StrengthCalculation
+			user_max_damage={gameConfig.user_max_damage}
+			user_base_damage={gameConfig.user_base_damage}
+			group_attack_multiplier_per_user={gameConfig.group_attack_multiplier_per_user}
+			user_base_repair={gameConfig.user_base_repair}
+			group_repair_multiplier_per_user={gameConfig.group_repair_multiplier_per_user}
+		/>
+	{/if}
 </section>
