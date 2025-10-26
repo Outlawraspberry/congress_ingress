@@ -13,7 +13,7 @@
 	);
 </script>
 
-<div class="prose max-w-none">
+<div class="">
 	<h2>Strength Calculation Simulator</h2>
 	<form class="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
 		<div class="">
@@ -30,13 +30,17 @@
 
 	<h3>Action Strength</h3>
 
-	<pre>action_strength = min(
+	<div class="mockup-code mb-4 w-full">
+		<pre>action_strength = min(
     user_max_damage,
     user_base_damage + (number_of_users_at_point - 1) × group_attack_multiplier_per_user
-) × number_of_users_at_point</pre>
+  ) × number_of_users_at_point</pre>
+	</div>
 
-	<pre><b>{attack_strength}</b> = min(
+	<div class="mockup-code w-full">
+		<pre><b>{attack_strength}</b> = min(
     {user_max_damage},
     {user_base_damage} + ({number_of_users_at_point} - 1) × {group_attack_multiplier_per_user}
-) × {number_of_users_at_point}</pre>
+  ) × {number_of_users_at_point}</pre>
+	</div>
 </div>
