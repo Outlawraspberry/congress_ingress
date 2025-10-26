@@ -7,19 +7,10 @@ export class PuzzleState {
 		puzzle: Puzzle['Row'];
 		secondsUntilTimeout: number;
 		actionType: TaskType;
-		pointId: string;
 		isTimeout: boolean;
 	};
 
-	constructor({
-		pointId,
-		actionType,
-		puzzle
-	}: {
-		puzzle: Puzzle['Row'];
-		actionType: TaskType;
-		pointId: string;
-	}) {
+	constructor({ actionType, puzzle }: { puzzle: Puzzle['Row']; actionType: TaskType }) {
 		const now = Date.now();
 		this.timeout = Date.parse(puzzle.expires_at);
 
@@ -29,7 +20,6 @@ export class PuzzleState {
 			puzzle: puzzle,
 			secondsUntilTimeout: this.timeout - now,
 			actionType,
-			pointId,
 			isTimeout: this.timeout - now <= 0
 		});
 

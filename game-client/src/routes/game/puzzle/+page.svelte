@@ -48,7 +48,7 @@
 				if (puzzleSolveError != null) {
 					const errorResult: ErrorResult = await resp?.json();
 					if (errorResult.errorCode == ErrorCode.PUZZLE_TIMEOOUT) {
-						puzzle.state.puzzle.timeout = true;
+						puzzle.state.isTimeout = true;
 					} else if (errorResult.errorCode == ErrorCode.PUZZLE_INVALID_RESULT) {
 						incorrectResult = true;
 					}
@@ -130,11 +130,11 @@
 	<Math puzzle={puzzle.state.puzzle} {onResultChanged}></Math>
 
 	<section class="mt-2 mb-2">
-		{#if !puzzle.state.puzzle.solved && !puzzle.state.puzzle.timeout}
+		{#if !puzzle.state.puzzle.solved && !puzzle.state.isTimeout}
 			<button class="btn btn-primary" type="submit">Submit result</button>
 		{/if}
 
-		{#if puzzle.state.puzzle.timeout || puzzle.state.puzzle.solved}
+		{#if puzzle.state.isTimeout || puzzle.state.puzzle.solved}
 			<a class="btn btn-secondary" href={pointUrl} data-sveltekit-preload-data="off"
 				>Back to Point</a
 			>

@@ -2,7 +2,6 @@ import type { Database } from "./database.types.ts";
 
 export type Faction = Database["public"]["Tables"]["faction"]["Row"];
 export type Point = Database["public"]["Tables"]["point"]["Row"];
-export type PointMapping = Database["public"]["Tables"]["point_mapping"]["Row"];
 export type User = Database["public"]["Tables"]["user"]["Row"];
 export type UserGameData =
   Database["public"]["Tables"]["user_game_data"]["Row"];

@@ -1,5 +1,5 @@
 import type { RealtimeChannel } from '@supabase/supabase-js';
-import { type Role, userActionCooldownInSeconds } from '../../../types/alias';
+import { type Role } from '../../../types/alias';
 import { supabase, userStore } from '../db.svelte';
 
 export const user: {
@@ -18,18 +18,20 @@ let realtimeChannel: RealtimeChannel | undefined = undefined;
 export async function init(): Promise<void> {
 	if ((user.user != null && realtimeChannel != null) || userStore.user == null) return;
 
-	const [userData, userRole, userGameData] = await Promise.all([
+	const [userData, userRole, userGameData, userActionCooldownInSeconds] = await Promise.all([
 		supabase.from('user').select('name').filter('id', 'eq', userStore.user.id),
 		supabase.from('user_role').select('role').filter('user_id', 'eq', userStore.user.id),
 		supabase
 			.from('user_game_data')
 			.select('faction_id,last_action')
-			.filter('user_id', 'eq', userStore.user.id)
+			.filter('user_id', 'eq', userStore.user.id),
+		supabase.from('game').select('user_last_action_timeout_in_seconds').filter('id', 'eq', 1)
 	]);
 
 	if (userData.error) throw userData.error;
 	if (userGameData.error) throw userGameData.error;
 	if (userRole.error) throw userRole.error;
+	if (userActionCooldownInSeconds.error) throw userActionCooldownInSeconds.error;
 
 	let lastAction: Date | null = null;
 	let canUseAction = true;
@@ -39,7 +41,8 @@ export async function init(): Promise<void> {
 		lastAction.setTime(Date.parse(userGameData.data[0].last_action));
 
 		const diff = Math.abs(lastAction.getTime() - Date.now());
-		canUseAction = diff >= userActionCooldownInSeconds * 1000;
+		canUseAction =
+			diff >= userActionCooldownInSeconds.data[0].user_last_action_timeout_in_seconds * 1000;
 
 		if (!canUseAction) {
 			setCanUseActionInSeconds(diff);
@@ -73,7 +76,9 @@ export async function init(): Promise<void> {
 					user.user.lastAction = date;
 					user.user.canUseAction = false;
 
-					setCanUseActionInSeconds(userActionCooldownInSeconds * 1000);
+					setCanUseActionInSeconds(
+						userActionCooldownInSeconds.data[0].user_last_action_timeout_in_seconds * 1000
+					);
 				}
 			}
 		)
