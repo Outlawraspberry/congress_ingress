@@ -1,32 +1,19 @@
 <script lang="ts">
+	import { type Game } from '../../../types/alias.js';
 	import Breadcrump from '$lib/components/breadcrump/breadcrump.svelte';
-	import Card from '$lib/components/card.svelte';
-	import RunTick from '$lib/components/run-tick.svelte';
-	import { supabase } from '$lib/supabase/db.svelte';
-	import { onMount } from 'svelte';
-	import { type Game } from '../../../types/alias';
 	import Fieldset from '$lib/components/form/fieldset.svelte';
-	import StrengthCalculation from '$lib/components/strength-calculation.svelte';
+	import RunTick from '$lib/components/run-tick.svelte';
+	import StrengthCalculation from '$lib/components/strength-calculation/strength-calculation.svelte';
+	import { supabase } from '$lib/supabase/db.svelte';
 
-	let gameConfig: Game | null = null;
-	let loading = true;
-	let error = '';
-	let success = '';
-
-	async function fetchGameConfig() {
-		loading = true;
-		const { data, error: fetchError } = await supabase
-			.from('game')
-			.select('*')
-			.eq('id', 1)
-			.single();
-		if (fetchError) {
-			error = fetchError.message;
-		} else {
-			gameConfig = data;
-		}
-		loading = false;
-	}
+	let {
+		data
+	}: {
+		data: { gameConfig: Game };
+	} = $props();
+	let gameConfig = data.gameConfig;
+	let error = $state('');
+	let success = $state('');
 
 	async function saveConfig(): Promise<void> {
 		if (gameConfig == null) return;
@@ -51,8 +38,6 @@
 			success = 'Configuration updated!';
 		}
 	}
-
-	onMount(fetchGameConfig);
 </script>
 
 <h1 class="text-3xl">Game Configuration</h1>
@@ -60,9 +45,7 @@
 
 <section class="my-5 flex flex-wrap justify-center gap-5">
 	<div class="">
-		{#if loading}
-			<div class="text-center">Loading...</div>
-		{:else if error}
+		{#if error}
 			<div class="alert alert-error">{error}</div>
 		{:else if gameConfig}
 			<form on:submit|preventDefault={saveConfig} class="flex w-xs flex-col">

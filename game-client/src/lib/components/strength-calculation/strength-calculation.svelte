@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ClassValue } from 'svelte/elements';
 	import { calculateStrength } from './calculations';
 	import StrengthChart from './strength-chart.svelte';
 
@@ -6,11 +7,13 @@
 		user_max_damage = 200,
 		user_base_damage = 10,
 		group_attack_multiplier_per_user = 1,
+		class: clazz,
 		...rest
 	}: {
 		user_max_damage: number;
 		user_base_damage: number;
 		group_attack_multiplier_per_user: number;
+		class: ClassValue;
 	} = $props();
 
 	let number_of_users_at_point = $state(1);
@@ -25,7 +28,7 @@
 	);
 </script>
 
-<section {...rest}>
+<section class={clazz} {...rest}>
 	<h2>Strength Calculation Simulator</h2>
 	<form class="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
 		<div class="">
