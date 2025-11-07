@@ -73,6 +73,7 @@ async function handle(req: Request): Promise<Response> {
     type: action.type,
     puzzle: action.puzzle,
     strength: strengthAtPoint,
+    rewarded_experience: 10
   });
 
   if (response.error) {

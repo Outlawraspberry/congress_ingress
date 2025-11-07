@@ -15,6 +15,7 @@ export type Database = {
           created_by: string
           point: string
           puzzle: string
+          rewarded_experience: number
           strength: number
           type: Database["public"]["Enums"]["task_type"]
         }
@@ -23,7 +24,8 @@ export type Database = {
           created_by: string
           point: string
           puzzle: string
-          strength: number
+          rewarded_experience?: number
+          strength?: number
           type: Database["public"]["Enums"]["task_type"]
         }
         Update: {
@@ -31,6 +33,7 @@ export type Database = {
           created_by?: string
           point?: string
           puzzle?: string
+          rewarded_experience?: number
           strength?: number
           type?: Database["public"]["Enums"]["task_type"]
         }
@@ -315,16 +318,19 @@ export type Database = {
       }
       user_game_data: {
         Row: {
+          experience: number
           faction_id: string
           last_action: string
           user_id: string
         }
         Insert: {
+          experience?: number
           faction_id: string
           last_action?: string
           user_id?: string
         }
         Update: {
+          experience?: number
           faction_id?: string
           last_action?: string
           user_id?: string
