@@ -77,6 +77,7 @@ export type Database = {
           group_attack_multiplier_per_user: number
           group_repair_multiplier_per_user: number
           id: number
+          max_ap: number
           point_user_kick_timeout_seconds: number
           state: Database["public"]["Enums"]["game-state"]
           user_base_damage: number
@@ -88,6 +89,7 @@ export type Database = {
           group_attack_multiplier_per_user?: number
           group_repair_multiplier_per_user?: number
           id?: number
+          max_ap?: number
           point_user_kick_timeout_seconds?: number
           state?: Database["public"]["Enums"]["game-state"]
           user_base_damage?: number
@@ -99,6 +101,7 @@ export type Database = {
           group_attack_multiplier_per_user?: number
           group_repair_multiplier_per_user?: number
           id?: number
+          max_ap?: number
           point_user_kick_timeout_seconds?: number
           state?: Database["public"]["Enums"]["game-state"]
           user_base_damage?: number
@@ -255,14 +258,17 @@ export type Database = {
       }
       puzzle_config: {
         Row: {
+          ap_gain: number
           timeout: number
           type: Database["public"]["Enums"]["puzzle-type"]
         }
         Insert: {
+          ap_gain?: number
           timeout: number
           type: Database["public"]["Enums"]["puzzle-type"]
         }
         Update: {
+          ap_gain?: number
           timeout?: number
           type?: Database["public"]["Enums"]["puzzle-type"]
         }
@@ -321,18 +327,21 @@ export type Database = {
       }
       user_game_data: {
         Row: {
+          action_points: number
           experience: number
           faction_id: string
           last_action: string
           user_id: string
         }
         Insert: {
+          action_points?: number
           experience?: number
           faction_id: string
           last_action?: string
           user_id?: string
         }
         Update: {
+          action_points?: number
           experience?: number
           faction_id?: string
           last_action?: string
@@ -415,6 +424,10 @@ export type Database = {
         Args: { a_user_id: string }
         Returns: number
       }
+      get_max_action_points: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       get_timeout_for_puzzle: {
         Args: { a_type: Database["public"]["Enums"]["puzzle-type"] }
         Returns: number
@@ -450,7 +463,7 @@ export type Database = {
     }
     Enums: {
       "game-state": "playing" | "paused"
-      point_type: "claimable" | "not_claimable"
+      point_type: "claimable" | "not_claimable" | "mini_game"
       "puzzle-type": "math"
       role: "user" | "admin"
       task_type: "attack" | "attack_and_claim" | "repair" | "claim"
@@ -570,7 +583,7 @@ export const Constants = {
   public: {
     Enums: {
       "game-state": ["playing", "paused"],
-      point_type: ["claimable", "not_claimable"],
+      point_type: ["claimable", "not_claimable", "mini_game"],
       "puzzle-type": ["math"],
       role: ["user", "admin"],
       task_type: ["attack", "attack_and_claim", "repair", "claim"],

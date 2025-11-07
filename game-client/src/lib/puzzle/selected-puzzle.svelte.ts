@@ -1,4 +1,4 @@
-import type { Puzzle, TaskType } from '../../types/alias';
+import type { Puzzle } from '../../types/alias';
 
 export class PuzzleState {
 	private timerId: number | null = null;
@@ -6,11 +6,10 @@ export class PuzzleState {
 	state: {
 		puzzle: Puzzle['Row'];
 		secondsUntilTimeout: number;
-		actionType: TaskType;
 		isTimeout: boolean;
 	};
 
-	constructor({ actionType, puzzle }: { puzzle: Puzzle['Row']; actionType: TaskType }) {
+	constructor({ puzzle }: { puzzle: Puzzle['Row'] }) {
 		const now = Date.now();
 		this.timeout = Date.parse(puzzle.expires_at);
 
@@ -19,7 +18,6 @@ export class PuzzleState {
 		this.state = $state({
 			puzzle: puzzle,
 			secondsUntilTimeout: this.timeout - now,
-			actionType,
 			isTimeout: this.timeout - now <= 0
 		});
 

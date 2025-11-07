@@ -6,19 +6,13 @@ VALUES
 INSERT INTO
     public.faction (name)
 VALUES
-    ('Faction A');
-
-INSERT INTO
-    public.faction (name)
-VALUES
+    ('Faction A'),
     ('Faction B');
 
 INSERT INTO
-    public.point (max_health, name)
+    public.point (max_health, name, type)
 VALUES
-  (255, 'Point A');
-
-INSERT INTO
-    public.point (max_health, name)
-VALUES
-  (255, 'Point B');
+  (255, 'Point A', 'claimable'::"point_type"),
+  (255, 'Point B', 'claimable'::"point_type"),
+  (255, 'Point D', 'mini_game'::"point_type"),
+  (255, 'Point C', 'not_claimable'::"point_type");

@@ -13,6 +13,7 @@
 
 	// Only allow actions if point type is claimable
 	const isClaimable = chosenPoint.state.point?.type === 'claimable';
+	const isMiniGame = chosenPoint.state.point?.type === 'mini_game';
 
 	const possibleTasks: TaskType[] = $derived.by(() => {
 		if (!isClaimable) return [];
@@ -32,8 +33,14 @@
 	});
 
 	async function preformAction(type: TaskType): Promise<void> {
+		// if (game.game != null) {
+		// 	goto(`/game/puzzle?type=${type}&pointId=${chosenPoint.state.point!.id}`);
+		// }
+	}
+
+	async function solvePuzzle(): Promise<void> {
 		if (game.game != null) {
-			goto(`/game/puzzle?type=${type}&pointId=${chosenPoint.state.point!.id}`);
+			goto('/game/puzzle');
 		}
 	}
 </script>
@@ -57,6 +64,16 @@
 				{/if}
 			</button>
 		{/each}
+	</section>
+{:else if isMiniGame}
+	<section class="flex justify-center gap-5">
+		<button
+			class="btn btn-primary btn-xl"
+			onclick={() => solvePuzzle()}
+			disabled={!user.user?.canUseAction}
+		>
+			Solve Puzzle
+		</button>
 	</section>
 {:else}
 	<div class="alert alert-warning">This point cannot be claimed or interacted with.</div>

@@ -2,10 +2,9 @@
 	import { goto } from '$app/navigation';
 	import Math from '$lib/components/puzzle/type/math/math.svelte';
 	import { selectedPuzzle } from '$lib/puzzle/selected-puzzle.svelte';
-	import { supabase, userStore } from '$lib/supabase/db.svelte';
+	import { supabase } from '$lib/supabase/db.svelte';
 	import { onMount } from 'svelte';
 	import { ErrorCode, type ErrorResult } from '../../../../../types/error-code';
-	import { selectedPoint } from '$lib/point/selected-point.svelte';
 
 	let result = $state('');
 	let incorrectResult: boolean = $state(false);
@@ -34,16 +33,15 @@
 			try {
 				incorrectResult = false;
 
-				const {
-					error: puzzleSolveError,
-					data: d,
-					response: resp
-				} = await supabase.functions.invoke('puzzle-solve', {
-					body: {
-						puzzle: puzzle.state.puzzle.id,
-						result
+				const { error: puzzleSolveError, response: resp } = await supabase.functions.invoke(
+					'puzzle-solve',
+					{
+						body: {
+							puzzle: puzzle.state.puzzle.id,
+							result
+						}
 					}
-				});
+				);
 
 				if (puzzleSolveError != null) {
 					const errorResult: ErrorResult = await resp?.json();
@@ -56,23 +54,7 @@
 				}
 				puzzle.state.puzzle.solved = true;
 
-				const { error: performActionError } = await supabase.functions.invoke<string>(
-					'perform_action',
-					{
-						body: {
-							user: userStore.user?.id,
-							point: selectedPoint.selectedPoint!.state.point!.id,
-							type: puzzle.state.actionType,
-							puzzle: puzzle.state.puzzle.id
-						}
-					}
-				);
-
-				if (performActionError != null) {
-					console.log(d, resp);
-				} else {
-					goto(pointUrl);
-				}
+				goto(pointUrl);
 			} catch (e) {
 				if (e) console.error(e);
 			}
