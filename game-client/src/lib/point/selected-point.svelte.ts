@@ -8,9 +8,11 @@ export const selectedPoint: {
 
 export async function initSelectedPoint(id: string): Promise<PointState | null> {
 	try {
-		selectedPoint.selectedPoint = new PointState(id);
-		await selectedPoint.selectedPoint.init();
-		await selectedPoint.selectedPoint.initCurrentUsers();
+		const selPoint = new PointState(id);
+		await selPoint.init();
+		await selPoint.initCurrentUsers();
+
+		selectedPoint.selectedPoint = selPoint;
 	} catch (error) {
 		console.error(error);
 	}
