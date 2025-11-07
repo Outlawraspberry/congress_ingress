@@ -116,6 +116,7 @@ export type Database = {
           id: string
           max_health: number
           name: string
+          type: Database["public"]["Enums"]["point_type"]
         }
         Insert: {
           acquired_by?: string | null
@@ -124,6 +125,7 @@ export type Database = {
           id?: string
           max_health?: number
           name: string
+          type?: Database["public"]["Enums"]["point_type"]
         }
         Update: {
           acquired_by?: string | null
@@ -132,6 +134,7 @@ export type Database = {
           id?: string
           max_health?: number
           name?: string
+          type?: Database["public"]["Enums"]["point_type"]
         }
         Relationships: [
           {
@@ -447,6 +450,7 @@ export type Database = {
     }
     Enums: {
       "game-state": "playing" | "paused"
+      point_type: "claimable" | "not_claimable"
       "puzzle-type": "math"
       role: "user" | "admin"
       task_type: "attack" | "attack_and_claim" | "repair" | "claim"
@@ -566,6 +570,7 @@ export const Constants = {
   public: {
     Enums: {
       "game-state": ["playing", "paused"],
+      point_type: ["claimable", "not_claimable"],
       "puzzle-type": ["math"],
       role: ["user", "admin"],
       task_type: ["attack", "attack_and_claim", "repair", "claim"],

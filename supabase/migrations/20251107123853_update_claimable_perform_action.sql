@@ -1,22 +1,13 @@
-alter table "public"."actions" add column "rewarded_experience" smallint not null default '0'::smallint;
-
-alter table "public"."user_game_data" add column "experience" bigint not null default '0'::bigint;
-
-alter table "public"."actions" add constraint "actions_rewarded_experience_check" CHECK ((rewarded_experience >= 0)) not valid;
-
-alter table "public"."actions" validate constraint "actions_rewarded_experience_check";
-
-alter table "public"."user_game_data" add constraint "user_game_data_experience_check" CHECK ((experience >= 0)) not valid;
-
-alter table "public"."user_game_data" validate constraint "user_game_data_experience_check";
-
-set check_function_bodies = off;
-
 CREATE OR REPLACE FUNCTION public.perform_action()
  RETURNS trigger
  LANGUAGE plpgsql
 AS $function$declare
 begin
+
+  --- Only allow actions on claimable points
+  IF (SELECT type FROM point WHERE id = new.point) != 'claimable' THEN
+    RAISE EXCEPTION 'Action not allowed on non-claimable point %', new.point;
+  END IF;
 
   --- type
   IF (new.type = 'attack' OR new.type = 'attack_and_claim') THEN

@@ -11,7 +11,11 @@
 		chosenPoint: PointState;
 	} = $props();
 
+	// Only allow actions if point type is claimable
+	const isClaimable = chosenPoint.state.point?.type === 'claimable';
+
 	const possibleTasks: TaskType[] = $derived.by(() => {
+		if (!isClaimable) return [];
 		if (chosenPoint.state.point?.acquired_by == null) {
 			return ['claim'];
 		}
@@ -34,22 +38,26 @@
 	}
 </script>
 
-<section class="flex justify-center gap-5">
-	{#each possibleTasks as task (task)}
-		<button
-			class="btn btn-primary btn-xl"
-			onclick={() => preformAction(task)}
-			disabled={!user.user?.canUseAction}
-		>
-			{#if task == 'attack'}
-				Attack
-			{:else if task === 'attack_and_claim'}
-				Attack and Claim
-			{:else if task === 'claim'}
-				Claim
-			{:else if task === 'repair'}
-				Repair
-			{/if}
-		</button>
-	{/each}
-</section>
+{#if isClaimable}
+	<section class="flex justify-center gap-5">
+		{#each possibleTasks as task (task)}
+			<button
+				class="btn btn-primary btn-xl"
+				onclick={() => preformAction(task)}
+				disabled={!user.user?.canUseAction}
+			>
+				{#if task == 'attack'}
+					Attack
+				{:else if task === 'attack_and_claim'}
+					Attack and Claim
+				{:else if task === 'claim'}
+					Claim
+				{:else if task === 'repair'}
+					Repair
+				{/if}
+			</button>
+		{/each}
+	</section>
+{:else}
+	<div class="alert alert-warning">This point cannot be claimed or interacted with.</div>
+{/if}

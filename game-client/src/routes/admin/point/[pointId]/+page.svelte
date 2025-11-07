@@ -43,6 +43,10 @@
 		<h3 class="mt-4 mb-4 text-xl">Stats</h3>
 
 		<PointStats point={data.pointState}></PointStats>
+
+		<p class="mb-2 text-lg">
+			<strong>Type:</strong> <span class="badge badge-info">{data.pointData.type}</span>
+		</p>
 	</section>
 
 	<button class="btn btn-sm" onclick={() => onGeneratePDF(data.pointData.id)}>
