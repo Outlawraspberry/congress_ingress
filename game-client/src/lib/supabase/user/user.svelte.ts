@@ -2,10 +2,14 @@ import type { RealtimeChannel } from '@supabase/supabase-js';
 import { type Role } from '../../../types/alias';
 import { supabase, userStore } from '../db.svelte';
 
+let interval: number | NodeJS.Timeout | null = null;
+
 export const user: {
 	user: {
 		username: string;
 		faction: string;
+		factionName: string | null;
+		experience: number | null;
 		lastAction: Date | null;
 		role: Role;
 		canUseAction: boolean;
@@ -23,7 +27,7 @@ export async function init(): Promise<void> {
 		supabase.from('user_role').select('role').filter('user_id', 'eq', userStore.user.id),
 		supabase
 			.from('user_game_data')
-			.select('faction_id,last_action')
+			.select('faction_id,last_action,experience')
 			.filter('user_id', 'eq', userStore.user.id),
 		supabase.from('game').select('user_last_action_timeout_in_seconds').filter('id', 'eq', 1)
 	]);
@@ -35,22 +39,42 @@ export async function init(): Promise<void> {
 
 	let lastAction: Date | null = null;
 	let canUseAction = true;
+	let factionName: string | null = null;
+	let experience: number | null = null;
 
 	if (userGameData.data[0].last_action != null) {
 		lastAction = new Date();
 		lastAction.setTime(Date.parse(userGameData.data[0].last_action));
 
+		const cooldownMs =
+			userActionCooldownInSeconds.data[0].user_last_action_timeout_in_seconds * 1000;
 		const diff = Math.abs(lastAction.getTime() - Date.now());
-		canUseAction =
-			diff >= userActionCooldownInSeconds.data[0].user_last_action_timeout_in_seconds * 1000;
+		canUseAction = diff >= cooldownMs;
 
-		if (!canUseAction) {
-			setCanUseActionInSeconds(diff);
+		// Only trigger countdown if last_action is within cooldown period
+		if (!canUseAction && diff <= cooldownMs) {
+			setCanUseActionInSeconds(cooldownMs - diff);
 		}
 	}
 
+	// Fetch faction name
+	if (userGameData.data[0].faction_id) {
+		const factionRes = await supabase
+			.from('faction')
+			.select('name')
+			.filter('id', 'eq', userGameData.data[0].faction_id);
+
+		if (!factionRes.error && factionRes.data.length > 0) {
+			factionName = factionRes.data[0].name;
+		}
+	}
+
+	experience = userGameData.data[0].experience ?? null;
+
 	user.user = {
 		faction: userGameData.data[0].faction_id,
+		factionName,
+		experience,
 		lastAction,
 		role: userRole.data[0].role,
 		username: userData.data[0].name,
@@ -69,16 +93,39 @@ export async function init(): Promise<void> {
 				filter: `user_id=eq.${userStore.user.id}`
 			},
 			(payload) => {
-				if (payload.new != null && user.user != null && payload.new.last_action != null) {
-					const date = new Date();
-					date.setTime(Date.parse(payload.new.last_action));
+				if (payload.new != null && user.user != null) {
+					if (payload.new.last_action != null) {
+						const date = new Date();
+						date.setTime(Date.parse(payload.new.last_action));
+						user.user.lastAction = date;
 
-					user.user.lastAction = date;
-					user.user.canUseAction = false;
+						const cooldownMs =
+							userActionCooldownInSeconds.data[0].user_last_action_timeout_in_seconds * 1000;
+						const diff = Math.abs(date.getTime() - Date.now());
+						user.user.canUseAction = diff >= cooldownMs;
 
-					setCanUseActionInSeconds(
-						userActionCooldownInSeconds.data[0].user_last_action_timeout_in_seconds * 1000
-					);
+						// Only trigger countdown if last_action is within cooldown period
+						if (!user.user.canUseAction && diff <= cooldownMs) {
+							setCanUseActionInSeconds(cooldownMs - diff);
+						}
+					}
+					if (payload.new.experience != null) {
+						console.log('experience', payload);
+						user.user.experience = payload.new.experience;
+					}
+					if (payload.new.faction_id != null && payload.new.faction_id !== user.user.faction) {
+						user.user.faction = payload.new.faction_id;
+						// Fetch new faction name
+						supabase
+							.from('faction')
+							.select('name')
+							.filter('id', 'eq', payload.new.faction_id)
+							.then((factionRes) => {
+								if (!factionRes.error && factionRes.data.length > 0 && user.user) {
+									user.user.factionName = factionRes.data[0].name;
+								}
+							});
+					}
 				}
 			}
 		)
@@ -95,12 +142,14 @@ function setCanUseActionInSeconds(milliseconds: number) {
 
 	if (user.user) user.user.canUseActionInSeconds = inSeconds--;
 
-	const interval = setInterval(() => {
+	if (interval) clearInterval(interval);
+
+	interval = setInterval(() => {
 		if (user.user != null) {
 			if (inSeconds === 0) {
 				user.user.canUseActionInSeconds = null;
 				user.user.canUseAction = true;
-				clearInterval(interval);
+				if (interval) clearInterval(interval);
 				return;
 			}
 
