@@ -14,6 +14,7 @@
 		<Card>
 			<p><strong>Username:</strong> {user.user.username}</p>
 			<p><strong>Experience:</strong> {user.user.experience ?? 'Unknown'}</p>
+			<p><strong>Action Points:</strong> {user.user.actionPoints}</p>
 			<p><strong>Faction:</strong> {user.user.factionName ?? user.user.faction ?? 'Unknown'}</p>
 			<p>
 				<strong>Last Action:</strong>
