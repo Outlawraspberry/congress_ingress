@@ -6,7 +6,8 @@
 		faHouse,
 		faLockOpen,
 		faUser,
-		faUserTie
+		faUserTie,
+		faTrophy
 	} from '@fortawesome/free-solid-svg-icons';
 	import Fa from 'svelte-fa';
 	import AActiveUrl from './a-active-url.svelte';
@@ -32,6 +33,11 @@
 		<AActiveUrl {activeUrl} href="/user">
 			<Fa icon={faUser} />
 			<span class="dock-label">User</span>
+		</AActiveUrl>
+
+		<AActiveUrl {activeUrl} href="/scoreboard">
+			<Fa icon={faTrophy} />
+			<span class="dock-label">Scoreboard</span>
 		</AActiveUrl>
 
 		{#if user.user.role === 'admin'}
