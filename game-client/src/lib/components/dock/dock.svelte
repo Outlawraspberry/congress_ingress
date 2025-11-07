@@ -29,6 +29,11 @@
 			<span class="dock-label">Game</span>
 		</AActiveUrl>
 
+		<AActiveUrl {activeUrl} href="/user">
+			<Fa icon={faUser} />
+			<span class="dock-label">User</span>
+		</AActiveUrl>
+
 		{#if user.user.role === 'admin'}
 			<AActiveUrl {activeUrl} href="/admin" setActive={activeUrl.startsWith('/admin')}>
 				<Fa icon={faUserTie} />

@@ -22,6 +22,8 @@
 					<LiActiveUrl href="/login" {activeUrl}>Login</LiActiveUrl>
 					<LiActiveUrl href="/register" {activeUrl}>Register</LiActiveUrl>
 				{:else}
+					<LiActiveUrl href="/user" {activeUrl}>User Page</LiActiveUrl>
+
 					{#if user.user.role === 'admin'}
 						<li class={activeUrl.includes('/admin') ? 'font-bold' : ''}>
 							<details>
