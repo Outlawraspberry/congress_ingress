@@ -14,7 +14,6 @@ export type Database = {
           created_at: string
           created_by: string
           point: string
-          puzzle: string
           rewarded_experience: number
           strength: number
           type: Database["public"]["Enums"]["task_type"]
@@ -23,7 +22,6 @@ export type Database = {
           created_at?: string
           created_by: string
           point: string
-          puzzle: string
           rewarded_experience?: number
           strength?: number
           type: Database["public"]["Enums"]["task_type"]
@@ -32,19 +30,11 @@ export type Database = {
           created_at?: string
           created_by?: string
           point?: string
-          puzzle?: string
           rewarded_experience?: number
           strength?: number
           type?: Database["public"]["Enums"]["task_type"]
         }
         Relationships: [
-          {
-            foreignKeyName: "actions_puzzle_fkey"
-            columns: ["puzzle"]
-            isOneToOne: true
-            referencedRelation: "puzzle"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "tick_task_point_fkey"
             columns: ["point"]
@@ -74,11 +64,14 @@ export type Database = {
       }
       game: {
         Row: {
+          attack_ap_cost: number
+          claim_ap_cost: number
           group_attack_multiplier_per_user: number
           group_repair_multiplier_per_user: number
           id: number
           max_ap: number
           point_user_kick_timeout_seconds: number
+          repair_ap_cost: number
           state: Database["public"]["Enums"]["game-state"]
           user_base_damage: number
           user_base_repair: number
@@ -86,11 +79,14 @@ export type Database = {
           user_max_damage: number
         }
         Insert: {
+          attack_ap_cost?: number
+          claim_ap_cost?: number
           group_attack_multiplier_per_user?: number
           group_repair_multiplier_per_user?: number
           id?: number
           max_ap?: number
           point_user_kick_timeout_seconds?: number
+          repair_ap_cost?: number
           state?: Database["public"]["Enums"]["game-state"]
           user_base_damage?: number
           user_base_repair?: number
@@ -98,11 +94,14 @@ export type Database = {
           user_max_damage?: number
         }
         Update: {
+          attack_ap_cost?: number
+          claim_ap_cost?: number
           group_attack_multiplier_per_user?: number
           group_repair_multiplier_per_user?: number
           id?: number
           max_ap?: number
           point_user_kick_timeout_seconds?: number
+          repair_ap_cost?: number
           state?: Database["public"]["Enums"]["game-state"]
           user_base_damage?: number
           user_base_repair?: number
@@ -392,6 +391,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_user_afford_action: {
+        Args: {
+          a_user_id: string
+          a_action_type: Database["public"]["Enums"]["task_type"]
+        }
+        Returns: boolean
+      }
       can_user_perform_action_on_point: {
         Args: { a_user_id: string; a_poind_id: string }
         Returns: boolean
@@ -403,6 +409,23 @@ export type Database = {
       does_username_exists: {
         Args: { a_username: string }
         Returns: boolean
+      }
+      get_all_ap_costs: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          attack_cost: number
+          claim_cost: number
+          repair_cost: number
+          attack_and_claim_cost: number
+        }[]
+      }
+      get_ap_cost_for_action: {
+        Args: { a_action_type: Database["public"]["Enums"]["task_type"] }
+        Returns: number
+      }
+      get_ap_gain_for_puzzle_type: {
+        Args: { a_puzzle_type: Database["public"]["Enums"]["puzzle-type"] }
+        Returns: number
       }
       get_attack_damage_for_point: {
         Args: { a_mapping_id: string }
@@ -432,6 +455,17 @@ export type Database = {
         Args: { a_type: Database["public"]["Enums"]["puzzle-type"] }
         Returns: number
       }
+      get_user_ap_info: {
+        Args: { a_user_id: string }
+        Returns: {
+          current_ap: number
+          max_ap: number
+        }[]
+      }
+      get_user_current_ap: {
+        Args: { a_user_id: string }
+        Returns: number
+      }
       insert_puzzle: {
         Args: {
           a_user_id: string
@@ -459,6 +493,20 @@ export type Database = {
       perform_attack_on_point: {
         Args: { point_id: string }
         Returns: undefined
+      }
+      spend_ap_for_action: {
+        Args: {
+          a_user_id: string
+          a_action_type: Database["public"]["Enums"]["task_type"]
+        }
+        Returns: undefined
+      }
+      user_has_enough_ap: {
+        Args: {
+          a_user_id: string
+          a_action_type: Database["public"]["Enums"]["task_type"]
+        }
+        Returns: boolean
       }
     }
     Enums: {

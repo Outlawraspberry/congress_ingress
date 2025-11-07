@@ -4,6 +4,12 @@
 	import type { PointState } from '$lib/supabase/game/points.svelte';
 	import { user } from '$lib/supabase/user/user.svelte';
 	import type { TaskType } from '../../../types/alias';
+	import { performAction, getActionPointCost } from '$lib/supabase/actions';
+	import ActionPointsDisplay from '../ui/action-points-display.svelte';
+
+	let isPerformingAction = $state(false);
+	let actionError = $state<string | null>(null);
+	let actionCosts = $state<Partial<Record<TaskType, number>>>({});
 
 	const {
 		chosenPoint
@@ -32,10 +38,69 @@
 		return [];
 	});
 
+	// Load action costs when component mounts
+	async function loadActionCosts() {
+		for (const task of possibleTasks) {
+			try {
+				actionCosts[task] = await getActionPointCost(task);
+			} catch (error) {
+				console.warn(`Failed to load cost for ${task}:`, error);
+			}
+		}
+	}
+
+	// Load costs when possible tasks change
+	$effect(() => {
+		if (possibleTasks.length > 0) {
+			loadActionCosts();
+		}
+	});
+
 	async function preformAction(type: TaskType): Promise<void> {
-		// if (game.game != null) {
-		// 	goto(`/game/puzzle?type=${type}&pointId=${chosenPoint.state.point!.id}`);
-		// }
+		if (!chosenPoint.state.point?.id) {
+			actionError = 'Point not available';
+			return;
+		}
+
+		if (!user.user?.id) {
+			actionError = 'User not authenticated';
+			return;
+		}
+
+		console.log(
+			'Performing action:',
+			type,
+			'for user:',
+			user.user.id,
+			'on point:',
+			chosenPoint.state.point.id
+		);
+
+		isPerformingAction = true;
+		actionError = null;
+
+		try {
+			// Check if user can afford the action using store data
+			const requiredAP = actionCosts[type] || 0;
+			if (user.user.actionPoints < requiredAP) {
+				actionError = `Not enough Action Points for this action (need ${requiredAP}, have ${user.user.actionPoints})`;
+				return;
+			}
+
+			// Perform the action
+			await performAction({
+				type,
+				point: chosenPoint.state.point.id
+			});
+
+			// Action successful - could add success feedback here
+			console.log(`Successfully performed ${type} action`);
+		} catch (error) {
+			console.error('Action failed:', error);
+			actionError = error instanceof Error ? error.message : 'Action failed';
+		} finally {
+			isPerformingAction = false;
+		}
 	}
 
 	async function solvePuzzle(): Promise<void> {
@@ -46,24 +111,45 @@
 </script>
 
 {#if isClaimable}
-	<section class="flex justify-center gap-5">
-		{#each possibleTasks as task (task)}
-			<button
-				class="btn btn-primary btn-xl"
-				onclick={() => preformAction(task)}
-				disabled={!user.user?.canUseAction}
-			>
-				{#if task == 'attack'}
-					Attack
-				{:else if task === 'attack_and_claim'}
-					Attack and Claim
-				{:else if task === 'claim'}
-					Claim
-				{:else if task === 'repair'}
-					Repair
-				{/if}
-			</button>
-		{/each}
+	<section class="flex flex-col items-center gap-3">
+		<!-- Action Points Display -->
+		<ActionPointsDisplay />
+
+		{#if actionError}
+			<div class="alert alert-error">
+				{actionError}
+			</div>
+		{/if}
+
+		<div class="flex justify-center gap-5">
+			{#each possibleTasks as task (task)}
+				<button
+					class="btn btn-primary btn-xl"
+					onclick={() => preformAction(task)}
+					disabled={!user.user?.canUseAction ||
+						isPerformingAction ||
+						(user.user && actionCosts[task] != null && user.user.actionPoints < actionCosts[task])}
+				>
+					{#if isPerformingAction}
+						<span class="loading loading-spinner loading-sm"></span>
+					{/if}
+					<div class="flex flex-col items-center">
+						{#if task == 'attack'}
+							Attack
+						{:else if task === 'attack_and_claim'}
+							Attack and Claim
+						{:else if task === 'claim'}
+							Claim
+						{:else if task === 'repair'}
+							Repair
+						{/if}
+						{#if actionCosts[task]}
+							<span class="text-xs opacity-70">({actionCosts[task]} AP)</span>
+						{/if}
+					</div>
+				</button>
+			{/each}
+		</div>
 	</section>
 {:else if isMiniGame}
 	<section class="flex justify-center gap-5">

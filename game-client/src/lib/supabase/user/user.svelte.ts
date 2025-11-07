@@ -14,6 +14,8 @@ export const user: {
 		role: Role;
 		canUseAction: boolean;
 		canUseActionInSeconds: number | null;
+		actionPoints: number;
+		id: string;
 	} | null;
 } = $state({ user: null });
 
@@ -27,7 +29,7 @@ export async function init(): Promise<void> {
 		supabase.from('user_role').select('role').filter('user_id', 'eq', userStore.user.id),
 		supabase
 			.from('user_game_data')
-			.select('faction_id,last_action,experience')
+			.select('faction_id,last_action,experience,action_points')
 			.filter('user_id', 'eq', userStore.user.id),
 		supabase.from('game').select('user_last_action_timeout_in_seconds').filter('id', 'eq', 1)
 	]);
@@ -41,6 +43,7 @@ export async function init(): Promise<void> {
 	let canUseAction = true;
 	let factionName: string | null = null;
 	let experience: number | null = null;
+	let actionPoints = 0;
 
 	if (userGameData.data[0].last_action != null) {
 		lastAction = new Date();
@@ -70,6 +73,7 @@ export async function init(): Promise<void> {
 	}
 
 	experience = userGameData.data[0].experience ?? null;
+	actionPoints = userGameData.data[0].action_points ?? 0;
 
 	user.user = {
 		faction: userGameData.data[0].faction_id,
@@ -79,7 +83,9 @@ export async function init(): Promise<void> {
 		role: userRole.data[0].role,
 		username: userData.data[0].name,
 		canUseAction,
-		canUseActionInSeconds: null
+		canUseActionInSeconds: null,
+		actionPoints,
+		id: userStore.user.id
 	};
 
 	realtimeChannel = supabase
@@ -112,6 +118,9 @@ export async function init(): Promise<void> {
 					if (payload.new.experience != null) {
 						console.log('experience', payload);
 						user.user.experience = payload.new.experience;
+					}
+					if (payload.new.action_points != null) {
+						user.user.actionPoints = payload.new.action_points;
 					}
 					if (payload.new.faction_id != null && payload.new.faction_id !== user.user.faction) {
 						user.user.faction = payload.new.faction_id;

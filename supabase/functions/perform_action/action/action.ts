@@ -2,10 +2,8 @@ import { Database } from "../../../../types/database.types.ts";
 import { v4 } from "@std/uuid";
 
 export interface Action {
-  user: string;
   point: string;
   type: Database["public"]["Enums"]["task_type"];
-  puzzle: string;
 }
 
 const actions = ["attack", "attack_and_claim", "repair", "claim"];
@@ -13,18 +11,6 @@ const actions = ["attack", "attack_and_claim", "repair", "claim"];
 export function isActionValid(input: unknown): input is Action {
   if (input == null || typeof input !== "object") {
     throw new Error("Object is either null or not from type object");
-  }
-
-  if (
-    !(
-      "user" in input &&
-      typeof input.user === "string" &&
-      v4.validate(input.user)
-    )
-  ) {
-    throw new Error(
-      'Object doesn\'t have the property "user" or it is not a valid uuid4',
-    );
   }
 
   if (
@@ -47,23 +33,10 @@ export function isActionValid(input: unknown): input is Action {
     )
   ) {
     throw new Error(
-      `Object doesn't have the property type or it is not one of ${
-        actions.join(
-          ", ",
-        )
+      `Object doesn't have the property type or it is not one of ${actions.join(
+        ", ",
+      )
       }`,
-    );
-  }
-
-  if (
-    !(
-      "puzzle" in input &&
-      typeof input.puzzle === "string" &&
-      v4.validate(input.puzzle)
-    )
-  ) {
-    throw new Error(
-      'Object doesn\'t have the property "puzzle" or it is not a valid uuid4',
     );
   }
 

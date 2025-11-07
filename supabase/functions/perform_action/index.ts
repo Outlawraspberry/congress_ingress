@@ -26,6 +26,16 @@ Deno.serve(async (req) => {
 async function handle(req: Request): Promise<Response> {
   const authHeader = req.headers.get("Authorization") ?? "";
 
+  if (!authHeader) {
+    console.error("No Authorization header found");
+    return new Response(JSON.stringify("Authorization header required"), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  console.log("Auth header present:", authHeader.substring(0, 20) + "...");
+
   let supabaseClient: SupabaseClient<Database> = createClient<Database>(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_ANON_KEY") ?? "",
@@ -51,6 +61,7 @@ async function handle(req: Request): Promise<Response> {
   }
 
   const userId = await getUserId(supabaseClient);
+  console.log("Retrieved user ID:", userId);
 
   supabaseClient = createClient<Database>(
     Deno.env.get("SUPABASE_URL") ?? "",
@@ -71,7 +82,6 @@ async function handle(req: Request): Promise<Response> {
     created_by: userId,
     point: action.point,
     type: action.type,
-    puzzle: action.puzzle,
     strength: strengthAtPoint,
     rewarded_experience: 10
   });
@@ -91,10 +101,29 @@ async function getUserId(supabase: SupabaseClient<Database>): Promise<string> {
   const userData = await supabase.auth.getUser();
 
   if (userData.error) {
+    console.error("Auth error:", userData.error);
     throw {
       errorCode: ErrorCode.AUTH_ERROR,
       httpStatus: 401,
-      message: "Not authorized",
+      message: `Authentication failed: ${userData.error.message}`,
+    } as ErrorResult;
+  }
+
+  if (!userData.data?.user) {
+    console.error("No user data found:", userData.data);
+    throw {
+      errorCode: ErrorCode.AUTH_ERROR,
+      httpStatus: 401,
+      message: "No user found in authentication data",
+    } as ErrorResult;
+  }
+
+  if (!userData.data.user.id) {
+    console.error("User ID missing:", userData.data.user);
+    throw {
+      errorCode: ErrorCode.AUTH_ERROR,
+      httpStatus: 401,
+      message: "User ID is missing or invalid",
     } as ErrorResult;
   }
 

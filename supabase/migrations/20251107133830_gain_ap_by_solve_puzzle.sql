@@ -2,7 +2,7 @@ CREATE OR REPLACE FUNCTION public.get_max_action_points()
  RETURNS int4
  LANGUAGE plpgsql
 AS $function$begin
-    return SELECT max_ap FROM game WHERE game.id = 1;
+    return (SELECT max_ap FROM game WHERE game.id = 1);
 end;$function$
 ;
 
