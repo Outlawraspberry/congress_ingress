@@ -54,7 +54,7 @@ console.log();
 // Example 6: Validation
 console.log("6. Validate input with fromUnknown:");
 try {
-  const validField = fromUnknown(emptyField);
+  const _validField = fromUnknown(emptyField);
   console.log("✓ Valid field accepted");
 } catch (error) {
   console.log("✗ Validation failed:", error);

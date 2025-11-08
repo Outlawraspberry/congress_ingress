@@ -234,12 +234,45 @@ interface LightsOffSolution {
 - Mathematical analysis: Anderson, M. & Feil, T. (1998). "Turning Lights Out with Linear Algebra"
 - Wikipedia: https://en.wikipedia.org/wiki/Lights_Out_(game)
 
-## Next Steps for Implementation
+## Implementation Status
 
 1. ✅ Document game mechanics (this file)
-2. ⬜ Implement field toggle logic
-3. ⬜ Implement puzzle generator (solvable configurations)
-4. ⬜ Implement solution validator
-5. ⬜ Add tests for all edge cases
-6. ⬜ Implement solver algorithm
-7. ⬜ Add difficulty levels
+2. ✅ Implement field toggle logic (`field/field.ts`)
+3. ✅ Implement puzzle generator (solvable configurations) (`lights-off-generator.ts`)
+4. ✅ Implement solution validator (`LightsOffGenerator.isValid()`)
+5. ✅ Add tests for all edge cases (54 test steps passing)
+6. ✅ Implement difficulty levels (easy, medium, hard)
+7. ⬜ Implement optimal solver algorithm (optional enhancement)
+
+### Completed Features
+
+- **Field Operations**: Full implementation of toggle mechanics with immutability
+- **Puzzle Generation**: Reverse-engineering approach guarantees solvability
+- **Difficulty Levels**: 
+  - Easy: 3-7 moves
+  - Medium: 8-12 moves
+  - Hard: 13-18 moves
+- **Validation**: Comprehensive input validation and solution verification
+- **Test Coverage**: 54 passing test steps across field and generator
+
+### Example Usage
+
+```typescript
+import { LightsOffGenerator } from "./lights-off-generator.ts";
+
+// Generate a medium difficulty puzzle (default)
+const generator = new LightsOffGenerator();
+const puzzle = generator.generate();
+
+// Generate an easy puzzle
+const easyGenerator = new LightsOffGenerator("easy");
+const easyPuzzle = easyGenerator.generate();
+
+// Validate a solution
+const isValid = generator.isValid({
+  puzzle: puzzle.puzzle,
+  result: puzzle.result
+});
+```
+
+See `generator-example.ts` for more detailed examples.
