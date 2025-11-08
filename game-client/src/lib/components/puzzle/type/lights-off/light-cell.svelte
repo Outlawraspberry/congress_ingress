@@ -22,9 +22,9 @@
 	class:bg-warning={isOn}
 	class:border-warning={isOn}
 	class:shadow-lg={isOn}
-	class:shadow-warning/50={isOn}
+	class:shadow-warning:50={isOn}
 	class:bg-base-300={!isOn}
-	class:border-base-content/20={!isOn}
+	class:border-base-content:20={!isOn}
 	onclick={handleClick}
 	aria-label={`Light at row ${row + 1}, column ${col + 1}, currently ${isOn ? 'on' : 'off'}`}
 >
