@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
   } else {
     // Randomly choose difficulty for lights-off
     const difficulties: ('easy' | 'medium' | 'hard')[] = ['easy', 'medium', 'hard'];
-    const difficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
+    const difficulty = difficulties[0];
     generator = new LightsOffGenerator(difficulty);
   }
 
