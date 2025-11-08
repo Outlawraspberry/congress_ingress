@@ -116,7 +116,7 @@ async function handle(req: Request): Promise<Response> {
       const lightsOffGenerator = new LightsOffGenerator();
       isValidResult = lightsOffGenerator.isValid({
         puzzle: puzzleTask,
-        result: json.result
+        result: JSON.parse(json.result)
       });
     } else {
       return error.handleError({
