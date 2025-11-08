@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import Math from '$lib/components/puzzle/type/math/math.svelte';
+	import LightsOff from '$lib/components/puzzle/type/lights-off/lights-off.svelte';
 	import { selectedPuzzle } from '$lib/puzzle/selected-puzzle.svelte';
 	import { supabase } from '$lib/supabase/db.svelte';
 	import { onMount } from 'svelte';
@@ -109,7 +110,15 @@
 		{/if}
 	</section>
 
-	<Math puzzle={puzzle.state.puzzle} {onResultChanged}></Math>
+	{#if puzzle.state.puzzle.type === 'math'}
+		<Math puzzle={puzzle.state.puzzle} {onResultChanged}></Math>
+	{:else if puzzle.state.puzzle.type === 'lights-off'}
+		<LightsOff puzzle={puzzle.state.puzzle} {onResultChanged}></LightsOff>
+	{:else}
+		<div role="alert" class="alert alert-error">
+			<span>Unknown puzzle type: {puzzle.state.puzzle.type}</span>
+		</div>
+	{/if}
 
 	<section class="mt-2 mb-2">
 		{#if !puzzle.state.puzzle.solved && !puzzle.state.isTimeout}
