@@ -28,7 +28,7 @@
 
 		if (devices.length > 0) {
 			currentDeviceIndex = 0;
-			startScanning();
+			// startScanning();
 		}
 
 		isLoadingDevices = false;

@@ -7,6 +7,8 @@ import { corsHeaders } from "@cors";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../types/database.types.ts";
 import { MathGenerator } from "../shared/puzzle/math-generator/math-generator.ts";
+import { LightsOffGenerator } from "../shared/puzzle/lights-off/lights-off-generator.ts";
+import { PuzzleGenerator } from "../shared/puzzle/puzzle-generator.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -37,11 +39,24 @@ Deno.serve(async (req) => {
     });
   }
 
-  const puzzle = new MathGenerator().generate();
+  // Randomly choose between math and lights-off puzzles
+  const puzzleType = Math.random() < 0.5 ? 'math' : 'lights-off';
+
+  let generator: PuzzleGenerator;
+  if (puzzleType === 'math') {
+    generator = new MathGenerator();
+  } else {
+    // Randomly choose difficulty for lights-off
+    const difficulties: ('easy' | 'medium' | 'hard')[] = ['easy', 'medium', 'hard'];
+    const difficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
+    generator = new LightsOffGenerator(difficulty);
+  }
+
+  const puzzle = generator.generate();
   const insertPuzzleResult = await supabaseClient.rpc("insert_puzzle", {
     a_user_id: data.user.id,
     a_task: puzzle.puzzle,
-    a_type: 'math'
+    a_type: puzzleType
   })
 
   if (insertPuzzleResult.error != null) {
