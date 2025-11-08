@@ -9,6 +9,8 @@ import { Database } from "../../../types/database.types.ts";
 import { ErrorCode } from "../../../types/error-code.ts";
 import { assertEquals } from "@std/assert";
 import { corsHeaders } from "@cors";
+import { MathGenerator } from "../shared/puzzle/math-generator/math-generator.ts";
+import { LightsOffGenerator } from "../shared/puzzle/lights-off/lights-off-generator.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -71,7 +73,7 @@ async function handle(req: Request): Promise<Response> {
 
   const puzzleResultResult = await supabaseClient
     .from("puzzle_result")
-    .select("id (id, expires_at), user_id, created_at, result")
+    .select("id (id, expires_at, type, task), user_id, created_at, result")
     .filter("user_id", "eq", userResponse.data.user.id)
     .filter("id", "eq", json.puzzle);
 
@@ -97,16 +99,47 @@ async function handle(req: Request): Promise<Response> {
     });
   }
 
+  // Get puzzle type and task from the puzzle table
+  const puzzleData = puzzleResultResult.data[0].id;
+  const puzzleType = puzzleData.type;
+  const puzzleTask = puzzleData.task;
+
+  // Validate the result based on puzzle type
+  let isValidResult = false;
   try {
-    assertEquals(puzzleResultResult.data[0].result, json.result);
-  } catch {
-    return error.handleError(
-      {
-        message: "The results are not equal, please try it again",
+    if (puzzleType === 'math') {
+      const mathGenerator = new MathGenerator();
+      isValidResult = mathGenerator.isValid({
+        puzzle: puzzleTask,
+        result: json.result
+      });
+    } else if (puzzleType === 'lights-off') {
+      const lightsOffGenerator = new LightsOffGenerator();
+      isValidResult = lightsOffGenerator.isValid({
+        puzzle: puzzleTask,
+        result: json.result
+      });
+    } else {
+      return error.handleError({
+        message: `Unknown puzzle type: ${puzzleType}`,
         httpStatus: 400,
-        errorCode: ErrorCode.PUZZLE_INVALID_RESULT,
-      },
-    );
+        errorCode: ErrorCode.INVALID_INPUT,
+      });
+    }
+  } catch (validationError) {
+    return error.handleError({
+      message: `Validation error: ${(validationError as Error).message}`,
+      httpStatus: 400,
+      errorCode: ErrorCode.PUZZLE_INVALID_RESULT,
+    });
+  }
+
+  if (!isValidResult) {
+    return error.handleError({
+      message: "The solution is incorrect, please try again",
+      httpStatus: 400,
+      errorCode: ErrorCode.PUZZLE_INVALID_RESULT,
+    });
   }
 
   const updateResult = await supabaseClient
