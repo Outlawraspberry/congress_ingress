@@ -13,8 +13,6 @@ export class PuzzleState {
 		const now = Date.now();
 		this.timeout = Date.parse(puzzle.expires_at);
 
-		console.log(now, this.timeout, this.timeout - now);
-
 		this.state = $state({
 			puzzle: puzzle,
 			secondsUntilTimeout: this.timeout - now,

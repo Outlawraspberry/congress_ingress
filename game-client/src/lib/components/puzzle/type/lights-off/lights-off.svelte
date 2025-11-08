@@ -5,10 +5,14 @@
 
 	const {
 		puzzle,
-		onResultChanged
+		onResultChanged,
+		onSolved,
+		isSubmitting
 	}: {
 		puzzle: Puzzle['Row'];
 		onResultChanged: (result: string) => void;
+		onSolved?: () => void;
+		isSubmitting?: boolean;
 	} = $props();
 
 	const task: LightsOffPuzzle = puzzle.task as unknown as LightsOffPuzzle;
@@ -50,6 +54,20 @@
 
 	// Check if puzzle is solved (all lights off)
 	const isSolved = $derived(currentField.every((row) => row.every((cell) => !cell)));
+
+	// Track previous solved state to detect when puzzle becomes solved
+	let wasSolved = $state(false);
+
+	// Auto-submit when puzzle is solved
+	$effect(() => {
+		if (isSolved && !wasSolved && onSolved) {
+			wasSolved = true;
+			// Submit immediately to prevent timeout issues
+			onSolved();
+		} else if (!isSolved) {
+			wasSolved = false;
+		}
+	});
 
 	// Reset the puzzle
 	function resetPuzzle() {
@@ -103,20 +121,28 @@
 	<!-- Win Message -->
 	{#if isSolved}
 		<div role="alert" class="alert alert-success">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				class="h-6 w-6 shrink-0 stroke-current"
-				fill="none"
-				viewBox="0 0 24 24"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-				/>
-			</svg>
-			<span>All lights are off! Puzzle solved in {moves.length} moves!</span>
+			{#if isSubmitting}
+				<span class="loading loading-spinner loading-md"></span>
+				<div>
+					<p class="font-semibold">Puzzle solved in {moves.length} moves!</p>
+					<p class="text-sm">Submitting your solution...</p>
+				</div>
+			{:else}
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-6 w-6 shrink-0 stroke-current"
+					fill="none"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+					/>
+				</svg>
+				<span>All lights are off! Puzzle solved in {moves.length} moves!</span>
+			{/if}
 		</div>
 	{/if}
 
