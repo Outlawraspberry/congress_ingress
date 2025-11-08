@@ -7,7 +7,6 @@ import { error } from "@shared";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../types/database.types.ts";
 import { ErrorCode } from "../../../types/error-code.ts";
-import { assertEquals } from "@std/assert";
 import { corsHeaders } from "@cors";
 import { MathGenerator } from "../shared/puzzle/math-generator/math-generator.ts";
 import { LightsOffGenerator } from "../shared/puzzle/lights-off/lights-off-generator.ts";
