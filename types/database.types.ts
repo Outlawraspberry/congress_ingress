@@ -447,13 +447,59 @@ export type Database = {
         Args: { a_user_id: string }
         Returns: number
       }
+      get_faction_statistics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          faction_id: string
+          faction_name: string
+          total_members: number
+          total_experience: number
+          average_experience: number
+          points_controlled: number
+          total_historical_claims: number
+        }[]
+      }
       get_max_action_points: {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      get_point_history: {
+        Args: { target_point_id: string }
+        Returns: {
+          created_at: string
+          faction_id: string
+          faction_name: string
+          health: number
+          duration_held: unknown
+        }[]
+      }
+      get_points_overview: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          point_id: string
+          point_name: string
+          current_health: number
+          max_health: number
+          current_faction_id: string
+          current_faction_name: string
+          current_claim_duration: unknown
+          total_claims_count: number
+        }[]
+      }
       get_timeout_for_puzzle: {
         Args: { a_type: Database["public"]["Enums"]["puzzle-type"] }
         Returns: number
+      }
+      get_top_users_by_experience: {
+        Args: { limit_count?: number }
+        Returns: {
+          user_id: string
+          username: string
+          experience: number
+          faction_id: string
+          faction_name: string
+          last_action: string
+        }[]
       }
       get_user_ap_info: {
         Args: { a_user_id: string }

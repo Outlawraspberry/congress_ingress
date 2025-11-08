@@ -14,7 +14,10 @@
 			</p>
 
 			{#if user.user != null}
-				<a href="/game/point" class="btn btn-primary btn-xl">Get Started</a>
+				<div class="flex flex-col gap-4 sm:flex-row sm:justify-center">
+					<a href="/game/point" class="btn btn-primary btn-xl">Get Started</a>
+					<a href="/scoreboard" class="btn btn-secondary btn-xl">View Scoreboard</a>
+				</div>
 			{:else}
 				<p class="my-6">But first, please</p>
 				<div class="flex justify-center">
