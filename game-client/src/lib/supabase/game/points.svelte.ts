@@ -68,6 +68,14 @@ export class PointState {
 					if ('health' in payload.new && payload.new.health != null) {
 						this.state.point.health = payload.new.health;
 					}
+
+					if ('max_health' in payload.new && payload.new.max_health != null) {
+						this.state.point.max_health = payload.new.max_health;
+					}
+
+					if ('level' in payload.new && payload.new.level != null) {
+						this.state.point.level = payload.new.level;
+					}
 				}
 			}
 		);
