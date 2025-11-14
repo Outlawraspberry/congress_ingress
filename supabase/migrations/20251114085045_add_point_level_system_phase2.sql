@@ -104,8 +104,7 @@ BEGIN
   -- Update point
   UPDATE public.point
   SET level = v_new_level,
-      max_health = v_new_max_health,
-      health = v_new_max_health  -- Set health to new max when upgrading
+      max_health = v_new_max_health
   WHERE id = p_point_id;
 
   -- Deduct AP (this is now handled in perform_action, but keeping for consistency)
