@@ -25,13 +25,9 @@
 	let map: L.Map | null = null;
 	let imageOverlay: L.ImageOverlay | null = null;
 	let markers: Map<string, L.CircleMarker> = new Map();
-
-	// Map bounds (adjust based on your image size)
-	const MAP_WIDTH = 1000;
-	const MAP_HEIGHT = 1000;
-	const bounds: L.LatLngBoundsExpression = [
+	let currentBounds: L.LatLngBoundsExpression = [
 		[0, 0],
-		[MAP_HEIGHT, MAP_WIDTH]
+		[1000, 1000]
 	];
 
 	onMount(async () => {
@@ -58,7 +54,7 @@
 			} as L.MapOptions);
 
 			// Set initial view
-			map.fitBounds(bounds);
+			map.fitBounds(currentBounds);
 
 			// Add touch-friendly zoom control positioning
 			if (map.zoomControl) {
@@ -92,20 +88,36 @@
 			imageOverlay.remove();
 		}
 
-		// Add new floor plan image
-		imageOverlay = L.imageOverlay($currentFloor.map_image_url, bounds).addTo(map);
+		// Calculate bounds based on image dimensions
+		// Use actual image dimensions if available, otherwise default to 1000x1000
+		const imageWidth = $currentFloor.image_width || 1000;
+		const imageHeight = $currentFloor.image_height || 1000;
 
-		// Fit bounds
-		map.fitBounds(bounds);
+		// Set bounds with proper aspect ratio
+		// Leaflet uses [y, x] for coordinates (lat, lng)
+		currentBounds = [
+			[0, 0],
+			[imageHeight, imageWidth]
+		];
+
+		// Add new floor plan image
+		imageOverlay = L.imageOverlay($currentFloor.map_image_url, currentBounds).addTo(map);
+
+		// Fit bounds to show the entire image
+		map.fitBounds(currentBounds);
+
+		// Clear existing markers since they're for the old floor
+		markers.forEach((marker) => marker.remove());
+		markers.clear();
 	}
 
 	// Update markers when visible points change
-	$: if (map && $visiblePoints) {
+	$: if (map && $visiblePoints && $currentFloor) {
 		updateMarkers($visiblePoints);
 	}
 
 	function updateMarkers(points: MapPoint[]) {
-		if (!map) return;
+		if (!map || !$currentFloor) return;
 
 		// Get current point IDs
 		const currentIds = new Set(points.map((p) => p.id));
@@ -123,6 +135,7 @@
 			let marker = markers.get(point.id);
 
 			// Convert point coordinates to Leaflet LatLng
+			// Point coordinates should be in the same coordinate system as the image
 			// Y coordinate is inverted for Leaflet (0 at top)
 			const latLng: L.LatLngExpression = [point.position.y, point.position.x];
 
