@@ -76,9 +76,14 @@ export const enemyCache = writable<Map<string, CachedPointState>>(new Map());
 export const playerPresence = writable<Map<string, number>>(new Map());
 
 /**
- * Loading state
+ * Loading state (for initial load)
  */
 export const isLoading = writable<boolean>(false);
+
+/**
+ * Loading state for floor switching (doesn't show full overlay)
+ */
+export const isSwitchingFloor = writable<boolean>(false);
 
 /**
  * Error state
@@ -213,7 +218,7 @@ export async function initializeMap(): Promise<void> {
 		// Load current floor if set
 		const currentId = get(currentFloorId);
 		if (currentId !== null) {
-			await loadFloor(currentId);
+			await loadFloor(currentId, true);
 		}
 
 		// Subscribe to real-time updates
@@ -229,10 +234,14 @@ export async function initializeMap(): Promise<void> {
 /**
  * Load a specific floor's data
  */
-export async function loadFloor(floorId: number): Promise<void> {
+export async function loadFloor(floorId: number, isInitialLoad: boolean = false): Promise<void> {
 	if (!user.user) return;
 
-	isLoading.set(true);
+	if (isInitialLoad) {
+		isLoading.set(true);
+	} else {
+		isSwitchingFloor.set(true);
+	}
 	error.set(null);
 
 	try {
@@ -260,7 +269,11 @@ export async function loadFloor(floorId: number): Promise<void> {
 		console.error('Error loading floor:', err);
 		error.set(err instanceof Error ? err.message : 'Failed to load floor');
 	} finally {
-		isLoading.set(false);
+		if (isInitialLoad) {
+			isLoading.set(false);
+		} else {
+			isSwitchingFloor.set(false);
+		}
 	}
 }
 

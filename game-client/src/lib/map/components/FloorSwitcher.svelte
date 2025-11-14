@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { floors, currentFloorId, floorStats, switchFloor, isLoading } from '../mapStore';
+	import { floors, currentFloorId, floorStats, switchFloor, isSwitchingFloor } from '../mapStore';
 
 	let isExpanded = false;
 
@@ -19,7 +19,7 @@
 <div class="floor-switcher">
 	<!-- Mobile: Compact Dropdown -->
 	<div class="mobile-switcher dropdown dropdown-bottom">
-		<button class="btn btn-sm btn-primary" disabled={$isLoading}>
+		<button class="btn btn-sm btn-primary" disabled={$isSwitchingFloor}>
 			<span class="floor-icon">🏢</span>
 			<span class="floor-name">{currentFloorName}</span>
 			<span class="arrow">▼</span>
@@ -34,7 +34,7 @@
 						class="floor-item"
 						class:active={isActive}
 						on:click={() => handleFloorChange(floor.id)}
-						disabled={$isLoading}
+						disabled={$isSwitchingFloor}
 					>
 						<div class="floor-info">
 							<span class="floor-item-name">{floor.name}</span>
@@ -77,7 +77,7 @@
 		<button
 			class="current-floor btn btn-ghost bg-base-100 shadow-lg"
 			on:click={toggleExpanded}
-			disabled={$isLoading}
+			disabled={$isSwitchingFloor}
 		>
 			<span class="floor-icon">🏢</span>
 			<span class="floor-name">{currentFloorName}</span>
@@ -94,7 +94,7 @@
 						class="floor-button"
 						class:active={isActive}
 						on:click={() => handleFloorChange(floor.id)}
-						disabled={$isLoading}
+						disabled={$isSwitchingFloor}
 					>
 						<div class="floor-info">
 							<span class="floor-item-name">{floor.name}</span>
