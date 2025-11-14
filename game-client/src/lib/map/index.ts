@@ -182,12 +182,16 @@ export {
 } from './visibilityRules';
 
 // =====================================================
-// Future Exports (will be added in Phase 3+)
+// Svelte Components
 // =====================================================
 
-// export { default as MapView } from './components/MapView.svelte';
-// export { default as FloorSwitcher } from './components/FloorSwitcher.svelte';
-// export { default as PointMarker } from './components/PointMarker.svelte';
-// export { default as PointInfoPanel } from './components/PointInfoPanel.svelte';
-// export { default as MapLegend } from './components/MapLegend.svelte';
+export { default as MapView } from './components/MapView.svelte';
+export { default as FloorSwitcher } from './components/FloorSwitcher.svelte';
+export { default as PointInfoPanel } from './components/PointInfoPanel.svelte';
+export { default as MapLegend } from './components/MapLegend.svelte';
+
+// =====================================================
+// Future Exports (will be added in Phase 4+)
+// =====================================================
+
 // export { default as MiniMap } from './components/MiniMap.svelte';

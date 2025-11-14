@@ -1,21 +1,23 @@
 # Map System Implementation Summary
 
 **Date:** 2025-11-14  
-**Status:** Phase 2 Complete ✅ (API & State Management)
+**Status:** Phase 3 Complete ✅ (UI Components)
 
 ---
 
-## 🎉 Phase 2 Complete!
+## 🎉 Phase 3 Complete!
 
 **What's New:**
-- ✅ Supabase API functions for loading floors, points, and discoveries
-- ✅ Real-time subscription functions for live updates
-- ✅ Visibility rules engine implementing Faction Intelligence Model
-- ✅ Svelte stores for reactive state management
-- ✅ Full integration with local storage caching system
-- ✅ Ready for Phase 3: UI Components (Svelte components with Leaflet)
+- ✅ MapView component with Leaflet.js integration
+- ✅ FloorSwitcher component for floor navigation
+- ✅ PointInfoPanel component for detailed point information
+- ✅ MapLegend component with collapsible legend
+- ✅ Full map page at `/map` route
+- ✅ Real-time marker updates and interactions
+- ✅ Mobile-responsive design
+- ✅ Faction colors, health indicators, and player presence
 
-**Next Steps:** Create Svelte components (MapView, FloorSwitcher, PointMarker, etc.)
+**Next Steps:** Phase 4 - Admin Tools (visual point editor, floor management UI)
 
 ---
 
@@ -251,7 +253,52 @@ All types, functions, stores, and utilities are exported from a single entry poi
 
 ---
 
-### ✅ 8. Documentation (Complete)
+### ✅ 8. Svelte UI Components (Complete)
+
+**Components Created:**
+
+**MapView.svelte** - Main map container
+- Leaflet.js integration with custom CRS for indoor maps
+- Floor plan image overlay
+- Dynamic point markers with real-time updates
+- Click handlers and selection state
+- Health-based opacity and faction colors
+- Loading and error states
+
+**FloorSwitcher.svelte** - Floor selection UI
+- Collapsible floor list
+- Current floor indicator
+- Floor statistics (total points, faction breakdown)
+- Smooth floor switching with loading states
+- Mobile-responsive design
+
+**PointInfoPanel.svelte** - Point details panel
+- Sliding panel with point information
+- Faction ownership display
+- Health bar with status indicators
+- Cache warning for enemy points
+- Real-time indicator for own faction
+- Player presence count
+- Action buttons (Navigate, Attack, Repair, Upgrade)
+- Mobile-responsive with overlay
+
+**MapLegend.svelte** - Map legend/key
+- Collapsible legend
+- Faction color indicators
+- Point level sizes
+- Status indicators (healthy, damaged, critical)
+- Player presence badges
+- Mobile-responsive
+
+**Main Map Page** (`/routes/map/+page.svelte`)
+- Integration of all components
+- Event handling (point clicks, actions)
+- Authentication check
+- Navigation to game actions
+
+---
+
+### ✅ 9. Documentation (Complete)
 
 **Concept Document:** `documentation/concepts/2025_11_14_map.md`
 - Complete design with all brainstormed ideas
@@ -344,13 +391,15 @@ congress-ingress/
 │   ├── mapStore.ts ✅
 │   ├── visibilityRules.ts ✅
 │   ├── README.md ✅
-│   └── components/ (TODO - Phase 3)
-│       ├── MapView.svelte
-│       ├── FloorSwitcher.svelte
-│       ├── PointMarker.svelte
-│       ├── PointInfoPanel.svelte
-│       ├── MapLegend.svelte
-│       └── MiniMap.svelte
+│   └── components/ ✅
+│       ├── MapView.svelte ✅
+│       ├── FloorSwitcher.svelte ✅
+│       ├── PointInfoPanel.svelte ✅
+│       ├── MapLegend.svelte ✅
+│       └── MiniMap.svelte (TODO - Phase 4)
+│
+├── game-client/src/routes/map/
+│   └── +page.svelte ✅
 │
 └── documentation/
     ├── concepts/2025_11_14_map.md ✅
@@ -458,7 +507,41 @@ VALUES ('your-point-uuid', 1, 500, 300);
 
 ## Usage Examples
 
-### Initialize Map System
+### Using the Map Page
+
+Simply navigate to `/map` in your application:
+
+```typescript
+// Link to map page
+<a href="/map">View Map</a>
+
+// Or programmatically
+import { goto } from '$app/navigation';
+goto('/map');
+```
+
+### Using Map Components Individually
+
+```svelte
+<script>
+  import { MapView, FloorSwitcher, PointInfoPanel, MapLegend } from '$lib/map';
+  
+  let selectedPoint = null;
+</script>
+
+<MapView on:pointClick={(e) => selectedPoint = e.detail.point} />
+<FloorSwitcher />
+<MapLegend />
+
+{#if selectedPoint}
+  <PointInfoPanel 
+    point={selectedPoint} 
+    on:close={() => selectedPoint = null}
+  />
+{/if}
+```
+
+### Initialize Map System Manually
 
 ```typescript
 import { initializeMap, destroyMap } from '$lib/map';
@@ -490,76 +573,26 @@ $: console.log('Floor stats:', $floorStats);
 ### Switch Floors
 
 ```typescript
-import { switchFloor, loadFloor } from '$lib/map';
+import { switchFloor } from '$lib/map';
 
 // Switch to floor 2
 await switchFloor(2);
-
-// Or load without switching
-await loadFloor(3);
 ```
 
-### Check Visibility
+### Custom Event Handlers
 
-```typescript
-import { 
-  determinePointVisibility, 
-  shouldShowDetails,
-  getDisplayPointState 
-} from '$lib/map';
+```svelte
+<MapView 
+  on:pointClick={handlePointClick}
+  on:mapReady={(e) => console.log('Map ready:', e.detail.map)}
+/>
 
-const visibility = determinePointVisibility(
-  point, 
-  userFactionId, 
-  isDiscovered, 
-  cache
-);
-
-if (visibility.showDetails) {
-  const state = getDisplayPointState(point, userFactionId, isDiscovered, cache);
-  console.log('Health:', state.health);
-  console.log('Is cached:', state.isCached);
-}
-```
-
-### Subscribe to Updates
-
-```typescript
-import { subscribeToFactionPoints, unsubscribe } from '$lib/map';
-
-const channel = subscribeToFactionPoints(factionId, (point) => {
-  console.log('Point updated:', point);
-});
-
-// Later: cleanup
-await unsubscribe(channel);
-```
-
-### Cache Enemy State
-
-```typescript
-import { updateEnemyCache } from '$lib/map';
-
-// When visiting an enemy point
-updateEnemyCache(point);
-// Automatically saves to localStorage and updates store
-```
-
-### Filter and Display
-
-```typescript
-import { filterPoints, getContestedPoints } from '$lib/map';
-
-const filtered = filterPoints(points, userFactionId, discoveries, {
-  showOwnFaction: true,
-  showEnemyFactions: true,
-  showNeutral: false,
-  showMiniGames: true,
-  showContested: true,
-  showUnvisited: false
-});
-
-const contested = getContestedPoints(points, 50); // <50% health
+<PointInfoPanel
+  {point}
+  on:close={handleClose}
+  on:navigate={handleNavigate}
+  on:action={handleAction}
+/>
 ```
 
 ---
@@ -617,7 +650,31 @@ The migration file has been corrected to reference `public.point` (singular) ins
 
 ---
 
-**Phase 1 & 2 Complete!** ✅  
-Ready for Phase 3: UI Components (Svelte + Leaflet)
+**Phase 1, 2 & 3 Complete!** ✅  
+Ready for Phase 4: Admin Tools (Visual point editor, floor management)
 
-See `documentation/guides/map_phase3_quickstart.md` for component development guide.
+The map system is now fully functional and ready to use at `/map`!
+
+### What's Working:
+- ✅ Full interactive map with Leaflet
+- ✅ Floor switching with statistics
+- ✅ Point markers with faction colors
+- ✅ Health indicators and status
+- ✅ Fog-of-war system
+- ✅ Real-time updates for own faction
+- ✅ Cached states for enemy points
+- ✅ Player presence indicators
+- ✅ Mobile-responsive design
+- ✅ Point information panel with actions
+- ✅ Collapsible legend
+
+### Try It Out:
+1. Navigate to `/map` in your app
+2. Switch between floors
+3. Click on points to see details
+4. Watch real-time updates
+5. See enemy point cache warnings
+
+### Dependencies Installed:
+- `leaflet` - Map rendering library
+- `@types/leaflet` - TypeScript definitions
