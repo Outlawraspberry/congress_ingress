@@ -18,6 +18,7 @@
 - Claiming, attacking, and repairing are implemented as types in the `task_type` enum.
 - Experience points are rewarded via the `actions` table and accumulated in `user_game_data`.
 - Actions no longer require puzzles - puzzles are only used for gaining AP at mini-game points.
+- Point level. see at ./documentation/concepts/2025_11_14_point_level.md.
 
 ## Client (Svelte)
 
@@ -37,12 +38,12 @@
 - **AP Storage:** Action points are stored in `user_game_data.action_points` (integer, default 0)
 - **AP Gaining:** Users gain AP by solving puzzles at mini-game points via the `gain_ap_on_puzzle_solve()` trigger
 - **AP Spending:** Users spend AP when performing actions on claimable points via the `perform_action()` trigger
-- **AP Configuration:** 
+- **AP Configuration:**
   - Max AP per user stored in `game.max_ap` (default 255)
   - AP gain per puzzle type stored in `puzzle_config.ap_gain`
   - AP costs per action type stored in `game` table:
     - `attack_ap_cost` (default 10)
-    - `claim_ap_cost` (default 15) 
+    - `claim_ap_cost` (default 15)
     - `repair_ap_cost` (default 8)
     - `attack_and_claim` costs both attack + claim AP
 - **AP Functions:**
