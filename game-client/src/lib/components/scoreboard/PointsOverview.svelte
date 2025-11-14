@@ -43,22 +43,44 @@
 	function formatDuration(durationString: string | null): string {
 		if (!durationString) return 'N/A';
 
-		// Parse PostgreSQL interval format
-		const match = durationString.match(/(\d+):(\d+):(\d+)/);
-		if (!match) return durationString;
+		// Parse PostgreSQL interval format - handles both "X days HH:MM:SS" and "HH:MM:SS"
+		let days = 0;
+		let hours = 0;
+		let minutes = 0;
 
-		const [, hours, minutes] = match;
-		const totalHours = parseInt(hours);
-		const totalMinutes = parseInt(minutes);
+		// Check for days in the format "X days HH:MM:SS" or "X day HH:MM:SS"
+		const daysMatch = durationString.match(/(\d+)\s+days?\s+(\d+):(\d+):(\d+)/);
+		if (daysMatch) {
+			days = parseInt(daysMatch[1]);
+			hours = parseInt(daysMatch[2]);
+			minutes = parseInt(daysMatch[3]);
+		} else {
+			// Try to match just time format "HH:MM:SS"
+			const timeMatch = durationString.match(/(\d+):(\d+):(\d+)/);
+			if (timeMatch) {
+				hours = parseInt(timeMatch[1]);
+				minutes = parseInt(timeMatch[2]);
+				// If hours >= 24, convert to days
+				if (hours >= 24) {
+					days = Math.floor(hours / 24);
+					hours = hours % 24;
+				}
+			} else {
+				return durationString; // Return as-is if we can't parse it
+			}
+		}
 
-		if (totalHours >= 24) {
-			const days = Math.floor(totalHours / 24);
-			const remainingHours = totalHours % 24;
-			return `${days}d ${remainingHours}h`;
-		} else if (totalHours > 0) {
-			return `${totalHours}h ${totalMinutes}m`;
-		} else if (totalMinutes > 0) {
-			return `${totalMinutes}m`;
+		// Format the output
+		if (days > 0) {
+			if (hours > 0) {
+				return `${days}d ${hours}h`;
+			} else {
+				return `${days}d`;
+			}
+		} else if (hours > 0) {
+			return `${hours}h ${minutes}m`;
+		} else if (minutes > 0) {
+			return `${minutes}m`;
 		} else {
 			return 'Just claimed';
 		}
