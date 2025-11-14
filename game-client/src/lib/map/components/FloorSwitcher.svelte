@@ -325,7 +325,7 @@
 		padding: 0.75rem 1rem;
 		border: none;
 		border-bottom: 1px solid hsl(var(--b2));
-		background: white;
+		background: var(--color-base-300);
 		cursor: pointer;
 		transition: background 0.2s;
 		text-align: left;
