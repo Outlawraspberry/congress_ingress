@@ -95,6 +95,17 @@
 			// Set initial view
 			map.fitBounds(currentBounds);
 
+			// Ensure proper z-index hierarchy for panes
+			const overlayPane = map.getPane('overlayPane');
+			const markerPane = map.getPane('markerPane');
+			const shadowPane = map.getPane('shadowPane');
+			const tooltipPane = map.getPane('tooltipPane');
+
+			if (overlayPane) overlayPane.style.zIndex = '400';
+			if (shadowPane) shadowPane.style.zIndex = '500';
+			if (markerPane) markerPane.style.zIndex = '600';
+			if (tooltipPane) tooltipPane.style.zIndex = '650';
+
 			// Add touch-friendly zoom control positioning
 			if (map.zoomControl) {
 				map.zoomControl.setPosition('bottomright');
@@ -180,8 +191,10 @@
 		}
 
 		// Create new overlay with opacity 0
+		// Explicitly set pane to overlayPane to ensure markers (in markerPane) are above it
 		const newOverlay = L.imageOverlay(floor.map_image_url, currentBounds, {
-			opacity: 0
+			opacity: 0,
+			pane: 'overlayPane'
 		});
 
 		newOverlay.addTo(map);
@@ -214,13 +227,14 @@
 		// Fit bounds to show the entire image
 		map.fitBounds(currentBounds);
 
-		// Clear existing markers since they're for the old floor
-		markers.forEach((marker) => marker.remove());
-		markers.clear();
+		// Don't clear markers here - updateMarkers will handle it
+		// Markers are managed by the reactive statement below
+		console.log('Floor image updated, waiting for markers to refresh');
 	}
 
 	// Update markers when visible points change
 	$: if (map && $visiblePoints) {
+		console.log('Updating markers, count:', $visiblePoints.length);
 		updateMarkers($visiblePoints);
 	}
 
