@@ -15,17 +15,18 @@
 		action: { pointId: string; actionType: string };
 	}>();
 
-	$: userFactionId = user.user?.faction || '';
-	$: isDiscovered = point ? $discoveries.has(point.id) : false;
-	$: cache = point ? $enemyCache.get(point.id) || null : null;
+	$: isDiscovered = point && $discoveries ? $discoveries.has(point.id) : false;
+	$: cache = point && $enemyCache ? $enemyCache.get(point.id) || null : null;
 	$: visibility = point
-		? determinePointVisibility(point, userFactionId, isDiscovered, cache)
+		? determinePointVisibility(point, user.user?.faction || '', isDiscovered, cache)
 		: null;
 	$: displayState =
-		point && visibility ? getDisplayPointState(point, userFactionId, isDiscovered, cache) : null;
+		point && visibility
+			? getDisplayPointState(point, user.user?.faction || '', isDiscovered, cache)
+			: null;
 	$: healthPercent = point ? getHealthPercentage(point) : 0;
 	$: status = point ? getPointStatus(point) : '';
-	$: presenceCount = point ? $playerPresence.get(point.id) || 0 : 0;
+	$: presenceCount = point && $playerPresence ? $playerPresence.get(point.id) || 0 : 0;
 
 	function handleClose() {
 		dispatch('close');
@@ -45,173 +46,416 @@
 
 	function getFactionBadgeColor(factionId: string | null): string {
 		if (factionId === null) return '#9E9E9E';
-		if (factionId === userFactionId) return '#4CAF50';
+		if (factionId === (user.user?.faction || '')) return '#4CAF50';
 		return '#f44336';
 	}
 </script>
 
 {#if point && visibility}
-	<div
-		class="panel-overlay"
-		on:click={handleClose}
-		on:keydown={handleClose}
-		role="button"
-		tabindex="0"
-	></div>
-	<div class="panel">
-		<div class="panel-header">
-			<div class="header-content">
-				<h2 class="point-name">
-					{#if visibility.showName}
-						{point.name}
-					{:else}
-						<span class="unknown">Unknown Point</span>
-					{/if}
-				</h2>
-				<div class="point-type-badge" class:mini-game={point.type === 'mini_game'}>
-					{point.type === 'claimable' ? '🎯 Claimable' : ''}
-					{point.type === 'mini_game' ? '🎮 Mini-game' : ''}
-					{point.type === 'not_claimable' ? '🚫 Not Claimable' : ''}
+	<!-- Mobile: Bottom Drawer -->
+	<div class="mobile-panel drawer drawer-end drawer-open">
+		<input id="point-info-drawer" type="checkbox" class="drawer-toggle" checked />
+		<div class="drawer-side">
+			<div
+				role="button"
+				tabindex="0"
+				class="drawer-overlay"
+				on:click={handleClose}
+				on:keydown={handleClose}
+			></div>
+			<div class="drawer-content-wrapper">
+				<!-- Header with drag handle -->
+				<div class="drawer-handle-area">
+					<div class="drawer-handle"></div>
 				</div>
-			</div>
-			<button class="close-button" on:click={handleClose} aria-label="Close">×</button>
-		</div>
 
-		<div class="panel-content">
-			{#if visibility.showDetails && displayState}
-				<!-- Faction Ownership -->
-				{#if point.type === 'claimable'}
-					<div class="info-section">
-						<div class="section-title">Ownership</div>
-						<div
-							class="faction-badge"
-							style="background: {getFactionBadgeColor(displayState.factionId)}"
-						>
-							{#if displayState.factionId === null}
-								Neutral
-							{:else if displayState.factionId === userFactionId}
-								Your Faction
+				<div class="panel-header">
+					<div class="header-content">
+						<h2 class="point-name">
+							{#if visibility.showName}
+								{point.name}
 							{:else}
-								Enemy Faction
+								<span class="unknown">Unknown Point</span>
 							{/if}
+						</h2>
+						<div class="point-type-badge" class:mini-game={point.type === 'mini_game'}>
+							{point.type === 'claimable' ? '🎯 Claimable' : ''}
+							{point.type === 'mini_game' ? '🎮 Mini-game' : ''}
+							{point.type === 'not_claimable' ? '🚫 Not Claimable' : ''}
 						</div>
 					</div>
+					<button class="btn btn-sm btn-circle btn-ghost close-button" on:click={handleClose}>
+						✕
+					</button>
+				</div>
 
-					<!-- Level -->
-					<div class="info-row">
-						<span class="label">Level:</span>
-						<span class="value">
-							<span class="level-badge">Lv. {displayState.level}</span>
-						</span>
-					</div>
-
-					<!-- Health -->
-					<div class="info-section">
-						<div class="info-row">
-							<span class="label">Health:</span>
-							<span class="value">
-								{displayState.health} / {displayState.maxHealth}
-								<span
-									class="status-badge"
-									class:healthy={healthPercent > 75}
-									class:damaged={healthPercent <= 75 && healthPercent > 25}
-									class:critical={healthPercent <= 25}
+				<div class="panel-content">
+					{#if visibility.showDetails && displayState}
+						<!-- Faction Ownership -->
+						{#if point.type === 'claimable'}
+							<div class="info-section">
+								<div class="section-title">Ownership</div>
+								<div
+									class="badge badge-lg faction-badge"
+									style="background: {getFactionBadgeColor(displayState.factionId)}; color: white;"
 								>
-									{status}
+									{#if displayState.factionId === null}
+										Neutral
+									{:else if displayState.factionId === (user.user?.faction || '')}
+										Your Faction
+									{:else}
+										Enemy Faction
+									{/if}
+								</div>
+							</div>
+
+							<!-- Level -->
+							<div class="info-row">
+								<span class="label">Level:</span>
+								<span class="value">
+									<span class="badge badge-primary level-badge">Lv. {displayState.level}</span>
 								</span>
+							</div>
+
+							<!-- Health -->
+							<div class="info-section">
+								<div class="info-row">
+									<span class="label">Health:</span>
+									<span class="value">
+										{displayState.health} / {displayState.maxHealth}
+										<span
+											class="badge badge-sm status-badge"
+											class:badge-success={healthPercent > 75}
+											class:badge-warning={healthPercent <= 75 && healthPercent > 25}
+											class:badge-error={healthPercent <= 25}
+										>
+											{status}
+										</span>
+									</span>
+								</div>
+
+								<!-- Health Bar -->
+								<div class="health-bar-container">
+									<progress
+										class="progress w-full"
+										class:progress-success={healthPercent > 75}
+										class:progress-warning={healthPercent <= 75 && healthPercent > 25}
+										class:progress-error={healthPercent <= 25}
+										value={healthPercent}
+										max="100"
+									></progress>
+									<span class="health-percent">{Math.round(healthPercent)}%</span>
+								</div>
+							</div>
+
+							<!-- Cache Status / Real-time Indicator -->
+							{#if displayState.isCached && displayState.lastUpdated}
+								<div class="alert alert-warning cache-warning">
+									<span class="icon">⚠️</span>
+									<div class="warning-content">
+										<div class="warning-title">Cached Information</div>
+										<div class="warning-text">
+											Last updated: {formatTimeSinceUpdate(displayState.lastUpdated)}
+										</div>
+									</div>
+								</div>
+							{:else if visibility.showRealTime}
+								<div class="alert alert-success realtime-indicator">
+									<span class="pulse"></span>
+									<span>Real-time updates</span>
+								</div>
+							{/if}
+						{/if}
+
+						<!-- Player Presence -->
+						{#if presenceCount > 0}
+							<div class="presence-section">
+								<span class="presence-icon">👥</span>
+								<span class="presence-text">
+									{presenceCount} faction {presenceCount === 1 ? 'member' : 'members'} present
+								</span>
+							</div>
+						{/if}
+
+						<!-- Position Info -->
+						<div class="info-row small">
+							<span class="label">Position:</span>
+							<span class="value">
+								({Math.round(point.position.x)}, {Math.round(point.position.y)})
+							</span>
+						</div>
+					{:else}
+						<!-- Point not discovered -->
+						<div class="undiscovered-message">
+							<span class="icon">🔒</span>
+							<p>Visit this point to reveal its details</p>
+						</div>
+					{/if}
+				</div>
+
+				<!-- Actions -->
+				<div class="panel-actions">
+					<button class="btn btn-primary action-button navigate" on:click={handleNavigate}>
+						<span class="button-icon">🧭</span>
+						Navigate
+					</button>
+
+					{#if visibility.showDetails && point.type === 'claimable'}
+						<!-- Add action buttons based on point state -->
+						{#if displayState && displayState.factionId === (user.user?.faction || '')}
+							<button
+								class="btn btn-success action-button repair"
+								on:click={() => handleAction('repair')}
+							>
+								<span class="button-icon">🔧</span>
+								Repair
+							</button>
+							<button
+								class="btn btn-warning action-button upgrade"
+								on:click={() => handleAction('upgrade')}
+							>
+								<span class="button-icon">⬆️</span>
+								Upgrade
+							</button>
+						{:else if displayState && displayState.factionId !== (user.user?.faction || '')}
+							<button
+								class="btn btn-error action-button attack"
+								on:click={() => handleAction('attack')}
+							>
+								<span class="button-icon">⚔️</span>
+								Attack
+							</button>
+						{/if}
+					{/if}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Desktop: Side Panel (hidden on mobile) -->
+	<div class="desktop-panel">
+		<div
+			class="panel-overlay"
+			on:click={handleClose}
+			on:keydown={handleClose}
+			role="button"
+			tabindex="0"
+		></div>
+		<div class="panel card bg-base-100 shadow-xl">
+			<div class="panel-header">
+				<div class="header-content">
+					<h2 class="point-name">
+						{#if visibility.showName}
+							{point.name}
+						{:else}
+							<span class="unknown">Unknown Point</span>
+						{/if}
+					</h2>
+					<div class="point-type-badge" class:mini-game={point.type === 'mini_game'}>
+						{point.type === 'claimable' ? '🎯 Claimable' : ''}
+						{point.type === 'mini_game' ? '🎮 Mini-game' : ''}
+						{point.type === 'not_claimable' ? '🚫 Not Claimable' : ''}
+					</div>
+				</div>
+				<button class="btn btn-sm btn-circle btn-ghost close-button" on:click={handleClose}
+					>✕</button
+				>
+			</div>
+
+			<div class="panel-content">
+				{#if visibility.showDetails && displayState}
+					<!-- Faction Ownership -->
+					{#if point.type === 'claimable'}
+						<div class="info-section">
+							<div class="section-title">Ownership</div>
+							<div
+								class="badge badge-lg faction-badge"
+								style="background: {getFactionBadgeColor(displayState.factionId)}; color: white;"
+							>
+								{#if displayState.factionId === null}
+									Neutral
+								{:else if displayState.factionId === (user.user?.faction || '')}
+									Your Faction
+								{:else}
+									Enemy Faction
+								{/if}
+							</div>
+						</div>
+
+						<!-- Level -->
+						<div class="info-row">
+							<span class="label">Level:</span>
+							<span class="value">
+								<span class="badge badge-primary level-badge">Lv. {displayState.level}</span>
 							</span>
 						</div>
 
-						<!-- Health Bar -->
-						<div class="health-bar-container">
-							<div class="health-bar">
-								<div
-									class="health-fill"
-									class:healthy={healthPercent > 75}
-									class:damaged={healthPercent <= 75 && healthPercent > 25}
-									class:critical={healthPercent <= 25}
-									style="width: {healthPercent}%"
-								></div>
+						<!-- Health -->
+						<div class="info-section">
+							<div class="info-row">
+								<span class="label">Health:</span>
+								<span class="value">
+									{displayState.health} / {displayState.maxHealth}
+									<span
+										class="badge badge-sm status-badge"
+										class:badge-success={healthPercent > 75}
+										class:badge-warning={healthPercent <= 75 && healthPercent > 25}
+										class:badge-error={healthPercent <= 25}
+									>
+										{status}
+									</span>
+								</span>
 							</div>
-							<span class="health-percent">{Math.round(healthPercent)}%</span>
-						</div>
-					</div>
 
-					<!-- Cache Status / Real-time Indicator -->
-					{#if displayState.isCached && displayState.lastUpdated}
-						<div class="cache-warning">
-							<span class="icon">⚠️</span>
-							<div class="warning-content">
-								<div class="warning-title">Cached Information</div>
-								<div class="warning-text">
-									Last updated: {formatTimeSinceUpdate(displayState.lastUpdated)}
+							<!-- Health Bar -->
+							<div class="health-bar-container">
+								<progress
+									class="progress w-full"
+									class:progress-success={healthPercent > 75}
+									class:progress-warning={healthPercent <= 75 && healthPercent > 25}
+									class:progress-error={healthPercent <= 25}
+									value={healthPercent}
+									max="100"
+								></progress>
+								<span class="health-percent">{Math.round(healthPercent)}%</span>
+							</div>
+						</div>
+
+						<!-- Cache Status / Real-time Indicator -->
+						{#if displayState.isCached && displayState.lastUpdated}
+							<div class="alert alert-warning cache-warning">
+								<span class="icon">⚠️</span>
+								<div class="warning-content">
+									<div class="warning-title">Cached Information</div>
+									<div class="warning-text">
+										Last updated: {formatTimeSinceUpdate(displayState.lastUpdated)}
+									</div>
 								</div>
 							</div>
-						</div>
-					{:else if visibility.showRealTime}
-						<div class="realtime-indicator">
-							<span class="pulse"></span>
-							<span>Real-time updates</span>
+						{:else if visibility.showRealTime}
+							<div class="alert alert-success realtime-indicator">
+								<span class="pulse"></span>
+								<span>Real-time updates</span>
+							</div>
+						{/if}
+					{/if}
+
+					<!-- Player Presence -->
+					{#if presenceCount > 0}
+						<div class="presence-section">
+							<span class="presence-icon">👥</span>
+							<span class="presence-text">
+								{presenceCount} faction {presenceCount === 1 ? 'member' : 'members'} present
+							</span>
 						</div>
 					{/if}
-				{/if}
 
-				<!-- Player Presence -->
-				{#if presenceCount > 0}
-					<div class="presence-section">
-						<span class="presence-icon">👥</span>
-						<span class="presence-text">
-							{presenceCount} faction {presenceCount === 1 ? 'member' : 'members'} present
+					<!-- Position Info -->
+					<div class="info-row small">
+						<span class="label">Position:</span>
+						<span class="value">
+							({Math.round(point.position.x)}, {Math.round(point.position.y)})
 						</span>
 					</div>
+				{:else}
+					<!-- Point not discovered -->
+					<div class="undiscovered-message">
+						<span class="icon">🔒</span>
+						<p>Visit this point to reveal its details</p>
+					</div>
 				{/if}
+			</div>
 
-				<!-- Position Info -->
-				<div class="info-row small">
-					<span class="label">Position:</span>
-					<span class="value">
-						({Math.round(point.position.x)}, {Math.round(point.position.y)})
-					</span>
-				</div>
-			{:else}
-				<!-- Point not discovered -->
-				<div class="undiscovered-message">
-					<span class="icon">🔒</span>
-					<p>Visit this point to reveal its details</p>
-				</div>
-			{/if}
-		</div>
+			<!-- Actions -->
+			<div class="panel-actions">
+				<button class="btn btn-primary action-button navigate" on:click={handleNavigate}>
+					<span class="button-icon">🧭</span>
+					Navigate
+				</button>
 
-		<!-- Actions -->
-		<div class="panel-actions">
-			<button class="action-button navigate" on:click={handleNavigate}>
-				<span class="button-icon">🧭</span>
-				Navigate
-			</button>
-
-			{#if visibility.showDetails && point.type === 'claimable'}
-				<!-- Add action buttons based on point state -->
-				{#if displayState && displayState.factionId === userFactionId}
-					<button class="action-button repair" on:click={() => handleAction('repair')}>
-						<span class="button-icon">🔧</span>
-						Repair
-					</button>
-					<button class="action-button upgrade" on:click={() => handleAction('upgrade')}>
-						<span class="button-icon">⬆️</span>
-						Upgrade
-					</button>
-				{:else if displayState && displayState.factionId !== userFactionId}
-					<button class="action-button attack" on:click={() => handleAction('attack')}>
-						<span class="button-icon">⚔️</span>
-						Attack
-					</button>
+				{#if visibility.showDetails && point.type === 'claimable'}
+					<!-- Add action buttons based on point state -->
+					{#if displayState && displayState.factionId === (user.user?.faction || '')}
+						<button
+							class="btn btn-success action-button repair"
+							on:click={() => handleAction('repair')}
+						>
+							<span class="button-icon">🔧</span>
+							Repair
+						</button>
+						<button
+							class="btn btn-warning action-button upgrade"
+							on:click={() => handleAction('upgrade')}
+						>
+							<span class="button-icon">⬆️</span>
+							Upgrade
+						</button>
+					{:else if displayState && displayState.factionId !== (user.user?.faction || '')}
+						<button
+							class="btn btn-error action-button attack"
+							on:click={() => handleAction('attack')}
+						>
+							<span class="button-icon">⚔️</span>
+							Attack
+						</button>
+					{/if}
 				{/if}
-			{/if}
+			</div>
 		</div>
 	</div>
 {/if}
 
 <style>
+	/* Mobile Panel - Bottom Drawer */
+	.mobile-panel {
+		display: block;
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		z-index: 2000;
+	}
+
+	.drawer-content-wrapper {
+		background: white;
+		width: 100vw;
+		max-height: 70vh;
+		border-radius: 1.5rem 1.5rem 0 0;
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+		animation: slideUp 0.3s ease-out;
+		box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+	}
+
+	@keyframes slideUp {
+		from {
+			transform: translateY(100%);
+		}
+		to {
+			transform: translateY(0);
+		}
+	}
+
+	.drawer-handle-area {
+		padding: 0.75rem;
+		display: flex;
+		justify-content: center;
+		cursor: grab;
+	}
+
+	.drawer-handle {
+		width: 3rem;
+		height: 0.25rem;
+		background: #d1d5db;
+		border-radius: 0.125rem;
+	}
+
+	/* Desktop Panel - Side Panel */
+	.desktop-panel {
+		display: none;
+	}
+
 	.panel-overlay {
 		position: fixed;
 		top: 0;
@@ -224,25 +468,22 @@
 
 	.panel {
 		position: fixed;
-		right: 20px;
-		top: 20px;
-		bottom: 20px;
+		right: 1.25rem;
+		top: 1.25rem;
+		bottom: 1.25rem;
 		width: 350px;
-		max-height: calc(100vh - 40px);
-		background: white;
-		border-radius: 12px;
-		box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-		z-index: 2000;
+		max-height: calc(100vh - 2.5rem);
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;
 		animation: slideIn 0.3s ease-out;
+		z-index: 2000;
 	}
 
 	@keyframes slideIn {
 		from {
 			opacity: 0;
-			transform: translateX(20px);
+			transform: translateX(1.25rem);
 		}
 		to {
 			opacity: 1;
@@ -254,20 +495,23 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-start;
-		padding: 20px;
+		padding: 1rem 1.25rem;
 		border-bottom: 2px solid #f0f0f0;
 		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 		color: white;
+		flex-shrink: 0;
 	}
 
 	.header-content {
 		flex: 1;
+		min-width: 0;
 	}
 
 	.point-name {
-		margin: 0 0 8px 0;
-		font-size: 20px;
+		margin: 0 0 0.5rem 0;
+		font-size: 1.125rem;
 		font-weight: 700;
+		word-wrap: break-word;
 	}
 
 	.unknown {
@@ -277,10 +521,10 @@
 
 	.point-type-badge {
 		display: inline-block;
-		padding: 4px 12px;
+		padding: 0.25rem 0.75rem;
 		background: rgba(255, 255, 255, 0.2);
-		border-radius: 12px;
-		font-size: 12px;
+		border-radius: 0.75rem;
+		font-size: 0.75rem;
 		font-weight: 600;
 	}
 
@@ -289,71 +533,53 @@
 	}
 
 	.close-button {
-		background: rgba(255, 255, 255, 0.2);
-		border: none;
-		font-size: 32px;
-		cursor: pointer;
-		padding: 0;
-		width: 40px;
-		height: 40px;
-		border-radius: 50%;
-		color: white;
-		transition: all 0.2s;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		line-height: 1;
-	}
-
-	.close-button:hover {
-		background: rgba(255, 255, 255, 0.3);
-		transform: rotate(90deg);
+		flex-shrink: 0;
+		margin-left: 0.5rem;
 	}
 
 	.panel-content {
 		flex: 1;
 		overflow-y: auto;
-		padding: 20px;
+		overflow-x: hidden;
+		padding: 1rem 1.25rem;
+		-webkit-overflow-scrolling: touch;
 	}
 
 	.info-section {
-		margin-bottom: 20px;
+		margin-bottom: 1.25rem;
 	}
 
 	.section-title {
-		font-size: 12px;
+		font-size: 0.75rem;
 		font-weight: 600;
 		text-transform: uppercase;
 		color: #999;
-		margin-bottom: 8px;
-		letter-spacing: 0.5px;
+		margin-bottom: 0.5rem;
+		letter-spacing: 0.03125rem;
 	}
 
 	.faction-badge {
-		display: inline-block;
-		padding: 8px 16px;
-		border-radius: 8px;
-		color: white;
 		font-weight: 600;
-		font-size: 14px;
 	}
 
 	.info-row {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 12px;
+		margin-bottom: 0.75rem;
+		gap: 0.5rem;
 	}
 
 	.info-row.small {
-		font-size: 12px;
+		font-size: 0.75rem;
 		color: #999;
-		margin-bottom: 8px;
+		margin-bottom: 0.5rem;
 	}
 
 	.label {
 		font-weight: 600;
 		color: #666;
+		flex-shrink: 0;
 	}
 
 	.value {
@@ -361,96 +587,40 @@
 		font-weight: 500;
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+		justify-content: flex-end;
 	}
 
 	.level-badge {
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		color: white;
-		padding: 4px 10px;
-		border-radius: 6px;
-		font-size: 12px;
 		font-weight: 700;
 	}
 
 	.status-badge {
-		padding: 3px 8px;
-		border-radius: 4px;
-		font-size: 11px;
 		font-weight: 600;
 		text-transform: uppercase;
-	}
-
-	.status-badge.healthy {
-		background: #e8f5e9;
-		color: #2e7d32;
-	}
-
-	.status-badge.damaged {
-		background: #fff3e0;
-		color: #e65100;
-	}
-
-	.status-badge.critical {
-		background: #ffebee;
-		color: #c62828;
 	}
 
 	.health-bar-container {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		margin-top: 8px;
-	}
-
-	.health-bar {
-		flex: 1;
-		height: 24px;
-		background: #e0e0e0;
-		border-radius: 12px;
-		overflow: hidden;
-		box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-	}
-
-	.health-fill {
-		height: 100%;
-		transition: width 0.5s ease;
-		border-radius: 12px;
-	}
-
-	.health-fill.healthy {
-		background: linear-gradient(90deg, #4caf50, #8bc34a);
-	}
-
-	.health-fill.damaged {
-		background: linear-gradient(90deg, #ff9800, #ffc107);
-	}
-
-	.health-fill.critical {
-		background: linear-gradient(90deg, #f44336, #e91e63);
+		gap: 0.625rem;
+		margin-top: 0.5rem;
 	}
 
 	.health-percent {
-		font-size: 14px;
+		font-size: 0.875rem;
 		font-weight: 700;
 		color: #666;
-		min-width: 45px;
+		min-width: 2.8125rem;
 		text-align: right;
+		flex-shrink: 0;
 	}
 
-	.cache-warning {
-		display: flex;
-		align-items: flex-start;
-		gap: 12px;
-		padding: 12px;
-		background: #fff3cd;
-		border: 1px solid #ffc107;
-		border-radius: 8px;
-		margin-top: 16px;
-	}
-
-	.cache-warning .icon {
-		font-size: 20px;
+	.cache-warning,
+	.realtime-indicator {
+		margin-top: 1rem;
+		font-size: 0.8125rem;
 	}
 
 	.warning-content {
@@ -459,34 +629,17 @@
 
 	.warning-title {
 		font-weight: 600;
-		font-size: 13px;
-		color: #856404;
-		margin-bottom: 2px;
+		margin-bottom: 0.125rem;
 	}
 
 	.warning-text {
-		font-size: 12px;
-		color: #856404;
-	}
-
-	.realtime-indicator {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		padding: 10px 12px;
-		background: #e8f5e9;
-		border: 1px solid #4caf50;
-		border-radius: 8px;
-		font-size: 13px;
-		font-weight: 600;
-		color: #2e7d32;
-		margin-top: 16px;
+		font-size: 0.75rem;
 	}
 
 	.pulse {
-		width: 8px;
-		height: 8px;
-		background: #4caf50;
+		width: 0.5rem;
+		height: 0.5rem;
+		background: currentColor;
 		border-radius: 50%;
 		animation: pulse 2s infinite;
 	}
@@ -506,146 +659,64 @@
 	.presence-section {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		padding: 12px;
+		gap: 0.625rem;
+		padding: 0.75rem;
 		background: #e3f2fd;
-		border-radius: 8px;
-		margin-bottom: 16px;
+		border-radius: 0.5rem;
+		margin-bottom: 1rem;
 	}
 
 	.presence-icon {
-		font-size: 20px;
+		font-size: 1.25rem;
 	}
 
 	.presence-text {
-		font-size: 14px;
+		font-size: 0.875rem;
 		font-weight: 600;
 		color: #1565c0;
 	}
 
 	.undiscovered-message {
 		text-align: center;
-		padding: 40px 20px;
+		padding: 2.5rem 1.25rem;
 		color: #999;
 	}
 
 	.undiscovered-message .icon {
-		font-size: 48px;
+		font-size: 3rem;
 		display: block;
-		margin-bottom: 16px;
+		margin-bottom: 1rem;
 	}
 
 	.undiscovered-message p {
 		margin: 0;
-		font-size: 14px;
+		font-size: 0.875rem;
 	}
 
 	.panel-actions {
-		padding: 16px 20px;
+		padding: 1rem 1.25rem;
 		border-top: 2px solid #f0f0f0;
 		display: flex;
-		gap: 10px;
+		gap: 0.625rem;
 		flex-wrap: wrap;
 		background: #fafafa;
+		flex-shrink: 0;
 	}
 
 	.action-button {
 		flex: 1;
-		min-width: 120px;
-		padding: 12px 16px;
-		border: none;
-		border-radius: 8px;
+		min-width: 6.875rem;
+		gap: 0.5rem;
 		font-weight: 600;
-		font-size: 14px;
-		cursor: pointer;
-		transition: all 0.2s;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 8px;
-	}
-
-	.action-button:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-	}
-
-	.action-button.navigate {
-		background: #2196f3;
-		color: white;
-	}
-
-	.action-button.navigate:hover {
-		background: #1976d2;
-	}
-
-	.action-button.repair {
-		background: #4caf50;
-		color: white;
-	}
-
-	.action-button.repair:hover {
-		background: #388e3c;
-	}
-
-	.action-button.attack {
-		background: #f44336;
-		color: white;
-	}
-
-	.action-button.attack:hover {
-		background: #d32f2f;
-	}
-
-	.action-button.upgrade {
-		background: #ff9800;
-		color: white;
-	}
-
-	.action-button.upgrade:hover {
-		background: #f57c00;
 	}
 
 	.button-icon {
-		font-size: 16px;
-	}
-
-	/* Mobile responsive */
-	@media (max-width: 768px) {
-		.panel {
-			right: 10px;
-			top: 10px;
-			bottom: 10px;
-			width: calc(100% - 20px);
-			max-width: 400px;
-		}
-
-		.panel-header {
-			padding: 16px;
-		}
-
-		.point-name {
-			font-size: 18px;
-		}
-
-		.panel-content {
-			padding: 16px;
-		}
-
-		.panel-actions {
-			padding: 12px 16px;
-		}
-
-		.action-button {
-			min-width: 100px;
-			padding: 10px 12px;
-			font-size: 13px;
-		}
+		font-size: 1rem;
 	}
 
 	/* Scrollbar styling */
 	.panel-content::-webkit-scrollbar {
-		width: 6px;
+		width: 0.375rem;
 	}
 
 	.panel-content::-webkit-scrollbar-track {
@@ -654,10 +725,62 @@
 
 	.panel-content::-webkit-scrollbar-thumb {
 		background: #888;
-		border-radius: 3px;
+		border-radius: 0.1875rem;
 	}
 
 	.panel-content::-webkit-scrollbar-thumb:hover {
 		background: #555;
+	}
+
+	/* Tablet and up */
+	@media (min-width: 768px) {
+		.mobile-panel {
+			display: none;
+		}
+
+		.desktop-panel {
+			display: block;
+		}
+	}
+
+	/* Small mobile adjustments */
+	@media (max-width: 380px) {
+		.drawer-content-wrapper {
+			max-height: 80vh;
+		}
+
+		.point-name {
+			font-size: 1rem;
+		}
+
+		.panel-header {
+			padding: 0.875rem 1rem;
+		}
+
+		.panel-content {
+			padding: 0.875rem 1rem;
+		}
+
+		.panel-actions {
+			padding: 0.75rem 1rem;
+			gap: 0.5rem;
+		}
+
+		.action-button {
+			min-width: 5.625rem;
+			font-size: 0.8125rem;
+			padding: 0.5rem 0.75rem;
+		}
+	}
+
+	/* Landscape mobile */
+	@media (max-width: 768px) and (orientation: landscape) {
+		.drawer-content-wrapper {
+			max-height: 85vh;
+		}
+
+		.panel-content {
+			max-height: 50vh;
+		}
 	}
 </style>

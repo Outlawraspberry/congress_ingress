@@ -44,6 +44,10 @@
 <svelte:head>
 	<title>Map - Congress Quest</title>
 	<meta name="description" content="Tactical map showing all floors and points" />
+	<meta
+		name="viewport"
+		content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+	/>
 </svelte:head>
 
 <div class="map-page">
@@ -75,9 +79,15 @@
 	.map-page {
 		width: 100vw;
 		height: 100vh;
+		height: 100dvh; /* Use dynamic viewport height for mobile */
 		overflow: hidden;
-		position: relative;
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
 		background: #f5f5f5;
+		touch-action: none; /* Prevent default touch behaviors */
 	}
 
 	.auth-required {
@@ -87,39 +97,42 @@
 		align-items: center;
 		justify-content: center;
 		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		padding: 1rem;
 	}
 
 	.message-box {
 		background: white;
-		padding: 40px;
-		border-radius: 16px;
+		padding: 2rem;
+		border-radius: 1rem;
 		box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 		text-align: center;
 		max-width: 400px;
-		margin: 20px;
+		width: 100%;
 	}
 
 	.message-box h2 {
-		margin: 0 0 16px 0;
+		margin: 0 0 1rem 0;
 		color: #333;
-		font-size: 24px;
+		font-size: 1.5rem;
 	}
 
 	.message-box p {
-		margin: 0 0 24px 0;
+		margin: 0 0 1.5rem 0;
 		color: #666;
-		font-size: 16px;
+		font-size: 1rem;
 	}
 
 	.login-button {
 		display: inline-block;
-		padding: 12px 32px;
+		padding: 0.75rem 2rem;
 		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 		color: white;
 		text-decoration: none;
-		border-radius: 8px;
+		border-radius: 0.5rem;
 		font-weight: 600;
-		transition: transform 0.2s, box-shadow 0.2s;
+		transition:
+			transform 0.2s,
+			box-shadow 0.2s;
 	}
 
 	.login-button:hover {
@@ -127,8 +140,51 @@
 		box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 	}
 
-	/* Ensure no scrolling */
+	/* Ensure no scrolling on body */
 	:global(body) {
 		overflow: hidden;
+		position: fixed;
+		width: 100%;
+		height: 100%;
+	}
+
+	:global(html) {
+		overflow: hidden;
+		height: 100%;
+	}
+
+	/* Mobile optimizations */
+	@media (max-width: 768px) {
+		.message-box {
+			padding: 1.5rem;
+			margin: 1rem;
+		}
+
+		.message-box h2 {
+			font-size: 1.25rem;
+		}
+
+		.message-box p {
+			font-size: 0.875rem;
+		}
+
+		.login-button {
+			padding: 0.625rem 1.5rem;
+			font-size: 0.875rem;
+		}
+	}
+
+	/* Prevent pull-to-refresh on mobile */
+	@media (max-width: 768px) {
+		.map-page {
+			overscroll-behavior: contain;
+		}
+	}
+
+	/* Fix for iOS Safari bottom bar */
+	@supports (-webkit-touch-callout: none) {
+		.map-page {
+			height: -webkit-fill-available;
+		}
 	}
 </style>

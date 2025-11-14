@@ -45,11 +45,25 @@
 				minZoom: -2,
 				maxZoom: 2,
 				zoomControl: true,
-				attributionControl: false
-			});
+				attributionControl: false,
+				doubleClickZoom: false,
+				scrollWheelZoom: true,
+				dragging: true,
+				zoomSnap: 0.5,
+				zoomDelta: 0.5,
+				wheelPxPerZoomLevel: 60,
+				// Mobile optimizations
+				touchZoom: true,
+				tapTolerance: 15
+			} as L.MapOptions);
 
 			// Set initial view
 			map.fitBounds(bounds);
+
+			// Add touch-friendly zoom control positioning
+			if (map.zoomControl) {
+				map.zoomControl.setPosition('bottomright');
+			}
 
 			// Dispatch map ready event
 			dispatch('mapReady', { map });
@@ -231,12 +245,18 @@
 		width: 100%;
 		height: 100%;
 		background: #f5f5f5;
+		touch-action: pan-x pan-y;
 	}
 
 	.leaflet-map {
 		width: 100%;
 		height: 100%;
 		z-index: 0;
+		cursor: grab;
+	}
+
+	.leaflet-map:active {
+		cursor: grabbing;
 	}
 
 	.loading-overlay {
@@ -329,5 +349,67 @@
 
 	:global(.leaflet-tooltip-top:before) {
 		border-top-color: rgba(0, 0, 0, 0.8);
+	}
+
+	/* Mobile optimizations */
+	@media (max-width: 768px) {
+		/* Larger touch targets for zoom controls */
+		:global(.leaflet-control-zoom) {
+			margin-bottom: 5rem !important;
+			margin-right: 0.5rem !important;
+		}
+
+		:global(.leaflet-control-zoom a) {
+			width: 2.5rem;
+			height: 2.5rem;
+			line-height: 2.5rem;
+			font-size: 1.25rem;
+		}
+
+		/* Larger markers on mobile for easier tapping */
+		:global(.leaflet-marker-icon),
+		:global(.leaflet-marker-pane svg) {
+			transform-origin: center;
+		}
+
+		/* Better tooltip visibility on mobile */
+		:global(.leaflet-tooltip) {
+			font-size: 0.75rem;
+			padding: 0.375rem 0.625rem;
+		}
+	}
+
+	/* Small mobile adjustments */
+	@media (max-width: 380px) {
+		:global(.leaflet-control-zoom) {
+			margin-bottom: 4.5rem !important;
+		}
+
+		:global(.leaflet-control-zoom a) {
+			width: 2.25rem;
+			height: 2.25rem;
+			line-height: 2.25rem;
+		}
+	}
+
+	/* Prevent text selection during dragging */
+	:global(.leaflet-container) {
+		-webkit-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	/* iOS Safari specific fixes */
+	@supports (-webkit-touch-callout: none) {
+		.map-view {
+			height: -webkit-fill-available;
+		}
+
+		:global(.leaflet-container) {
+			-webkit-user-drag: none;
+			-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+		}
 	}
 </style>

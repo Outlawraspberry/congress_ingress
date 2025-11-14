@@ -1,28 +1,159 @@
 <script lang="ts">
-	let isExpanded = true;
+	let isExpanded = false;
+	let showMobileModal = false;
 
 	function toggleExpanded() {
 		isExpanded = !isExpanded;
 	}
+
+	function toggleMobileModal() {
+		showMobileModal = !showMobileModal;
+	}
 </script>
 
-<div class="legend" class:collapsed={!isExpanded}>
-	<button class="legend-toggle" on:click={toggleExpanded}>
+<!-- Mobile: Floating Button + Modal -->
+<div class="mobile-legend">
+	<button class="btn btn-circle btn-primary legend-fab" on:click={toggleMobileModal}>
+		<span class="fab-icon">?</span>
+	</button>
+
+	{#if showMobileModal}
+		<div class="modal modal-open">
+			<div class="modal-box max-w-sm">
+				<button
+					class="btn btn-sm btn-circle btn-ghost absolute top-2 right-2"
+					on:click={toggleMobileModal}>✕</button
+				>
+				<h3 class="mb-4 text-lg font-bold">Map Legend</h3>
+
+				<div class="legend-content-mobile">
+					<!-- Faction Colors -->
+					<div class="legend-section">
+						<h4 class="legend-section-title">Factions</h4>
+						<div class="legend-grid">
+							<div class="legend-item">
+								<div class="color-marker own-faction"></div>
+								<span>Your Faction</span>
+							</div>
+							<div class="legend-item">
+								<div class="color-marker enemy-faction"></div>
+								<span>Enemy Faction</span>
+							</div>
+							<div class="legend-item">
+								<div class="color-marker neutral"></div>
+								<span>Neutral</span>
+							</div>
+							<div class="legend-item">
+								<div class="color-marker undiscovered"></div>
+								<span>Undiscovered</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Point Levels -->
+					<div class="legend-section">
+						<h4 class="legend-section-title">Point Levels</h4>
+						<div class="legend-grid">
+							<div class="legend-item">
+								<div class="size-marker level-1"></div>
+								<span>Level 1</span>
+							</div>
+							<div class="legend-item">
+								<div class="size-marker level-2"></div>
+								<span>Level 2</span>
+							</div>
+							<div class="legend-item">
+								<div class="size-marker level-3"></div>
+								<span>Level 3</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Point Types -->
+					<div class="legend-section">
+						<h4 class="legend-section-title">Point Types</h4>
+						<div class="legend-grid">
+							<div class="legend-item">
+								<span class="type-icon">🎯</span>
+								<span>Claimable</span>
+							</div>
+							<div class="legend-item">
+								<span class="type-icon">🎮</span>
+								<span>Mini-game</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Status Indicators -->
+					<div class="legend-section">
+						<h4 class="legend-section-title">Health Status</h4>
+						<div class="legend-grid">
+							<div class="legend-item">
+								<div class="status-indicator healthy"></div>
+								<span>Healthy (&gt;75%)</span>
+							</div>
+							<div class="legend-item">
+								<div class="status-indicator damaged"></div>
+								<span>Damaged (25-75%)</span>
+							</div>
+							<div class="legend-item">
+								<div class="status-indicator critical"></div>
+								<span>Critical (&lt;25%)</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Indicators -->
+					<div class="legend-section">
+						<h4 class="legend-section-title">Indicators</h4>
+						<div class="legend-grid">
+							<div class="legend-item">
+								<span class="indicator-badge">3</span>
+								<span>Players Present</span>
+							</div>
+							<div class="legend-item">
+								<div class="border-example selected"></div>
+								<span>Selected Point</span>
+							</div>
+							<div class="legend-item">
+								<div class="border-example contested"></div>
+								<span>Contested</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div
+				role="button"
+				tabindex="0"
+				class="modal-backdrop"
+				on:click={toggleMobileModal}
+				on:keydown={toggleMobileModal}
+			></div>
+		</div>
+	{/if}
+</div>
+
+<!-- Desktop: Collapsible Panel -->
+<div class="desktop-legend card bg-base-100 shadow-xl" class:collapsed={!isExpanded}>
+	<button class="legend-toggle btn btn-ghost" on:click={toggleExpanded}>
 		<span class="legend-title">
 			{#if isExpanded}
 				Legend
 			{:else}
-				?
+				<span class="collapsed-icon">?</span>
 			{/if}
 		</span>
-		<span class="toggle-icon" class:rotated={!isExpanded}>▼</span>
+		{#if isExpanded}
+			<span class="toggle-icon" class:rotated={!isExpanded}>▼</span>
+		{/if}
 	</button>
 
 	{#if isExpanded}
 		<div class="legend-content">
 			<!-- Faction Colors -->
 			<div class="legend-section">
-				<h4>Factions</h4>
+				<h4 class="legend-section-title">Factions</h4>
 				<div class="legend-item">
 					<div class="color-marker own-faction"></div>
 					<span>Your Faction</span>
@@ -43,7 +174,7 @@
 
 			<!-- Point Levels -->
 			<div class="legend-section">
-				<h4>Point Levels</h4>
+				<h4 class="legend-section-title">Point Levels</h4>
 				<div class="legend-item">
 					<div class="size-marker level-1"></div>
 					<span>Level 1</span>
@@ -60,7 +191,7 @@
 
 			<!-- Point Types -->
 			<div class="legend-section">
-				<h4>Point Types</h4>
+				<h4 class="legend-section-title">Point Types</h4>
 				<div class="legend-item">
 					<span class="type-icon">🎯</span>
 					<span>Claimable</span>
@@ -73,7 +204,7 @@
 
 			<!-- Status Indicators -->
 			<div class="legend-section">
-				<h4>Status</h4>
+				<h4 class="legend-section-title">Health Status</h4>
 				<div class="legend-item">
 					<div class="status-indicator healthy"></div>
 					<span>Healthy (&gt;75%)</span>
@@ -90,7 +221,7 @@
 
 			<!-- Indicators -->
 			<div class="legend-section">
-				<h4>Indicators</h4>
+				<h4 class="legend-section-title">Indicators</h4>
 				<div class="legend-item">
 					<span class="indicator-badge">3</span>
 					<span>Players Present</span>
@@ -109,20 +240,51 @@
 </div>
 
 <style>
-	.legend {
+	/* Mobile Legend - FAB + Modal */
+	.mobile-legend {
+		display: block;
+	}
+
+	.legend-fab {
+		position: fixed;
+		bottom: 1.25rem;
+		right: 1.25rem;
+		z-index: 999;
+		width: 3.5rem;
+		height: 3.5rem;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+	}
+
+	.fab-icon {
+		font-size: 1.5rem;
+		font-weight: 700;
+	}
+
+	.legend-content-mobile {
+		max-height: calc(100vh - 12rem);
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.legend-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.75rem;
+	}
+
+	/* Desktop Legend - Collapsible Panel */
+	.desktop-legend {
+		display: none;
 		position: absolute;
-		bottom: 20px;
-		left: 20px;
-		background: white;
-		border-radius: 8px;
-		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+		bottom: 1.25rem;
+		left: 1.25rem;
 		z-index: 1000;
-		max-width: 220px;
+		max-width: 13.75rem;
 		transition: all 0.3s;
 	}
 
-	.legend.collapsed {
-		max-width: 60px;
+	.desktop-legend.collapsed {
+		max-width: 3.75rem;
 	}
 
 	.legend-toggle {
@@ -130,22 +292,19 @@
 		align-items: center;
 		justify-content: space-between;
 		width: 100%;
-		padding: 12px 16px;
-		background: none;
-		border: none;
-		cursor: pointer;
+		padding: 0.75rem 1rem;
 		font-weight: 600;
-		font-size: 14px;
-		color: #333;
+		font-size: 0.875rem;
 		transition: background 0.2s;
 	}
 
 	.legend-toggle:hover {
-		background: #f5f5f5;
+		background: hsl(var(--b2));
 	}
 
-	.legend.collapsed .legend-toggle {
+	.desktop-legend.collapsed .legend-toggle {
 		justify-content: center;
+		padding: 0.75rem;
 	}
 
 	.legend-title {
@@ -153,10 +312,15 @@
 		text-align: left;
 	}
 
+	.collapsed-icon {
+		font-size: 1.25rem;
+		font-weight: 700;
+	}
+
 	.toggle-icon {
 		transition: transform 0.2s;
-		font-size: 12px;
-		color: #666;
+		font-size: 0.75rem;
+		opacity: 0.7;
 	}
 
 	.toggle-icon.rotated {
@@ -164,7 +328,7 @@
 	}
 
 	.legend-content {
-		padding: 0 16px 16px;
+		padding: 0 1rem 1rem;
 		animation: fadeIn 0.3s ease-out;
 	}
 
@@ -178,29 +342,28 @@
 	}
 
 	.legend-section {
-		margin-bottom: 16px;
+		margin-bottom: 1rem;
 	}
 
 	.legend-section:last-child {
 		margin-bottom: 0;
 	}
 
-	h4 {
-		margin: 0 0 8px 0;
-		font-size: 12px;
+	.legend-section-title {
+		margin: 0 0 0.5rem 0;
+		font-size: 0.75rem;
 		font-weight: 700;
 		text-transform: uppercase;
-		color: #999;
-		letter-spacing: 0.5px;
+		opacity: 0.6;
+		letter-spacing: 0.03125rem;
 	}
 
 	.legend-item {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		margin-bottom: 8px;
-		font-size: 13px;
-		color: #333;
+		gap: 0.625rem;
+		margin-bottom: 0.5rem;
+		font-size: 0.8125rem;
 	}
 
 	.legend-item:last-child {
@@ -209,8 +372,8 @@
 
 	/* Color Markers */
 	.color-marker {
-		width: 20px;
-		height: 20px;
+		width: 1.25rem;
+		height: 1.25rem;
 		border-radius: 50%;
 		border: 2px solid #333;
 		flex-shrink: 0;
@@ -241,31 +404,31 @@
 	}
 
 	.size-marker.level-1 {
-		width: 16px;
-		height: 16px;
+		width: 1rem;
+		height: 1rem;
 	}
 
 	.size-marker.level-2 {
-		width: 24px;
-		height: 24px;
+		width: 1.5rem;
+		height: 1.5rem;
 	}
 
 	.size-marker.level-3 {
-		width: 32px;
-		height: 32px;
+		width: 2rem;
+		height: 2rem;
 	}
 
 	/* Type Icons */
 	.type-icon {
-		font-size: 18px;
+		font-size: 1.125rem;
 		flex-shrink: 0;
 	}
 
 	/* Status Indicators */
 	.status-indicator {
-		width: 40px;
-		height: 6px;
-		border-radius: 3px;
+		width: 2.5rem;
+		height: 0.375rem;
+		border-radius: 0.1875rem;
 		flex-shrink: 0;
 	}
 
@@ -283,23 +446,23 @@
 
 	/* Indicator Badge */
 	.indicator-badge {
-		width: 20px;
-		height: 20px;
+		width: 1.25rem;
+		height: 1.25rem;
 		border-radius: 50%;
 		background: #2196f3;
 		color: white;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 11px;
+		font-size: 0.6875rem;
 		font-weight: 700;
 		flex-shrink: 0;
 	}
 
 	/* Border Examples */
 	.border-example {
-		width: 20px;
-		height: 20px;
+		width: 1.25rem;
+		height: 1.25rem;
 		border-radius: 50%;
 		background: #4caf50;
 		flex-shrink: 0;
@@ -313,46 +476,65 @@
 		border: 3px solid #ff9800;
 	}
 
-	/* Mobile responsive */
-	@media (max-width: 768px) {
-		.legend {
-			bottom: 10px;
-			left: 10px;
-			max-width: 200px;
+	/* Tablet and up */
+	@media (min-width: 768px) {
+		.mobile-legend {
+			display: none;
 		}
 
-		.legend.collapsed {
-			max-width: 50px;
+		.desktop-legend {
+			display: block;
+		}
+	}
+
+	/* Small mobile adjustments */
+	@media (max-width: 380px) {
+		.legend-fab {
+			width: 3rem;
+			height: 3rem;
+			bottom: 1rem;
+			right: 1rem;
 		}
 
-		.legend-toggle {
-			padding: 10px 12px;
-			font-size: 13px;
+		.fab-icon {
+			font-size: 1.25rem;
 		}
 
-		.legend-content {
-			padding: 0 12px 12px;
+		.legend-grid {
+			grid-template-columns: 1fr;
+			gap: 0.5rem;
 		}
 
 		.legend-item {
-			font-size: 12px;
-			gap: 8px;
+			font-size: 0.75rem;
+			gap: 0.5rem;
 		}
+	}
 
-		.color-marker,
-		.size-marker.level-1 {
-			width: 16px;
-			height: 16px;
-		}
+	/* Scrollbar styling */
+	.legend-content::-webkit-scrollbar,
+	.legend-content-mobile::-webkit-scrollbar {
+		width: 0.375rem;
+	}
 
-		.size-marker.level-2 {
-			width: 20px;
-			height: 20px;
-		}
+	.legend-content::-webkit-scrollbar-track,
+	.legend-content-mobile::-webkit-scrollbar-track {
+		background: hsl(var(--b2));
+	}
 
-		.size-marker.level-3 {
-			width: 24px;
-			height: 24px;
-		}
+	.legend-content::-webkit-scrollbar-thumb,
+	.legend-content-mobile::-webkit-scrollbar-thumb {
+		background: hsl(var(--bc) / 0.3);
+		border-radius: 0.1875rem;
+	}
+
+	.legend-content::-webkit-scrollbar-thumb:hover,
+	.legend-content-mobile::-webkit-scrollbar-thumb:hover {
+		background: hsl(var(--bc) / 0.5);
+	}
+
+	/* Ensure modal is above everything */
+	:global(.modal) {
+		z-index: 9999 !important;
 	}
 </style>
