@@ -99,6 +99,14 @@ The Point Level System adds strategic depth through base-building mechanics, hea
   - `game.upgrade_point_ap_cost` - AP cost to upgrade a point (default: 50+)
 - **Implementation Guide:** See `/documentation/implementation/point_level_system.md` for detailed step-by-step implementation instructions
 
+## Indoor Geo location
+
+- Game works indoor
+- No GPS available
+- No WIFI location, because it is in the browser
+- **QR Code / Physical Code System (Recommended)**
+  - QR Codes are used to check if a user is at a specific point.
+
 ## Quick Reference
 
 - **Point type enum:** `CREATE TYPE public.point_type AS ENUM ('claimable', 'not_claimable', 'mini_game');`

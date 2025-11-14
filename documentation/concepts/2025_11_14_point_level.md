@@ -65,4 +65,4 @@ The following values should be configurable in the game config:
 
 ## Status
 
-Concept - Ready for implementation planning
+Implemented
