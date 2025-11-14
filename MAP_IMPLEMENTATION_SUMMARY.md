@@ -1,7 +1,21 @@
 # Map System Implementation Summary
 
 **Date:** 2025-11-14  
-**Status:** Phase 1 Complete ✅
+**Status:** Phase 2 Complete ✅ (API & State Management)
+
+---
+
+## 🎉 Phase 2 Complete!
+
+**What's New:**
+- ✅ Supabase API functions for loading floors, points, and discoveries
+- ✅ Real-time subscription functions for live updates
+- ✅ Visibility rules engine implementing Faction Intelligence Model
+- ✅ Svelte stores for reactive state management
+- ✅ Full integration with local storage caching system
+- ✅ Ready for Phase 3: UI Components (Svelte components with Leaflet)
+
+**Next Steps:** Create Svelte components (MapView, FloorSwitcher, PointMarker, etc.)
 
 ---
 
@@ -117,7 +131,127 @@
 
 ---
 
-### ✅ 4. Documentation (Complete)
+### ✅ 4. API Functions (Complete)
+
+**File:** `game-client/src/lib/map/mapApi.ts`
+
+**Floor API Functions:**
+- `loadFloors()` - Load all active floors
+- `loadFloor(floorId)` - Load specific floor
+- `loadPointPositions(floorId)` - Get point positions for floor
+- `loadFloorPoints(floorId, userId)` - Load points with discovery status
+- `loadAllPoints(userId)` - Load all points across all floors
+
+**Discovery API Functions:**
+- `loadUserDiscoveries(userId)` - Get all user's discoveries
+- `hasUserDiscoveredPoint(userId, pointId)` - Check if discovered
+- `markPointDiscovered(userId, pointId)` - Manually mark discovery
+
+**Player Presence API Functions:**
+- `loadFloorPlayerPresence(floorId, factionId)` - Get presence for floor
+- `loadPointPlayerPresence(pointId, factionId)` - Get presence for point
+
+**Real-time Subscription Functions:**
+- `subscribeToFactionPoints(factionId, callback)` - Subscribe to own faction points
+- `subscribeToDiscoveries(userId, callback)` - Subscribe to discoveries
+- `subscribeToPlayerPresence(pointIds, callback)` - Subscribe to presence changes
+- `subscribeToAllPoints(callback)` - Subscribe to all point updates
+- `unsubscribe(channel)` - Clean up subscription
+
+**Admin API Functions:**
+- `createFloor(floor)` - Create new floor
+- `updateFloor(floorId, updates)` - Update floor
+- `upsertPointPosition(position)` - Create/update point position
+- `deletePointPosition(pointId)` - Delete point position
+
+---
+
+### ✅ 5. Visibility Rules Engine (Complete)
+
+**File:** `game-client/src/lib/map/visibilityRules.ts`
+
+**Core Visibility Functions:**
+- `determinePointVisibility()` - Full visibility determination
+- `shouldShowPoint()` - Check if point visible on map
+- `shouldShowDetails()` - Check if details should be shown
+- `shouldShowRealTime()` - Check if real-time updates available
+- `shouldShowName()` - Check if name should be shown
+- `getDisplayPointState()` - Get correct state (real-time or cached)
+
+**Marker Styling Helpers:**
+- `getMarkerClass()` - CSS class for marker
+- `getMarkerOpacity()` - Opacity based on visibility and health
+- `getMarkerSize()` - Size based on level
+
+**Filter Helpers:**
+- `filterPoints()` - Filter points based on preferences
+- `getContestedPoints()` - Get low-health points
+- `getAutoDiscoveredPoints()` - Get own faction points
+- `calculateExplorationProgress()` - Calculate % explored
+- `getUnexploredVisiblePoints()` - Get gray marker points
+
+---
+
+### ✅ 6. Svelte Stores (Complete)
+
+**File:** `game-client/src/lib/map/mapStore.ts`
+
+**Core State Stores:**
+- `floors` - All available floors
+- `currentFloorId` - Currently selected floor
+- `allPoints` - All points across all floors
+- `currentFloorPoints` - Points on current floor
+- `discoveries` - User's discovered point IDs
+- `enemyCache` - Cached enemy point states
+- `playerPresence` - Player counts at points
+- `isLoading` - Loading state
+- `error` - Error state
+
+**Derived Stores:**
+- `visiblePoints` - Points visible on current floor (after visibility rules)
+- `currentFloor` - Current floor object
+- `floorStats` - Statistics per floor (point counts, faction control)
+- `filteredPoints` - Points after applying filters
+
+**Action Functions:**
+- `initializeMap()` - Initialize the map system
+- `loadFloor(floorId)` - Load specific floor data
+- `switchFloor(floorId)` - Switch to different floor
+- `discoverPoint(pointId)` - Mark point as discovered
+- `updateEnemyCache(point)` - Update enemy point cache
+- `updatePoint(pointId, updates)` - Update point data
+- `destroyMap()` - Cleanup and reset
+- `refreshCurrentFloor()` - Reload current floor
+- `clearCache()` - Clear all cached data
+
+**Real-time Features:**
+- Automatic subscription to own faction points
+- Automatic subscription to discoveries
+- Automatic subscription to player presence
+- Automatic cache updates on visits
+
+---
+
+### ✅ 7. Module Integration (Complete)
+
+**File:** `game-client/src/lib/map/index.ts`
+
+Centralized exports for easy imports:
+```typescript
+import { 
+  initializeMap, 
+  currentFloorPoints, 
+  visiblePoints,
+  determinePointVisibility,
+  loadFloors
+} from '$lib/map';
+```
+
+All types, functions, stores, and utilities are exported from a single entry point.
+
+---
+
+### ✅ 8. Documentation (Complete)
 
 **Concept Document:** `documentation/concepts/2025_11_14_map.md`
 - Complete design with all brainstormed ideas
@@ -206,10 +340,10 @@ congress-ingress/
 │   ├── index.ts ✅
 │   ├── map.types.ts ✅
 │   ├── mapStorage.ts ✅
+│   ├── mapApi.ts ✅
+│   ├── mapStore.ts ✅
+│   ├── visibilityRules.ts ✅
 │   ├── README.md ✅
-│   ├── mapStore.ts (TODO - Phase 2)
-│   ├── visibilityRules.ts (TODO - Phase 2)
-│   ├── mapApi.ts (TODO - Phase 2)
 │   └── components/ (TODO - Phase 3)
 │       ├── MapView.svelte
 │       ├── FloorSwitcher.svelte
@@ -222,38 +356,6 @@ congress-ingress/
     ├── concepts/2025_11_14_map.md ✅
     ├── implementation/map_system_implementation.md ✅
     └── guides/map_admin_quickstart.md ✅
-```
-
----
-
-## Next Steps - Phase 2
-
-### API & State Management
-
-**1. Create `mapApi.ts`** - Supabase API functions
-```typescript
-- loadFloors()
-- loadFloorPoints(floorId, userId)
-- subscribeToPoints(floorId, factionId)
-- subscribeToPlayerPresence(floorId)
-- updateVisitCache(pointId, state)
-```
-
-**2. Create `mapStore.ts`** - Svelte stores
-```typescript
-- floors (writable)
-- currentFloor (writable)
-- points (derived)
-- discoveries (writable)
-- enemyCache (writable)
-- visiblePoints (derived)
-```
-
-**3. Create `visibilityRules.ts`** - Fog-of-war logic
-```typescript
-- determineVisibility(point, user, discoveries, cache)
-- shouldShowDetails(point, user)
-- shouldShowRealTime(point, user)
 ```
 
 ---
@@ -344,7 +446,7 @@ INSERT INTO public.point_positions (point_id, floor_id, x_coordinate, y_coordina
 VALUES ('your-point-uuid', 1, 500, 300);
 ```
 
-### 5. Test in Client (Once Phase 2/3 Complete)
+### 5. Test in Client (Phase 3)
 
 - Navigate to map view
 - Verify floors display
@@ -356,49 +458,108 @@ VALUES ('your-point-uuid', 1, 500, 300);
 
 ## Usage Examples
 
-### Import Map Module
+### Initialize Map System
+
+```typescript
+import { initializeMap, destroyMap } from '$lib/map';
+
+// On component mount
+await initializeMap();
+
+// On component destroy
+await destroyMap();
+```
+
+### Access Map Data
 
 ```typescript
 import { 
-  mapStorage, 
-  isOwnFactionPoint,
-  getHealthPercentage,
-  createCachedState 
+  floors, 
+  currentFloorId, 
+  visiblePoints,
+  currentFloor,
+  floorStats 
 } from '$lib/map';
+
+// Use in Svelte components
+$: console.log('Current floor:', $currentFloor);
+$: console.log('Visible points:', $visiblePoints);
+$: console.log('Floor stats:', $floorStats);
 ```
 
-### Check Discoveries
+### Switch Floors
 
 ```typescript
-const discoveries = mapStorage.getDiscoveries();
-if (mapStorage.isPointDiscovered('point-id')) {
-  // Show point name
-}
-```
+import { switchFloor, loadFloor } from '$lib/map';
 
-### Cache Enemy State
+// Switch to floor 2
+await switchFloor(2);
 
-```typescript
-// When visiting an enemy point
-const cache = createCachedState(
-  pointId,
-  point.health,
-  point.maxHealth,
-  point.level,
-  point.factionId
-);
-mapStorage.updateEnemyPointCache(cache);
+// Or load without switching
+await loadFloor(3);
 ```
 
 ### Check Visibility
 
 ```typescript
-if (isOwnFactionPoint(point, userFactionId)) {
-  // Subscribe to real-time updates
-} else {
-  // Use cached state
-  const cached = mapStorage.getEnemyPointCache(point.id);
+import { 
+  determinePointVisibility, 
+  shouldShowDetails,
+  getDisplayPointState 
+} from '$lib/map';
+
+const visibility = determinePointVisibility(
+  point, 
+  userFactionId, 
+  isDiscovered, 
+  cache
+);
+
+if (visibility.showDetails) {
+  const state = getDisplayPointState(point, userFactionId, isDiscovered, cache);
+  console.log('Health:', state.health);
+  console.log('Is cached:', state.isCached);
 }
+```
+
+### Subscribe to Updates
+
+```typescript
+import { subscribeToFactionPoints, unsubscribe } from '$lib/map';
+
+const channel = subscribeToFactionPoints(factionId, (point) => {
+  console.log('Point updated:', point);
+});
+
+// Later: cleanup
+await unsubscribe(channel);
+```
+
+### Cache Enemy State
+
+```typescript
+import { updateEnemyCache } from '$lib/map';
+
+// When visiting an enemy point
+updateEnemyCache(point);
+// Automatically saves to localStorage and updates store
+```
+
+### Filter and Display
+
+```typescript
+import { filterPoints, getContestedPoints } from '$lib/map';
+
+const filtered = filterPoints(points, userFactionId, discoveries, {
+  showOwnFaction: true,
+  showEnemyFactions: true,
+  showNeutral: false,
+  showMiniGames: true,
+  showContested: true,
+  showUnvisited: false
+});
+
+const contested = getContestedPoints(points, 50); // <50% health
 ```
 
 ---
@@ -456,5 +617,7 @@ The migration file has been corrected to reference `public.point` (singular) ins
 
 ---
 
-**Phase 1 Complete!** ✅  
-Ready for Phase 2: API & State Management
+**Phase 1 & 2 Complete!** ✅  
+Ready for Phase 3: UI Components (Svelte + Leaflet)
+
+See `documentation/guides/map_phase3_quickstart.md` for component development guide.
