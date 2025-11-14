@@ -3,6 +3,7 @@
 	import PointStats from '$lib/components/point-stats.svelte';
 	import QrCodeScanner from '$lib/components/qr-code-scanner.svelte';
 	import TaskOverview from '$lib/components/task/task-overview.svelte';
+	import UpgradeInfo from '$lib/components/upgrade-info.svelte';
 	import {
 		destroySelectedPoint,
 		initSelectedPoint,
@@ -63,6 +64,12 @@
 		{#if selectedPoint.selectedPoint}
 			<section class="w-full">
 				<PointStats class="w-full" point={selectedPoint.selectedPoint}></PointStats>
+
+				{#if selectedPoint.selectedPoint.state.point?.acquired_by === user.user?.faction && selectedPoint.selectedPoint.state.point}
+					<div class="my-4">
+						<UpgradeInfo point={selectedPoint.selectedPoint.state.point}></UpgradeInfo>
+					</div>
+				{/if}
 
 				{#if user.user?.canUseActionInSeconds}
 					<p class="text-center">

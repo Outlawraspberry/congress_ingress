@@ -28,7 +28,18 @@
 		}
 
 		if (chosenPoint.state.point?.acquired_by === user.user?.faction) {
-			return ['repair'];
+			const tasks: TaskType[] = ['repair'];
+
+			// Add upgrade if conditions are met
+			const point = chosenPoint.state.point;
+			const maxLevel = game.game?.max_point_level ?? 3;
+			const canUpgrade = point.health === point.max_health && point.level < maxLevel;
+
+			if (canUpgrade) {
+				tasks.push('upgrade');
+			}
+
+			return tasks;
 		}
 
 		if (chosenPoint.state.point?.acquired_by !== user.user?.faction) {
@@ -142,6 +153,8 @@
 							Claim
 						{:else if task === 'repair'}
 							Repair
+						{:else if task === 'upgrade'}
+							Upgrade Point
 						{/if}
 						{#if actionCosts[task]}
 							<span class="text-xs opacity-70">({actionCosts[task]} AP)</span>

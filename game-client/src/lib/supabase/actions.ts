@@ -54,7 +54,8 @@ export async function getActionPointCost(actionType: TaskType): Promise<number> 
 			attack: 10,
 			claim: 15,
 			repair: 8,
-			attack_and_claim: 25
+			attack_and_claim: 25,
+			upgrade: 50
 		};
 		return defaults[actionType] || 0;
 	}

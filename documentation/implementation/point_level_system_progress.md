@@ -10,7 +10,7 @@ This document tracks the implementation progress of the Point Level System featu
 
 ---
 
-## ✅ Phase 1: Database Schema & Configuration - COMPLETE
+## ✅ Phase 1: Database Schema & Configuration - COMPLETE ✅
 
 ### Migration File
 - **File:** `supabase/migrations/20251114085044_add_point_level_system_phase1.sql`
@@ -43,7 +43,7 @@ Migration includes data updates:
 
 ---
 
-## ✅ Phase 2: Database Functions - COMPLETE
+## ✅ Phase 2: Database Functions - COMPLETE ✅
 
 ### Migration File
 - **File:** `supabase/migrations/20251114085045_add_point_level_system_phase2.sql`
@@ -97,73 +97,91 @@ Created `upgrade_point(p_point_id, p_user_id)` function:
 
 ---
 
-## 🔄 Phase 3: Backend API - TODO
+## ✅ Phase 3: Backend API - COMPLETE ✅
 
 ### Tasks Remaining
 
-#### Step 7: Update Action Insertion ⏳
-- No direct changes needed - actions table already handles inserts
-- Verify edge function `perform_action` works with new 'upgrade' type
+#### Step 7: Update Action Insertion ✅
+- **File:** `supabase/functions/perform_action/action/action.ts`
+- Added 'upgrade' to the valid actions array
+- Edge function now accepts and validates upgrade actions
 
-#### Step 8: Add Level Data to Existing Queries ⏳
-- Update queries that fetch point data to include `level` column
-- Check `game` queries include new config columns
+#### Step 8: Add Level Data to Existing Queries ✅
+- Queries automatically include `level` column after schema migration
+- Game config queries automatically include new columns
 
-#### Step 9: Update TypeScript Types ⏳
-- Run `./update_db_types.sh` to regenerate types from database
-- Verify `Point` interface includes `level` field
-- Verify `GameConfig` interface includes new fields:
-  - `max_point_level`
-  - `health_per_point_level`
-  - `upgrade_point_ap_cost`
+#### Step 9: Update TypeScript Types ✅
+- **Action:** Ran `./update_db_types.sh` to regenerate types from database
+- `Point` interface now includes `level: number` field
+- `Game` interface includes new fields:
+  - `max_point_level: number`
+  - `health_per_point_level: number`
+  - `upgrade_point_ap_cost: number`
+- `TaskType` enum automatically includes 'upgrade'
+
+#### Step 10: Update Action Cost Fallbacks ✅
+- **File:** `game-client/src/lib/supabase/actions.ts`
+- Added 'upgrade': 50 to default action costs
+- Function now handles upgrade cost queries
 
 ---
 
-## 🔄 Phase 4: Client UI - Point Display - TODO
+## ✅ Phase 4: Client UI - Point Display - COMPLETE ✅
 
 ### Tasks Remaining
 
-#### Step 10: Update Point Display Components ⏳
-File: `game-client/src/lib/components/point-stats.svelte`
-- Add level badge display
-- Add visual styling for different levels
-- Show level information in point stats
+#### Step 11: Update Point Display Components ✅
+**File:** `game-client/src/lib/components/point-stats.svelte`
+- Added level badge display with badge-primary styling
+- Level 0 points show "Unclaimed (Level 0)" in warning color
+- Level 1+ points show "Level X" badge next to faction name
+- Added calculated max health display for verification
+- Shows expected vs actual max health if they differ
 
-#### Step 11: Update Point Info Panels ⏳
-- Display current level prominently
-- Show "can upgrade" indicator when conditions met
-- Display health bar with level-adjusted max health
-- Show upgrade availability status
+#### Step 12: Create Upgrade Info Component ✅
+**File:** `game-client/src/lib/components/upgrade-info.svelte` (NEW)
+- Created dedicated component for upgrade information
+- Displays current level and next level stats
+- Shows upgrade cost and next max health
+- Visual checklist of upgrade requirements:
+  - Full health status
+  - Below max level status
+  - Faction ownership status
+- Color-coded alert messages (success/info/warning)
+- Integrated into point page for owned points
 
 ---
 
-## 🔄 Phase 5: Client UI - Upgrade Action - TODO
+## ✅ Phase 5: Client UI - Upgrade Action - COMPLETE ✅
 
 ### Tasks Remaining
 
-#### Step 12: Create Upgrade UI Components ⏳
-- Create upgrade button component
-- Add confirmation dialog for upgrade action
-- Display upgrade requirements (full health, AP cost)
-- Show disabled state with reason when upgrade not available
+#### Step 13: Implement Upgrade Action Handler ✅
+**File:** `game-client/src/lib/components/task/task-overview.svelte`
+- Added upgrade to possible tasks calculation
+- Checks point ownership, full health, and level < max
+- Gets max level from game config
+- Upgrade button appears alongside repair button for owned points
+- Button shows "Upgrade Point" text with AP cost
+- Uses existing action system infrastructure
+- All existing validation and error handling applies
 
-#### Step 13: Implement Upgrade Action Handler ⏳
-File: `game-client/src/lib/supabase/actions.ts`
-- Already supports generic action types via `performAction()`
-- Add 'upgrade' to TaskType if not present
-- Update `getActionPointCost()` to handle 'upgrade' type
+#### Step 14: Add Upgrade Button Display ✅
+- Upgrade button displays in task overview when conditions met
+- Shows AP cost below button text
+- Automatically disabled when:
+  - User lacks sufficient AP
+  - Point not at full health
+  - Point at max level
+  - User on action cooldown
+- Uses same styling as other action buttons
 
-File: `game-client/src/lib/components/task/task-overview.svelte`
-- Add upgrade to possible tasks when conditions met:
-  - User owns point
-  - Point at full health
-  - Point below max level
-- Display upgrade button with AP cost
-- Handle upgrade action errors
-
-#### Step 14: Update AP Display ⏳
-- Verify AP display shows upgrade costs correctly
-- Ensure AP updates after upgrade action
+#### Step 15: Integrate Upgrade Info Component ✅
+**File:** `game-client/src/routes/game/point/+page.svelte`
+- Added UpgradeInfo component import
+- Component displays below PointStats
+- Only shown when user owns the point
+- Provides clear upgrade status and requirements
 
 ---
 
@@ -347,9 +365,37 @@ The upgrade action follows the existing action pattern:
 - ✅ Database schema ready
 - ✅ Database functions implemented
 - ✅ perform_action trigger updated
-- ⏳ TypeScript types need regeneration
-- ⏳ Client UI needs updates
+- ✅ TypeScript types regenerated
+- ✅ Edge function updated
+- ✅ Client UI updated
+- ✅ Point display shows levels
+- ✅ Upgrade action available in UI
+- ✅ Upgrade info component created
 - ⏳ Testing required
+- ⏳ Admin interface updates needed
+- ⏳ Documentation for users needed
+
+### Implementation Summary
+
+**Files Modified:**
+1. Database Migrations:
+   - `20251114085044_add_point_level_system_phase1.sql`
+   - `20251114085045_add_point_level_system_phase2.sql`
+
+2. Edge Functions:
+   - `supabase/functions/perform_action/action/action.ts`
+
+3. Client-Side TypeScript:
+   - `game-client/src/lib/supabase/actions.ts`
+
+4. Svelte Components:
+   - `game-client/src/lib/components/point-stats.svelte`
+   - `game-client/src/lib/components/task/task-overview.svelte`
+   - `game-client/src/lib/components/upgrade-info.svelte` (NEW)
+   - `game-client/src/routes/game/point/+page.svelte`
+
+5. Type Definitions:
+   - `types/database.types.ts` (auto-regenerated)
 
 ### Known Considerations
 - **AP Balance:** Default 50 AP for upgrade may need tuning

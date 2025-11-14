@@ -6,7 +6,7 @@ export interface Action {
   type: Database["public"]["Enums"]["task_type"];
 }
 
-const actions = ["attack", "attack_and_claim", "repair", "claim"];
+const actions = ["attack", "attack_and_claim", "repair", "claim", "upgrade"];
 
 export function isActionValid(input: unknown): input is Action {
   if (input == null || typeof input !== "object") {
