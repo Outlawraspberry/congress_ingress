@@ -270,7 +270,7 @@
 				</select>
 			</div>
 
-			<button class="btn btn-primary" onclick={handleAddPoint}>
+			<a href="/admin/point/new" class="btn btn-primary">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					class="h-5 w-5"
@@ -286,7 +286,7 @@
 					/>
 				</svg>
 				Add Point
-			</button>
+			</a>
 		</div>
 
 		<!-- Point Editor Modal -->
@@ -558,7 +558,7 @@
 										</svg>
 										View
 									</a>
-									<button class="btn btn-ghost btn-xs" onclick={() => handleEditPoint(point)}>
+									<a href={`/admin/point/${point.id}/edit`} class="btn btn-ghost btn-xs">
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
 											class="h-4 w-4"
@@ -574,7 +574,7 @@
 											/>
 										</svg>
 										Edit
-									</button>
+									</a>
 									<button class="btn btn-error btn-xs" onclick={() => handleDeletePoint(point)}>
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
