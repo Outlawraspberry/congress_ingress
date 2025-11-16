@@ -1,6 +1,6 @@
 # Map System Implementation Summary
 
-## Status: Phase 1 - Database & Types Complete ✅
+## Status: Phase 1 - Database, Storage & Types Complete ✅
 
 ---
 
@@ -8,8 +8,8 @@
 
 This document tracks the implementation of the map system for Congress Quest, including floor-based navigation, point positioning, fog-of-war mechanics, and faction intelligence features.
 
-**Implementation Date:** 2025-11-14  
-**Current Phase:** Database schema and TypeScript types complete  
+**Implementation Date:** 2025-11-14
+**Current Phase:** Database schema, image storage, and TypeScript types complete
 **Next Phase:** Svelte components and API integration
 
 ---
@@ -213,6 +213,120 @@ Created `MapStorageManager` class for client-side caching.
 
 ---
 
+## 4. Image Storage System ✅
+
+**Migration File:** `supabase/migrations/20251114160000_add_image_storage.sql`
+
+Created a general-purpose image storage bucket in Supabase Storage.
+
+#### Storage Bucket:
+
+**`images` Bucket**
+- Public bucket for all game images
+- 10MB max file size
+- Allowed formats: PNG, JPEG, JPG, SVG, WebP, GIF
+- Organized in folders by category
+
+#### Folder Structure:
+```
+images/
+├── floor-plans/      - Floor plan images for map system
+├── points/           - Images for specific points
+├── puzzles/          - Puzzle-related images
+├── factions/         - Faction logos and banners
+├── ui/               - UI elements and icons
+├── achievements/     - Achievement badges
+└── events/           - Event-specific images
+```
+
+#### Storage Policies (RLS):
+f
+**Public Access:**
+- All users (authenticated & anonymous) can view images
+- Images are publicly accessible via URL
+
+**Admin Only:**
+- Only admins can upload images
+- Only admins can update images
+- Only admins can delete images
+
+#### Helper Functions:
+
+1. **`get_image_url(file_path TEXT)`** - Database function
+   - Constructs full public URL from file path
+   - Returns: `[supabase-url]/storage/v1/object/public/images/[file_path]`
+
+2. **`is_user_admin(user_id UUID)`** - Check function
+   - Validates if user has admin role
+
+#### TypeScript Utilities:
+
+**File:** `game-client/src/lib/supabase/storage/imageStorage.ts`
+
+Created comprehensive utilities:
+
+**Upload Functions:**
+- `uploadImage(file, options)` - Upload single image
+- `uploadMultipleImages(files, options)` - Batch upload
+- `replaceImage(oldPath, newFile)` - Replace existing image
+
+**Management Functions:**
+- `deleteImage(filePath)` - Delete single image
+- `deleteMultipleImages(filePaths)` - Batch delete
+- `listImages(options)` - List images by category
+- `listCategories()` - Get all available categories
+- `getImageInfo(filePath)` - Get file metadata
+- `downloadImage(filePath)` - Download as blob
+
+**Validation & Helpers:**
+- `validateImageFile(file)` - Check file type and size
+- `sanitizeFilename(filename)` - Make filename storage-safe
+- `generateUniqueFilename(name)` - Create timestamped filename
+- `getImagePublicUrl(filePath)` - Construct public URL
+- `extractFilePathFromUrl(url)` - Parse URL to get path
+- `getCategoryFromPath(path)` - Extract category from path
+- `checkAdminPermission()` - Verify user is admin
+- `formatFileSize(bytes)` - Human-readable file sizes
+- `getImageDimensions(file)` - Get image width/height
+
+**Constants:**
+- `IMAGES_BUCKET` - Bucket name ('images')
+- `IMAGE_CATEGORIES` - Predefined categories object
+- `ALLOWED_IMAGE_TYPES` - Valid MIME types array
+- `MAX_FILE_SIZE` - 10MB limit
+
+**Types:**
+- `ImageCategory` - Category type
+- `UploadResult` - Upload operation result
+- `ImageFile` - File metadata interface
+- `UploadOptions` - Upload configuration
+
+#### Admin Component:
+
+**File:** `game-client/src/lib/components/admin/ImageUploader.svelte`
+
+Reusable image upload component with:
+- Drag & drop support
+- Category selector
+- File validation
+- Preview grid
+- Copy URL/path to clipboard
+- Delete functionality
+- Multiple file support
+- Progress tracking
+- Error handling
+
+**Props:**
+```typescript
+category: ImageCategory | string       // Default category
+onImageUploaded?: (url, path) => void // Callback after upload
+showFileList: boolean                  // Show uploaded files
+allowMultiple: boolean                 // Allow multiple uploads
+showCategorySelector: boolean          // Show category dropdown
+```
+
+---
+
 ## Design Decisions
 
 ### 1. Separate Position Table
@@ -221,26 +335,34 @@ Created `MapStorageManager` class for client-side caching.
 - Easy to update positions without affecting game logic
 - Can add multiple positions per point in future (if needed)
 
-### 2. Configurable Floor Images
-- `floors.map_image_url` stores path/URL to floor plan image
-- Admins can update floor plans without code changes
-- Supports SVG, PNG, or any web-compatible format
-- Can be absolute URLs or relative paths
+### 2. General-Purpose Image Storage
+- Single `images` bucket for all game images instead of separate buckets
+- Organized by category folders (floor-plans, points, puzzles, etc.)
+- More flexible for future features (point images, puzzle images, etc.)
+- Consistent API for all image uploads
+- Public URLs for easy access and sharing
 
-### 3. Automatic Discovery on QR Scan
+### 3. Configurable Floor Images
+- `floors.map_image_url` stores path to image in storage
+- Path format: `floor-plans/[filename]`
+- Admins upload via ImageUploader component
+- Supports SVG, PNG, JPEG, WebP, GIF
+- Can be updated without code deployment
+
+### 4. Automatic Discovery on QR Scan
 - Trigger on `point_user` INSERT automatically marks discovery
 - No manual API calls needed for discovery
 - Guaranteed consistency between visit and discovery
 - Works seamlessly with existing QR code system
 
-### 4. Client-Side Enemy Cache
+### 5. Client-Side Enemy Cache
 - Reduces server load (no need to query stale data)
 - Works offline
 - User-specific (each player has own cache)
 - Automatic stale detection and cleanup
 - Syncs when points are visited
 
-### 5. Permanent Discoveries
+### 6. Permanent Discoveries
 - No UPDATE or DELETE on `point_discoveries`
 - Once discovered, always visible
 - Simplifies logic and prevents bugs
@@ -376,12 +498,16 @@ To deploy this migration:
 
 ### Floor Image URLs
 
-Floor images can be:
-- **Relative paths:** `/floor-plans/ground-floor.svg`
-- **Absolute URLs:** `https://cdn.example.com/maps/floor1.png`
-- **Supabase Storage:** `[supabase-url]/storage/v1/object/public/floor-plans/...`
+Floor images are stored in Supabase Storage:
+- **Storage path:** `floor-plans/[filename]`
+- **Public URL:** `[supabase-url]/storage/v1/object/public/images/floor-plans/[filename]`
+- **Database field:** Store the path (`floor-plans/[filename]`) in `floors.map_image_url`
 
-Recommended: Use Supabase Storage for floor plan images.
+Example workflow:
+1. Admin uploads `ground-floor.svg` via ImageUploader component
+2. File stored at: `images/floor-plans/1731600000000-ground-floor.svg`
+3. Store path in database: `floor-plans/1731600000000-ground-floor.svg`
+4. Public URL: `https://[project].supabase.co/storage/v1/object/public/images/floor-plans/1731600000000-ground-floor.svg`
 
 ### Coordinate System
 
@@ -404,20 +530,27 @@ Default: 24 hours (configurable in UI)
 ```
 congress-ingress/
 ├── supabase/migrations/
-│   └── 20251114135117_add_map_system.sql ✅
+│   ├── 20251114135117_add_map_system.sql ✅
+│   └── 20251114160000_add_image_storage.sql ✅
 ├── types/
 │   └── database.types.ts ✅ (updated)
-├── game-client/src/lib/map/
-│   ├── map.types.ts ✅
-│   ├── mapStorage.ts ✅
-│   ├── mapStore.ts (TODO)
-│   ├── visibilityRules.ts (TODO)
-│   └── components/
-│       ├── MapView.svelte (TODO)
-│       ├── FloorSwitcher.svelte (TODO)
-│       ├── PointMarker.svelte (TODO)
-│       ├── PointInfoPanel.svelte (TODO)
-│       └── MapLegend.svelte (TODO)
+├── game-client/src/lib/
+│   ├── map/
+│   │   ├── map.types.ts ✅
+│   │   ├── mapStorage.ts ✅
+│   │   ├── mapStore.ts (TODO)
+│   │   ├── visibilityRules.ts (TODO)
+│   │   └── components/
+│   │       ├── MapView.svelte (TODO)
+│   │       ├── FloorSwitcher.svelte (TODO)
+│   │       ├── PointMarker.svelte (TODO)
+│   │       ├── PointInfoPanel.svelte (TODO)
+│   │       └── MapLegend.svelte (TODO)
+│   ├── supabase/storage/
+│   │   ├── imageStorage.ts ✅
+│   │   └── index.ts ✅
+│   └── components/admin/
+│       └── ImageUploader.svelte ✅
 └── documentation/
     ├── concepts/2025_11_14_map.md ✅
     └── implementation/map_system_implementation.md ✅ (this file)
@@ -445,10 +578,13 @@ congress-ingress/
 
 - Design Document: `documentation/concepts/2025_11_14_map.md`
 - Database Schema: `supabase/migrations/20251114135117_add_map_system.sql`
+- Image Storage Migration: `supabase/migrations/20251114160000_add_image_storage.sql`
 - TypeScript Types: `game-client/src/lib/map/map.types.ts`
-- Storage System: `game-client/src/lib/map/mapStorage.ts`
+- Map Storage (Client Cache): `game-client/src/lib/map/mapStorage.ts`
+- Image Storage Utilities: `game-client/src/lib/supabase/storage/imageStorage.ts`
+- Image Uploader Component: `game-client/src/lib/components/admin/ImageUploader.svelte`
 
 ---
 
-**Last Updated:** 2025-11-14  
+**Last Updated:** 2025-11-14
 **Next Review:** After Phase 2 completion

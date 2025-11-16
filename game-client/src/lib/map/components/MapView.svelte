@@ -252,14 +252,23 @@
 			}
 		});
 
+		// Get image dimensions for coordinate conversion
+		const imageWidth = $currentFloor.image_width || 1000;
+		const imageHeight = $currentFloor.image_height || 1000;
+
 		// Add or update markers
 		points.forEach((point) => {
 			let marker = markers.get(point.id);
 
-			// Convert point coordinates to Leaflet LatLng
-			// Point coordinates should be in the same coordinate system as the image
-			// Y coordinate is inverted for Leaflet (0 at top)
-			const latLng: L.LatLngExpression = [point.position.y, point.position.x];
+			// Convert point coordinates from percentages (0-100) to absolute coordinates
+			// Point coordinates are stored as percentages in the database
+			// Convert to the image coordinate system [0, imageHeight] x [0, imageWidth]
+			// NOTE: Y coordinate is inverted because:
+			// - Editor uses DOM coordinates (Y=0 at top, Y=100 at bottom)
+			// - Leaflet uses geographic coordinates (Y=0 at bottom, Y increases upward)
+			const absoluteY = ((100 - point.position.y) / 100) * imageHeight;
+			const absoluteX = (point.position.x / 100) * imageWidth;
+			const latLng: L.LatLngExpression = [absoluteY, absoluteX];
 
 			if (!marker) {
 				// Create new marker

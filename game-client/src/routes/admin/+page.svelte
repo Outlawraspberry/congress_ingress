@@ -31,6 +31,12 @@
 				'From here, you can manage all points of the game.',
 				'/admin/point'
 			)}
+
+			{@render card(
+				'Map Editor',
+				'Edit floors, upload floor plans, and position points on the map.',
+				'/admin/map-editor'
+			)}
 		</div>
 	</div>
 </section>
