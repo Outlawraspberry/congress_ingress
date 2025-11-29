@@ -88,6 +88,8 @@
 		bottom: 0;
 		background: #f5f5f5;
 		touch-action: none; /* Prevent default touch behaviors */
+
+		z-index: -1;
 	}
 
 	.auth-required {

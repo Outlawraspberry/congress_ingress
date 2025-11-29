@@ -139,7 +139,7 @@
 <style>
 	.floor-switcher {
 		position: absolute;
-		top: 0.625rem;
+		top: 3.625rem;
 		left: 0.625rem;
 		z-index: 1000;
 	}
@@ -404,7 +404,7 @@
 		}
 
 		.floor-switcher {
-			top: 1.25rem;
+			top: 5.25rem;
 			left: 1.25rem;
 		}
 	}

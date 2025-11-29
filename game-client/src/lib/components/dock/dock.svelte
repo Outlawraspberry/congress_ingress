@@ -7,7 +7,8 @@
 		faLockOpen,
 		faUser,
 		faUserTie,
-		faTrophy
+		faTrophy,
+		faMap
 	} from '@fortawesome/free-solid-svg-icons';
 	import Fa from 'svelte-fa';
 	import AActiveUrl from './a-active-url.svelte';
@@ -28,6 +29,11 @@
 		<AActiveUrl {activeUrl} href="/game/point">
 			<Fa icon={faGamepad} />
 			<span class="dock-label">Game</span>
+		</AActiveUrl>
+
+		<AActiveUrl {activeUrl} href="/game/map">
+			<Fa icon={faMap} />
+			<span class="dock-label">Map</span>
 		</AActiveUrl>
 
 		<AActiveUrl {activeUrl} href="/user">

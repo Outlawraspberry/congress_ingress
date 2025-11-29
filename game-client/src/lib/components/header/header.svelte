@@ -23,6 +23,7 @@
 					<LiActiveUrl href="/register" {activeUrl}>Register</LiActiveUrl>
 				{:else}
 					<LiActiveUrl href="/user" {activeUrl}>User Page</LiActiveUrl>
+					<LiActiveUrl href="/game/map" {activeUrl}>Map</LiActiveUrl>
 					<LiActiveUrl href="/scoreboard" {activeUrl}>Scoreboard</LiActiveUrl>
 
 					{#if user.user.role === 'admin'}

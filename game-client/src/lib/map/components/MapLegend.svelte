@@ -247,8 +247,8 @@
 
 	.legend-fab {
 		position: fixed;
-		bottom: 1.25rem;
-		right: 1.25rem;
+		bottom: 5rem;
+		left: 1.25rem;
 		z-index: 999;
 		width: 3.5rem;
 		height: 3.5rem;
