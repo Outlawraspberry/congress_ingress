@@ -33,6 +33,7 @@
 								<ul class="bg-base-100 z-10 rounded-t-none p-2">
 									<LiActiveUrl href="/admin" {activeUrl}>Overview</LiActiveUrl>
 									<LiActiveUrl href="/admin/game" {activeUrl}>Game</LiActiveUrl>
+									<LiActiveUrl href="/admin/map-editor" {activeUrl}>Map Editor</LiActiveUrl>
 									<LiActiveUrl href="/admin/point" {activeUrl}>Points</LiActiveUrl>
 								</ul>
 							</details>
