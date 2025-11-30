@@ -2,16 +2,16 @@
 	import { page } from '$app/state';
 	import { user } from '$lib/supabase/user/user.svelte';
 	import {
-		faAddressCard,
-		faGamepad,
-		faHouse,
-		faLockOpen,
-		faMap,
-		faTrophy,
-		faUser,
-		faUserTie
-	} from '@fortawesome/free-solid-svg-icons';
-	import Fa from 'svelte-fa';
+		BookUser,
+		Building,
+		Gamepad,
+		LockKeyholeOpen,
+		LogOut,
+		Map,
+		Medal,
+		User,
+		UserStar
+	} from '@lucide/svelte';
 	import AActiveUrl from './a-active-url.svelte';
 
 	const { class: klass }: { class?: string } = $props();
@@ -22,49 +22,48 @@
 <div class={`dock ${klass ? klass : ''}`}>
 	{#if user.user != null}
 		<AActiveUrl {activeUrl} href="/">
-			<Fa icon={faHouse} />
+			<Building />
 			<span class="dock-label">Home</span>
 		</AActiveUrl>
 
 		<AActiveUrl {activeUrl} href="/game/point">
-			<Fa icon={faGamepad} />
+			<Gamepad />
 			<span class="dock-label">Game</span>
 		</AActiveUrl>
 
 		<AActiveUrl {activeUrl} href="/game/map">
-			<Fa icon={faMap} />
+			<Map />
 			<span class="dock-label">Map</span>
 		</AActiveUrl>
 
 		<AActiveUrl {activeUrl} href="/user">
-			<Fa icon={faUser} />
+			<User />
 			<span class="dock-label">User</span>
 		</AActiveUrl>
 
 		<AActiveUrl {activeUrl} href="/scoreboard">
-			<Fa icon={faTrophy} />
+			<Medal />
 			<span class="dock-label">Scoreboard</span>
 		</AActiveUrl>
 
 		{#if user.user.role === 'admin'}
 			<AActiveUrl {activeUrl} href="/admin" setActive={activeUrl.startsWith('/admin')}>
-				<Fa icon={faUserTie} />
+				<UserStar />
 				<span class="dock-label">Admin Lounge</span>
 			</AActiveUrl>
 		{/if}
 
 		<AActiveUrl {activeUrl} href="/logout" data-sveltekit-preload-data="off">
-			<Fa icon={faUser} />
+			<LogOut />
 			<span class="dock-label">Logout</span>
 		</AActiveUrl>
 	{:else}
 		<AActiveUrl {activeUrl} href="/login">
-			<Fa icon={faLockOpen} />
+			<LockKeyholeOpen />
 			<span class="dock-label">Login</span>
 		</AActiveUrl>
 		<AActiveUrl {activeUrl} href="/register">
-			<Fa icon={faAddressCard} />
-			<span class="dock-label">Register</span>
+			<BookUser /> <span class="dock-label">Register</span>
 		</AActiveUrl>
 	{/if}
 </div>

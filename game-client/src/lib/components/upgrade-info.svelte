@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { game } from '$lib/supabase/game/game.svelte';
-	import { faBolt } from '@fortawesome/free-solid-svg-icons';
-	import Fa from 'svelte-fa';
+	import { CircleFadingArrowUp } from '@lucide/svelte';
 	import type { Point } from '../../types/alias';
 
 	const { point }: { point: Point } = $props();
@@ -38,7 +37,7 @@
 <div class="collapse-arrow bg-base-200 collapse w-full shadow-md">
 	<input type="checkbox" />
 	<div class="collapse-title font-semibold">
-		<Fa icon={faBolt} class="mr-2 inline"></Fa>
+		<CircleFadingArrowUp class="mr-2 inline" />
 		Upgrade Information
 	</div>
 

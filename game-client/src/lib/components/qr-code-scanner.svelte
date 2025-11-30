@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { faCamera, faRepeat, faStop } from '@fortawesome/free-solid-svg-icons';
+	import { Play, Repeat, Square } from '@lucide/svelte';
 	import { Html5Qrcode, type CameraDevice } from 'html5-qrcode';
 	import { onDestroy, onMount } from 'svelte';
-	import Fa from 'svelte-fa';
 
 	let { onTextFound: onFoundCode }: { onTextFound: (codeText: string) => void } = $props();
 
@@ -82,17 +81,17 @@
 
 	<div class="mb-6 flex flex-wrap justify-center gap-3">
 		{#if isScanning}
-			<button class="btn btn-secondary" onclick={stopScanning}
-				><Fa icon={faStop} />Stop scanning</button
-			>
+			<button class="btn btn-secondary" onclick={stopScanning}>
+				<Square />Stop scanning
+			</button>
 		{:else}
-			<button class="btn btn-xl btn-primary" onclick={startScanning}
-				><Fa icon={faCamera} />Start Scanning</button
-			>
+			<button class="btn btn-xl btn-primary" onclick={startScanning}>
+				<Play />Start Scanning
+			</button>
 		{/if}
 
 		{#if isScanning && currentDevice}
-			<button class="btn" onclick={switchCamera}><Fa icon={faRepeat} />Switch Camera</button>
+			<button class="btn" onclick={switchCamera}><Repeat />Switch Camera</button>
 		{/if}
 	</div>
 

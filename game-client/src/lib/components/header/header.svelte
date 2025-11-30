@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { user } from '$lib/supabase/user/user.svelte';
-	import { faHome } from '@fortawesome/free-solid-svg-icons';
-	import Fa from 'svelte-fa';
+	import { Building } from '@lucide/svelte';
 	import LiActiveUrl from './li-active-url.svelte';
 
 	let { class: klass }: { class?: string } = $props();
@@ -13,7 +12,7 @@
 <header class={klass ?? ''}>
 	<div class="navbar bg-base-100 shadow-sm">
 		<div class="flex-1">
-			<a class="btn btn-ghost text-xl" href="/"><Fa icon={faHome} />Home</a>
+			<a class="btn btn-ghost text-xl" href="/"><Building /> Home</a>
 		</div>
 
 		<div class="flex-none">
