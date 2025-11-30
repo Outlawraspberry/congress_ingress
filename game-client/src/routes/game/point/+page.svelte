@@ -46,61 +46,64 @@
 <Breadcrump />
 
 <section class="hero">
-	<div class="hero-content w-full flex-col">
-		<PointDescription />
-
+	<div class="hero-content w-full flex-col gap-10 md:flex-row">
 		{#if selectedPoint.selectedPoint}
-			<section class="w-full">
-				{#if selectedPoint?.selectedPoint.state.point?.type === 'claimable'}
-					<PointStats class="w-full" point={selectedPoint.selectedPoint}></PointStats>
+			<PointDescription />
+			<div>
+				<section class="flex w-full flex-col items-center">
+					{#if selectedPoint?.selectedPoint.state.point?.type === 'claimable'}
+						<PointStats class="w-full" point={selectedPoint.selectedPoint}></PointStats>
 
-					{#if selectedPoint.selectedPoint.state.point?.acquired_by === user.user?.faction && selectedPoint.selectedPoint.state.point}
-						<div class="my-4">
-							<UpgradeInfo point={selectedPoint.selectedPoint.state.point}></UpgradeInfo>
+						{#if selectedPoint.selectedPoint.state.point?.acquired_by === user.user?.faction && selectedPoint.selectedPoint.state.point}
+							<div class="my-4">
+								<UpgradeInfo point={selectedPoint.selectedPoint.state.point}></UpgradeInfo>
+							</div>
+						{/if}
+					{/if}
+
+					{#if user.user?.canUseActionInSeconds}
+						<p class="text-center">
+							In
+							<span class="countdown font-mono text-2xl">
+								<span
+									style={`--value:${user.user.canUseActionInSeconds};`}
+									aria-live="polite"
+									aria-label={user.user.canUseActionInSeconds.toString()}
+									>{user.user.canUseActionInSeconds}</span
+								>
+							</span>
+							seconds, you can do your next action
+						</p>
+					{:else if !selectedPoint.selectedPoint.state.kicked}
+						<section class="container flex justify-center">
+							<TaskOverview chosenPoint={selectedPoint.selectedPoint}></TaskOverview>
+						</section>
+					{:else}
+						<div role="alert" class="alert alert-info">
+							You were kicked because you were at this point for too long without doing nothing!
 						</div>
 					{/if}
-				{/if}
 
-				{#if user.user?.canUseActionInSeconds}
-					<p class="text-center">
-						In
-						<span class="countdown font-mono text-2xl">
-							<span
-								style={`--value:${user.user.canUseActionInSeconds};`}
-								aria-live="polite"
-								aria-label={user.user.canUseActionInSeconds.toString()}
-								>{user.user.canUseActionInSeconds}</span
-							>
-						</span>
-						seconds, you can do your next action
-					</p>
-				{:else if !selectedPoint.selectedPoint.state.kicked}
-					<section class="container flex justify-center">
-						<TaskOverview chosenPoint={selectedPoint.selectedPoint}></TaskOverview>
-					</section>
-				{:else}
-					<div role="alert" class="alert alert-info">
-						You were kicked because you were at this point for too long without doing nothing!
-					</div>
-				{/if}
-			</section>
-
-			<button
-				class="btn btn-secondary btn-xl"
-				onclick={() => {
-					destroySelectedPoint();
-				}}
-				>Select another point
-			</button>
+					<button
+						class="btn btn-secondary btn-xl"
+						onclick={() => {
+							destroySelectedPoint();
+						}}
+						>Select another point
+					</button>
+				</section>
+			</div>
 		{:else}
-			<p class="mb-6 text-3xl font-bold">Okay, how do I play now?</p>
+			<div>
+				<p class="mb-6 text-3xl font-bold">Okay, how do I play now?</p>
 
-			<p class="mb-6 w-sm">
-				It's very easy. All over the place, you'll find QRCodes on the wall. Scan them, and you can
-				play!
-			</p>
+				<p class="mb-6 w-sm">
+					It's very easy. All over the place, you'll find QRCodes on the wall. Scan them, and you
+					can play!
+				</p>
 
-			<QrCodeScanner {onTextFound} />
+				<QrCodeScanner {onTextFound} />
+			</div>
 		{/if}
 	</div>
 </section>
