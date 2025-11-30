@@ -47,6 +47,8 @@
 
 <section class="hero">
 	<div class="hero-content w-full flex-col">
+		<PointDescription />
+
 		{#if selectedPoint.selectedPoint}
 			<section class="w-full">
 				{#if selectedPoint?.selectedPoint.state.point?.type === 'claimable'}
