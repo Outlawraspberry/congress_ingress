@@ -5,7 +5,6 @@
 	import { user } from '$lib/supabase/user/user.svelte';
 	import type { TaskType } from '../../../types/alias';
 	import { performAction, getActionPointCost } from '$lib/supabase/actions';
-	import ActionPointsDisplay from '../ui/action-points-display.svelte';
 
 	let isPerformingAction = $state(false);
 	let actionError = $state<string | null>(null);
@@ -123,9 +122,6 @@
 
 {#if isClaimable}
 	<section class="flex flex-col items-center gap-3">
-		<!-- Action Points Display -->
-		<ActionPointsDisplay />
-
 		{#if actionError}
 			<div class="alert alert-error">
 				{actionError}
