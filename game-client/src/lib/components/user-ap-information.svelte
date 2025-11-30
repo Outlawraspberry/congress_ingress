@@ -11,7 +11,7 @@
 		<progress class="progress w-full" value={user.user.actionPoints} max={game.game.max_ap}>
 		</progress>
 		<p class="text-center text-xs">
-			Your Action Points:{user.user.actionPoints}/{game.game.max_ap}
+			Your Action Points: {user.user.actionPoints} / {game.game.max_ap}
 		</p>
 	{/if}
 </div>

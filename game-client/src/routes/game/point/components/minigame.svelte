@@ -1,8 +1,4 @@
-<script>
-	import Dock from '$lib/components/dock/dock.svelte';
-</script>
-
-<div class="bg-base-100 border-base-300 collapse max-w-full border md:max-w-80">
+<div class="bg-base-100 border-base-300 collapse-arrow collapse max-w-full border md:max-w-80">
 	<input type="checkbox" />
 	<div class="collapse-title font-semibold">What are mini game points?</div>
 	<div class="collapse-content text-sm">

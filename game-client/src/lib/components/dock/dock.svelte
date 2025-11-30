@@ -1,18 +1,18 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { user } from '$lib/supabase/user/user.svelte';
 	import {
 		faAddressCard,
 		faGamepad,
 		faHouse,
 		faLockOpen,
-		faUser,
-		faUserTie,
+		faMap,
 		faTrophy,
-		faMap
+		faUser,
+		faUserTie
 	} from '@fortawesome/free-solid-svg-icons';
 	import Fa from 'svelte-fa';
 	import AActiveUrl from './a-active-url.svelte';
-	import { page } from '$app/state';
 
 	const { class: klass }: { class?: string } = $props();
 

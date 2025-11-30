@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { game } from '$lib/supabase/game/game.svelte';
+	import { faBolt } from '@fortawesome/free-solid-svg-icons';
+	import Fa from 'svelte-fa';
 	import type { Point } from '../../types/alias';
 
 	const { point }: { point: Point } = $props();
@@ -33,31 +35,19 @@
 	};
 </script>
 
-<div class="card bg-base-200 shadow-md">
-	<div class="card-body p-4">
-		<h3 class="card-title text-sm">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				class="h-5 w-5"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M13 10V3L4 14h7v7l9-11h-7z"
-				/>
-			</svg>
-			Upgrade Information
-		</h3>
+<div class="collapse-arrow bg-base-200 collapse w-full shadow-md">
+	<input type="checkbox" />
+	<div class="collapse-title font-semibold">
+		<Fa icon={faBolt} class="mr-2 inline"></Fa>
+		Upgrade Information
+	</div>
 
+	<div class="collapse-content">
 		<div class="space-y-2 text-sm">
 			<!-- Current Status -->
 			<div class="flex justify-between">
 				<span class="text-base-content/70">Current Level:</span>
-				<span class="font-bold badge badge-primary">Level {point.level}</span>
+				<span class="badge badge-primary font-bold">Level {point.level}</span>
 			</div>
 
 			{#if point.level > 0 && !isAtMaxLevel}
@@ -68,54 +58,21 @@
 
 				<div class="flex justify-between">
 					<span class="text-base-content/70">Next Max Health:</span>
-					<span class="font-bold text-success">{nextLevelHealth} HP</span>
+					<span class="text-success font-bold">{nextLevelHealth} HP</span>
 				</div>
 
 				<div class="flex justify-between">
 					<span class="text-base-content/70">Upgrade Cost:</span>
-					<span class="font-bold text-warning">{upgradeCost} AP</span>
+					<span class="text-warning font-bold">{upgradeCost} AP</span>
 				</div>
 			{/if}
 
 			<div class="divider my-2"></div>
 
-			<!-- Status Message -->
-			<div
-				class="alert {canUpgrade
-					? 'alert-success'
-					: isAtMaxLevel
-						? 'alert-info'
-						: 'alert-warning'} p-3"
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="h-5 w-5 shrink-0 stroke-current"
-					fill="none"
-					viewBox="0 0 24 24"
-				>
-					{#if canUpgrade}
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-						/>
-					{:else}
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-						/>
-					{/if}
-				</svg>
-				<span class="text-xs">{getUpgradeMessage()}</span>
-			</div>
-
 			{#if !isAtMaxLevel && point.level > 0}
 				<!-- Requirements Checklist -->
-				<div class="space-y-1 mt-2">
-					<p class="text-xs font-semibold text-base-content/70">Requirements:</p>
+				<div class="mt-2 space-y-1">
+					<p class="text-base-content/70 text-xs font-semibold">Requirements:</p>
 					<div class="flex items-center gap-2">
 						<input
 							type="checkbox"
@@ -135,7 +92,12 @@
 						<span class="text-xs">Below Max Level ({point.level}/{maxLevel})</span>
 					</div>
 					<div class="flex items-center gap-2">
-						<input type="checkbox" checked={true} disabled class="checkbox checkbox-xs checkbox-success" />
+						<input
+							type="checkbox"
+							checked={true}
+							disabled
+							class="checkbox checkbox-xs checkbox-success"
+						/>
 						<span class="text-xs">Point Owned by Your Faction</span>
 					</div>
 				</div>

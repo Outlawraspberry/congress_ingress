@@ -5,6 +5,7 @@
 	import QrCodeScanner from '$lib/components/qr-code-scanner.svelte';
 	import TaskOverview from '$lib/components/task/task-overview.svelte';
 	import UpgradeInfo from '$lib/components/upgrade-info.svelte';
+	import UserApInformation from '$lib/components/user-ap-information.svelte';
 	import {
 		destroySelectedPoint,
 		initSelectedPoint,
@@ -46,9 +47,14 @@
 <Breadcrump />
 
 <section class="hero">
-	<div class="hero-content w-full flex-col gap-10 md:flex-row">
+	<div class="hero-content w-full flex-col gap-0 md:flex-row md:gap-10">
 		{#if selectedPoint.selectedPoint}
-			<PointDescription />
+			<div class="max-w-80">
+				<a href="/user"><UserApInformation class="mb-5 hidden md:block" /></a>
+
+				<PointDescription />
+			</div>
+
 			<div>
 				<section class="flex w-full flex-col items-center">
 					{#if selectedPoint?.selectedPoint.state.point?.type === 'claimable'}
@@ -85,7 +91,7 @@
 					{/if}
 
 					<button
-						class="btn btn-secondary btn-xl"
+						class="btn btn-secondary btn-xl mt-5"
 						onclick={() => {
 							destroySelectedPoint();
 						}}
