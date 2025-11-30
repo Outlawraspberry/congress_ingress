@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import Breadcrump from '$lib/components/breadcrump/breadcrump.svelte';
 	import PointStats from '$lib/components/point-stats.svelte';
 	import QrCodeScanner from '$lib/components/qr-code-scanner.svelte';
 	import TaskOverview from '$lib/components/task/task-overview.svelte';
@@ -11,6 +12,7 @@
 	} from '$lib/point/selected-point.svelte';
 	import { user } from '$lib/supabase/user/user.svelte';
 	import { onMount } from 'svelte';
+	import PointDescription from './components/point-description.svelte';
 
 	onMount(() => {
 		const searchParams = new URLSearchParams(window.location.search);
@@ -41,34 +43,20 @@
 {:else}
 	<h1 class="mb-3 text-3xl font-bold">Play the game</h1>{/if}
 
-<div class="breadcrumbs text-sm">
-	<ul>
-		<li><a href="/">/</a></li>
-		<li>
-			<button
-				onclick={() => {
-					destroySelectedPoint();
-				}}
-			>
-				game
-			</button>
-		</li>
-		{#if selectedPoint.selectedPoint != null}
-			<li>{selectedPoint.selectedPoint.state.point?.name}</li>
-		{/if}
-	</ul>
-</div>
+<Breadcrump />
 
 <section class="hero">
 	<div class="hero-content w-full flex-col">
 		{#if selectedPoint.selectedPoint}
 			<section class="w-full">
-				<PointStats class="w-full" point={selectedPoint.selectedPoint}></PointStats>
+				{#if selectedPoint?.selectedPoint.state.point?.type === 'claimable'}
+					<PointStats class="w-full" point={selectedPoint.selectedPoint}></PointStats>
 
-				{#if selectedPoint.selectedPoint.state.point?.acquired_by === user.user?.faction && selectedPoint.selectedPoint.state.point}
-					<div class="my-4">
-						<UpgradeInfo point={selectedPoint.selectedPoint.state.point}></UpgradeInfo>
-					</div>
+					{#if selectedPoint.selectedPoint.state.point?.acquired_by === user.user?.faction && selectedPoint.selectedPoint.state.point}
+						<div class="my-4">
+							<UpgradeInfo point={selectedPoint.selectedPoint.state.point}></UpgradeInfo>
+						</div>
+					{/if}
 				{/if}
 
 				{#if user.user?.canUseActionInSeconds}
