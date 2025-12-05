@@ -7,6 +7,15 @@
 	let { class: klass }: { class?: string } = $props();
 
 	let activeUrl = $derived(page.url.pathname);
+	let adminDetailsElement: HTMLDetailsElement | undefined = $state();
+
+	$effect(() => {
+		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+		activeUrl;
+		if (adminDetailsElement) {
+			adminDetailsElement.open = false;
+		}
+	});
 </script>
 
 <header class={klass ?? ''}>
@@ -27,7 +36,7 @@
 
 					{#if user.user.role === 'admin'}
 						<li class={activeUrl.includes('/admin') ? 'font-bold' : ''}>
-							<details>
+							<details bind:this={adminDetailsElement}>
 								<summary>Admin Lounge</summary>
 								<ul class="bg-base-100 z-10 rounded-t-none p-2">
 									<LiActiveUrl href="/admin" {activeUrl}>Overview</LiActiveUrl>
