@@ -9,7 +9,7 @@
 import { supabase } from '../db.svelte';
 import { PUBLIC_SUPABASE_URL } from '$env/static/public';
 
-export const IMAGES_BUCKET = 'images';
+export const IMAGES_BUCKET = 'game-assets';
 
 /**
  * Image categories for organizing storage

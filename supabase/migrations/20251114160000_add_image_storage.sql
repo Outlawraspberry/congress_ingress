@@ -1,39 +1,39 @@
 -- Migration: Add General Purpose Image Storage
 -- Created: 2025-11-14
--- Description: Creates storage buckets for game images (floor plans, points, puzzles, etc.)
+-- Description: Creates storage buckets for game g (floor plans, points, puzzles, etc.)
 
--- Create main images bucket for general game images
+-- Create main game-assets bucket for general game game-assets
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES (
-    'images',
-    'images',
-    true, -- Public bucket so images can be accessed via public URL
+    'game-assets',
+    'game-assets',
+    true, -- Public bucket so game-assets can be accessed via public URL
     10485760, -- 10MB max file size
     ARRAY['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp', 'image/gif']
 )
 ON CONFLICT (id) DO NOTHING;
 
--- Storage policies for images bucket
+-- Storage policies for game-assets bucket
 
--- Policy: Allow authenticated users to view images (SELECT)
-CREATE POLICY "Authenticated users can view images"
+-- Policy: Allow authenticated users to view game-assets (SELECT)
+CREATE POLICY "Authenticated users can view game-assets"
 ON storage.objects FOR SELECT
 TO authenticated
-USING (bucket_id = 'images');
+USING (bucket_id = 'game-assets');
 
--- Policy: Allow public (anonymous) users to view images (SELECT)
--- This is needed for public access to images
-CREATE POLICY "Public users can view images"
+-- Policy: Allow public (anonymous) users to view game-assets (SELECT)
+-- This is needed for public access to game-assets
+CREATE POLICY "Public users can view game-assets"
 ON storage.objects FOR SELECT
 TO public
-USING (bucket_id = 'images');
+USING (bucket_id = 'game-assets');
 
--- Policy: Only admins can upload images (INSERT)
-CREATE POLICY "Only admins can upload images"
+-- Policy: Only admins can upload game-assets (INSERT)
+CREATE POLICY "Only admins can upload game-assets"
 ON storage.objects FOR INSERT
 TO authenticated
 WITH CHECK (
-    bucket_id = 'images' AND
+    bucket_id = 'game-assets' AND
     EXISTS (
         SELECT 1 FROM public.user_role
         WHERE user_role.user_id = auth.uid()
@@ -41,12 +41,12 @@ WITH CHECK (
     )
 );
 
--- Policy: Only admins can update images (UPDATE)
-CREATE POLICY "Only admins can update images"
+-- Policy: Only admins can update game-assets (UPDATE)
+CREATE POLICY "Only admins can update game-assets"
 ON storage.objects FOR UPDATE
 TO authenticated
 USING (
-    bucket_id = 'images' AND
+    bucket_id = 'game-assets' AND
     EXISTS (
         SELECT 1 FROM public.user_role
         WHERE user_role.user_id = auth.uid()
@@ -54,7 +54,7 @@ USING (
     )
 )
 WITH CHECK (
-    bucket_id = 'images' AND
+    bucket_id = 'game-assets' AND
     EXISTS (
         SELECT 1 FROM public.user_role
         WHERE user_role.user_id = auth.uid()
@@ -62,12 +62,12 @@ WITH CHECK (
     )
 );
 
--- Policy: Only admins can delete images (DELETE)
-CREATE POLICY "Only admins can delete images"
+-- Policy: Only admins can delete game-assets (DELETE)
+CREATE POLICY "Only admins can delete game-assets"
 ON storage.objects FOR DELETE
 TO authenticated
 USING (
-    bucket_id = 'images' AND
+    bucket_id = 'game-assets' AND
     EXISTS (
         SELECT 1 FROM public.user_role
         WHERE user_role.user_id = auth.uid()
@@ -96,7 +96,7 @@ BEGIN
         storage_url := 'https://your-project.supabase.co';
     END IF;
 
-    RETURN storage_url || '/storage/v1/object/public/images/' || file_path;
+    RETURN storage_url || '/storage/v1/object/public/game-assets/' || file_path;
 END;
 $$;
 
