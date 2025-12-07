@@ -18,7 +18,7 @@
 
 <div class="floor-switcher">
 	<!-- Mobile: Compact Dropdown -->
-	<div class="mobile-switcher dropdown dropdown-bottom">
+	<div class="mobile-switcher dropdown dropdown-bottom top-10">
 		<button class="btn btn-sm btn-primary" disabled={$isSwitchingFloor}>
 			<span class="floor-icon">🏢</span>
 			<span class="floor-name">{currentFloorName}</span>

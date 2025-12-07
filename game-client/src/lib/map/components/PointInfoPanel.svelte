@@ -160,6 +160,13 @@
 	<!-- Mobile: Bottom Drawer -->
 	<div class="mobile-panel drawer drawer-end drawer-open">
 		<input id="point-info-drawer" type="checkbox" class="drawer-toggle" checked />
+		<div
+			class="panel-overlay"
+			on:click={handleClose}
+			on:keydown={handleClose}
+			role="button"
+			tabindex="0"
+		></div>
 		<div class="drawer-side">
 			<div
 				role="button"
@@ -168,12 +175,7 @@
 				on:click={handleClose}
 				on:keydown={handleClose}
 			></div>
-			<div class="drawer-content-wrapper">
-				<!-- Header with drag handle -->
-				<div class="drawer-handle-area">
-					<div class="drawer-handle"></div>
-				</div>
-
+			<div class="drawer-content-wrapper bg-base-100">
 				<div class="panel-header">
 					<div class="header-content">
 						{@render contentHeader(point, visibility)}
@@ -221,17 +223,15 @@
 	.mobile-panel {
 		display: block;
 		position: fixed;
-		bottom: 0;
+		bottom: -10rem;
 		left: 0;
 		right: 0;
 		z-index: 2000;
 	}
 
 	.drawer-content-wrapper {
-		background: white;
 		width: 100vw;
 		max-height: 70vh;
-		border-radius: 1.5rem 1.5rem 0 0;
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;
@@ -364,7 +364,6 @@
 		font-size: 0.75rem;
 		font-weight: 600;
 		text-transform: uppercase;
-		color: #999;
 		margin-bottom: 0.5rem;
 		letter-spacing: 0.03125rem;
 	}
@@ -383,18 +382,15 @@
 
 	.info-row.small {
 		font-size: 0.75rem;
-		color: #999;
 		margin-bottom: 0.5rem;
 	}
 
 	.label {
 		font-weight: 600;
-		color: #666;
 		flex-shrink: 0;
 	}
 
 	.value {
-		color: #333;
 		font-weight: 500;
 		display: flex;
 		align-items: center;
@@ -422,7 +418,6 @@
 	.health-percent {
 		font-size: 0.875rem;
 		font-weight: 700;
-		color: #666;
 		min-width: 2.8125rem;
 		text-align: right;
 		flex-shrink: 0;
