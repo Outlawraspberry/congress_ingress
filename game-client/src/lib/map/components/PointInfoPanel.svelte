@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { MapPoint } from '../map.types';
+	import type { MapPoint, PointVisibilityInfo } from '../map.types';
 	import { determinePointVisibility, getDisplayPointState } from '../visibilityRules';
 	import { getHealthPercentage, getPointStatus } from '../map.types';
 	import { formatTimeSinceUpdate } from '../mapStorage';
@@ -32,24 +32,129 @@
 		dispatch('close');
 	}
 
-	function handleNavigate() {
-		if (point) {
-			dispatch('navigate', { pointId: point.id });
-		}
-	}
-
-	function handleAction(actionType: string) {
-		if (point) {
-			dispatch('action', { pointId: point.id, actionType });
-		}
-	}
-
 	function getFactionBadgeColor(factionId: string | null): string {
 		if (factionId === null) return '#9E9E9E';
 		if (factionId === (user.user?.faction || '')) return '#4CAF50';
 		return '#f44336';
 	}
 </script>
+
+{#snippet content(point: MapPoint, visibility: PointVisibilityInfo)}
+	{#if visibility.showDetails && displayState}
+		<!-- Faction Ownership -->
+		{#if point.type === 'claimable'}
+			<div class="info-section">
+				<div class="section-title">Ownership</div>
+				<div
+					class="badge badge-lg faction-badge"
+					style="background: {getFactionBadgeColor(displayState.factionId)}; color: white;"
+				>
+					{#if displayState.factionId === null}
+						Neutral
+					{:else if displayState.factionId === (user.user?.faction || '')}
+						Your Faction
+					{:else}
+						Enemy Faction
+					{/if}
+				</div>
+			</div>
+
+			<!-- Level -->
+			<div class="info-row">
+				<span class="label">Level:</span>
+				<span class="value">
+					<span class="badge badge-primary level-badge">Lv. {displayState.level}</span>
+				</span>
+			</div>
+
+			<!-- Health -->
+			<div class="info-section">
+				<div class="info-row">
+					<span class="label">Health:</span>
+					<span class="value">
+						{displayState.health} / {displayState.maxHealth}
+						<span
+							class="badge badge-sm status-badge"
+							class:badge-success={healthPercent > 75}
+							class:badge-warning={healthPercent <= 75 && healthPercent > 25}
+							class:badge-error={healthPercent <= 25}
+						>
+							{status}
+						</span>
+					</span>
+				</div>
+
+				<!-- Health Bar -->
+				<div class="health-bar-container">
+					<progress
+						class="progress w-full"
+						class:progress-success={healthPercent > 75}
+						class:progress-warning={healthPercent <= 75 && healthPercent > 25}
+						class:progress-error={healthPercent <= 25}
+						value={healthPercent}
+						max="100"
+					></progress>
+					<span class="health-percent">{Math.round(healthPercent)}%</span>
+				</div>
+			</div>
+
+			<!-- Cache Status / Real-time Indicator -->
+			{#if displayState.isCached && displayState.lastUpdated}
+				<div class="alert alert-warning cache-warning">
+					<span class="icon">⚠️</span>
+					<div class="warning-content">
+						<div class="warning-title">Cached Information</div>
+						<div class="warning-text">
+							Last updated: {formatTimeSinceUpdate(displayState.lastUpdated)}
+						</div>
+					</div>
+				</div>
+			{:else if visibility.showRealTime}
+				<div class="alert alert-success realtime-indicator">
+					<span class="pulse"></span>
+					<span>Real-time updates</span>
+				</div>
+			{/if}
+		{/if}
+
+		<!-- Player Presence -->
+		{#if presenceCount > 0}
+			<div class="presence-section">
+				<span class="presence-icon">👥</span>
+				<span class="presence-text">
+					{presenceCount} faction {presenceCount === 1 ? 'member' : 'members'} present
+				</span>
+			</div>
+		{/if}
+
+		<!-- Position Info -->
+		<div class="info-row small">
+			<span class="label">Position:</span>
+			<span class="value">
+				({Math.round(point.position.x)}, {Math.round(point.position.y)})
+			</span>
+		</div>
+	{:else}
+		<!-- Point not discovered -->
+		<div class="undiscovered-message">
+			<span class="icon">🔒</span>
+			<p>Visit this point to reveal its details</p>
+		</div>
+	{/if}{/snippet}
+
+{#snippet contentHeader(point: MapPoint, visibility: PointVisibilityInfo)}
+	<h2 class="point-name">
+		{#if visibility.showName}
+			{point.name}
+		{:else}
+			<span class="unknown">Unknown Point</span>
+		{/if}
+	</h2>
+	<div class="point-type-badge" class:mini-game={point.type === 'mini_game'}>
+		{point.type === 'claimable' ? '🎯 Claimable' : ''}
+		{point.type === 'mini_game' ? '🎮 Mini-game' : ''}
+		{point.type === 'not_claimable' ? '🚫 Not Claimable' : ''}
+	</div>{/snippet}
 
 {#if point && visibility}
 	<!-- Mobile: Bottom Drawer -->
@@ -71,18 +176,7 @@
 
 				<div class="panel-header">
 					<div class="header-content">
-						<h2 class="point-name">
-							{#if visibility.showName}
-								{point.name}
-							{:else}
-								<span class="unknown">Unknown Point</span>
-							{/if}
-						</h2>
-						<div class="point-type-badge" class:mini-game={point.type === 'mini_game'}>
-							{point.type === 'claimable' ? '🎯 Claimable' : ''}
-							{point.type === 'mini_game' ? '🎮 Mini-game' : ''}
-							{point.type === 'not_claimable' ? '🚫 Not Claimable' : ''}
-						</div>
+						{@render contentHeader(point, visibility)}
 					</div>
 					<button class="btn btn-sm btn-circle btn-ghost close-button" on:click={handleClose}>
 						✕
@@ -90,143 +184,7 @@
 				</div>
 
 				<div class="panel-content">
-					{#if visibility.showDetails && displayState}
-						<!-- Faction Ownership -->
-						{#if point.type === 'claimable'}
-							<div class="info-section">
-								<div class="section-title">Ownership</div>
-								<div
-									class="badge badge-lg faction-badge"
-									style="background: {getFactionBadgeColor(displayState.factionId)}; color: white;"
-								>
-									{#if displayState.factionId === null}
-										Neutral
-									{:else if displayState.factionId === (user.user?.faction || '')}
-										Your Faction
-									{:else}
-										Enemy Faction
-									{/if}
-								</div>
-							</div>
-
-							<!-- Level -->
-							<div class="info-row">
-								<span class="label">Level:</span>
-								<span class="value">
-									<span class="badge badge-primary level-badge">Lv. {displayState.level}</span>
-								</span>
-							</div>
-
-							<!-- Health -->
-							<div class="info-section">
-								<div class="info-row">
-									<span class="label">Health:</span>
-									<span class="value">
-										{displayState.health} / {displayState.maxHealth}
-										<span
-											class="badge badge-sm status-badge"
-											class:badge-success={healthPercent > 75}
-											class:badge-warning={healthPercent <= 75 && healthPercent > 25}
-											class:badge-error={healthPercent <= 25}
-										>
-											{status}
-										</span>
-									</span>
-								</div>
-
-								<!-- Health Bar -->
-								<div class="health-bar-container">
-									<progress
-										class="progress w-full"
-										class:progress-success={healthPercent > 75}
-										class:progress-warning={healthPercent <= 75 && healthPercent > 25}
-										class:progress-error={healthPercent <= 25}
-										value={healthPercent}
-										max="100"
-									></progress>
-									<span class="health-percent">{Math.round(healthPercent)}%</span>
-								</div>
-							</div>
-
-							<!-- Cache Status / Real-time Indicator -->
-							{#if displayState.isCached && displayState.lastUpdated}
-								<div class="alert alert-warning cache-warning">
-									<span class="icon">⚠️</span>
-									<div class="warning-content">
-										<div class="warning-title">Cached Information</div>
-										<div class="warning-text">
-											Last updated: {formatTimeSinceUpdate(displayState.lastUpdated)}
-										</div>
-									</div>
-								</div>
-							{:else if visibility.showRealTime}
-								<div class="alert alert-success realtime-indicator">
-									<span class="pulse"></span>
-									<span>Real-time updates</span>
-								</div>
-							{/if}
-						{/if}
-
-						<!-- Player Presence -->
-						{#if presenceCount > 0}
-							<div class="presence-section">
-								<span class="presence-icon">👥</span>
-								<span class="presence-text">
-									{presenceCount} faction {presenceCount === 1 ? 'member' : 'members'} present
-								</span>
-							</div>
-						{/if}
-
-						<!-- Position Info -->
-						<div class="info-row small">
-							<span class="label">Position:</span>
-							<span class="value">
-								({Math.round(point.position.x)}, {Math.round(point.position.y)})
-							</span>
-						</div>
-					{:else}
-						<!-- Point not discovered -->
-						<div class="undiscovered-message">
-							<span class="icon">🔒</span>
-							<p>Visit this point to reveal its details</p>
-						</div>
-					{/if}
-				</div>
-
-				<!-- Actions -->
-				<div class="panel-actions">
-					<button class="btn btn-primary action-button navigate" on:click={handleNavigate}>
-						<span class="button-icon">🧭</span>
-						Navigate
-					</button>
-
-					{#if visibility.showDetails && point.type === 'claimable'}
-						<!-- Add action buttons based on point state -->
-						{#if displayState && displayState.factionId === (user.user?.faction || '')}
-							<button
-								class="btn btn-success action-button repair"
-								on:click={() => handleAction('repair')}
-							>
-								<span class="button-icon">🔧</span>
-								Repair
-							</button>
-							<button
-								class="btn btn-warning action-button upgrade"
-								on:click={() => handleAction('upgrade')}
-							>
-								<span class="button-icon">⬆️</span>
-								Upgrade
-							</button>
-						{:else if displayState && displayState.factionId !== (user.user?.faction || '')}
-							<button
-								class="btn btn-error action-button attack"
-								on:click={() => handleAction('attack')}
-							>
-								<span class="button-icon">⚔️</span>
-								Attack
-							</button>
-						{/if}
-					{/if}
+					{@render content(point, visibility)}
 				</div>
 			</div>
 		</div>
@@ -244,18 +202,7 @@
 		<div class="panel card bg-base-100 shadow-xl">
 			<div class="panel-header">
 				<div class="header-content">
-					<h2 class="point-name">
-						{#if visibility.showName}
-							{point.name}
-						{:else}
-							<span class="unknown">Unknown Point</span>
-						{/if}
-					</h2>
-					<div class="point-type-badge" class:mini-game={point.type === 'mini_game'}>
-						{point.type === 'claimable' ? '🎯 Claimable' : ''}
-						{point.type === 'mini_game' ? '🎮 Mini-game' : ''}
-						{point.type === 'not_claimable' ? '🚫 Not Claimable' : ''}
-					</div>
+					{@render contentHeader(point, visibility)}
 				</div>
 				<button class="btn btn-sm btn-circle btn-ghost close-button" on:click={handleClose}
 					>✕</button
@@ -263,143 +210,7 @@
 			</div>
 
 			<div class="panel-content">
-				{#if visibility.showDetails && displayState}
-					<!-- Faction Ownership -->
-					{#if point.type === 'claimable'}
-						<div class="info-section">
-							<div class="section-title">Ownership</div>
-							<div
-								class="badge badge-lg faction-badge"
-								style="background: {getFactionBadgeColor(displayState.factionId)}; color: white;"
-							>
-								{#if displayState.factionId === null}
-									Neutral
-								{:else if displayState.factionId === (user.user?.faction || '')}
-									Your Faction
-								{:else}
-									Enemy Faction
-								{/if}
-							</div>
-						</div>
-
-						<!-- Level -->
-						<div class="info-row">
-							<span class="label">Level:</span>
-							<span class="value">
-								<span class="badge badge-primary level-badge">Lv. {displayState.level}</span>
-							</span>
-						</div>
-
-						<!-- Health -->
-						<div class="info-section">
-							<div class="info-row">
-								<span class="label">Health:</span>
-								<span class="value">
-									{displayState.health} / {displayState.maxHealth}
-									<span
-										class="badge badge-sm status-badge"
-										class:badge-success={healthPercent > 75}
-										class:badge-warning={healthPercent <= 75 && healthPercent > 25}
-										class:badge-error={healthPercent <= 25}
-									>
-										{status}
-									</span>
-								</span>
-							</div>
-
-							<!-- Health Bar -->
-							<div class="health-bar-container">
-								<progress
-									class="progress w-full"
-									class:progress-success={healthPercent > 75}
-									class:progress-warning={healthPercent <= 75 && healthPercent > 25}
-									class:progress-error={healthPercent <= 25}
-									value={healthPercent}
-									max="100"
-								></progress>
-								<span class="health-percent">{Math.round(healthPercent)}%</span>
-							</div>
-						</div>
-
-						<!-- Cache Status / Real-time Indicator -->
-						{#if displayState.isCached && displayState.lastUpdated}
-							<div class="alert alert-warning cache-warning">
-								<span class="icon">⚠️</span>
-								<div class="warning-content">
-									<div class="warning-title">Cached Information</div>
-									<div class="warning-text">
-										Last updated: {formatTimeSinceUpdate(displayState.lastUpdated)}
-									</div>
-								</div>
-							</div>
-						{:else if visibility.showRealTime}
-							<div class="alert alert-success realtime-indicator">
-								<span class="pulse"></span>
-								<span>Real-time updates</span>
-							</div>
-						{/if}
-					{/if}
-
-					<!-- Player Presence -->
-					{#if presenceCount > 0}
-						<div class="presence-section">
-							<span class="presence-icon">👥</span>
-							<span class="presence-text">
-								{presenceCount} faction {presenceCount === 1 ? 'member' : 'members'} present
-							</span>
-						</div>
-					{/if}
-
-					<!-- Position Info -->
-					<div class="info-row small">
-						<span class="label">Position:</span>
-						<span class="value">
-							({Math.round(point.position.x)}, {Math.round(point.position.y)})
-						</span>
-					</div>
-				{:else}
-					<!-- Point not discovered -->
-					<div class="undiscovered-message">
-						<span class="icon">🔒</span>
-						<p>Visit this point to reveal its details</p>
-					</div>
-				{/if}
-			</div>
-
-			<!-- Actions -->
-			<div class="panel-actions">
-				<button class="btn btn-primary action-button navigate" on:click={handleNavigate}>
-					<span class="button-icon">🧭</span>
-					Navigate
-				</button>
-
-				{#if visibility.showDetails && point.type === 'claimable'}
-					<!-- Add action buttons based on point state -->
-					{#if displayState && displayState.factionId === (user.user?.faction || '')}
-						<button
-							class="btn btn-success action-button repair"
-							on:click={() => handleAction('repair')}
-						>
-							<span class="button-icon">🔧</span>
-							Repair
-						</button>
-						<button
-							class="btn btn-warning action-button upgrade"
-							on:click={() => handleAction('upgrade')}
-						>
-							<span class="button-icon">⬆️</span>
-							Upgrade
-						</button>
-					{:else if displayState && displayState.factionId !== (user.user?.faction || '')}
-						<button
-							class="btn btn-error action-button attack"
-							on:click={() => handleAction('attack')}
-						>
-							<span class="button-icon">⚔️</span>
-							Attack
-						</button>
-					{/if}
-				{/if}
+				{@render content(point, visibility)}
 			</div>
 		</div>
 	</div>
