@@ -130,18 +130,8 @@
 		box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 	}
 
-	/* Ensure no scrolling on body */
-	:global(body) {
-		overflow: hidden;
-		position: fixed;
-		width: 100%;
-		height: 100%;
-	}
-
-	:global(html) {
-		overflow: hidden;
-		height: 100%;
-	}
+	/* Map page doesn't need body/html scrolling since it's full-screen fixed */
+	/* Removed global overflow:hidden to allow scrolling on other pages */
 
 	/* Mobile optimizations */
 	@media (max-width: 768px) {

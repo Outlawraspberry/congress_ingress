@@ -83,6 +83,30 @@
 	input[type='search']::-webkit-search-cancel-button {
 		display: none;
 	}
+
+	/* Ensure proper mobile scrolling */
+	html {
+		height: 100%;
+		overflow-x: hidden;
+	}
+
+	body {
+		min-height: 100%;
+		overflow-x: hidden;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	/* Prevent viewport issues on mobile */
+	* {
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	/* Fix for iOS Safari address bar */
+	@supports (-webkit-touch-callout: none) {
+		body {
+			min-height: -webkit-fill-available;
+		}
+	}
 }
 
 @plugin "daisyui";

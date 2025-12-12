@@ -28,8 +28,41 @@
 
 <Header class="hidden md:block"></Header>
 
-<div class="container mx-auto w-screen p-6">
-	{@render children()}
+<div class="main-content">
+	<div class="container mx-auto max-w-full p-6">
+		{@render children()}
+	</div>
 </div>
 
 <Dock class="md:hidden" />
+
+<style>
+	.main-content {
+		min-height: 100vh;
+		min-height: 100dvh;
+		width: 100vw;
+		max-width: 100%;
+		overflow-y: auto;
+		overflow-x: hidden;
+		-webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+	}
+
+	/* Ensure proper scrolling on mobile */
+	@media (max-width: 768px) {
+		.main-content {
+			padding-bottom: 5rem; /* Space for dock at bottom */
+		}
+	}
+
+	/* Prevent horizontal overflow */
+	:global(body) {
+		overflow-x: hidden;
+		width: 100%;
+		max-width: 100vw;
+	}
+
+	:global(html) {
+		overflow-x: hidden;
+		max-width: 100vw;
+	}
+</style>
