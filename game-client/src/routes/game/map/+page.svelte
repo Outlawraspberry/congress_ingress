@@ -1,14 +1,15 @@
 <script lang="ts">
-	import MapView from '$lib/map/components/MapView.svelte';
-	import FloorSwitcher from '$lib/map/components/FloorSwitcher.svelte';
-	import PointInfoPanel from '$lib/map/components/PointInfoPanel.svelte';
-	import MapLegend from '$lib/map/components/MapLegend.svelte';
-	import type { MapPoint } from '$lib/map/map.types';
 	import { goto } from '$app/navigation';
+	import FloorSwitcher from '$lib/map/components/FloorSwitcher.svelte';
+	import MapLegend from '$lib/map/components/MapLegend.svelte';
+	import MapView from '$lib/map/components/MapView.svelte';
+	import PointInfoPanel from '$lib/map/components/PointInfoPanel.svelte';
+	import type { MapPoint } from '$lib/map/map.types';
 	import { user } from '$lib/supabase/user/user.svelte';
 	import { onMount } from 'svelte';
 
-	let selectedPoint: MapPoint | null = null;
+	let selectedPoint: MapPoint | null = $state(null);
+	let myPointOverlay: PointInfoPanel | null = $state(null);
 
 	// Redirect to login if not authenticated
 	onMount(() => {
@@ -19,25 +20,12 @@
 
 	function handlePointClick(event: CustomEvent<{ point: MapPoint }>) {
 		selectedPoint = event.detail.point;
+		myPointOverlay?.open();
 	}
 
 	function handleClosePanel() {
 		selectedPoint = null;
-	}
-
-	function handleNavigate(event: CustomEvent<{ pointId: string }>) {
-		console.log('Navigate to point:', event.detail.pointId);
-		// TODO: Implement navigation logic
-		// This could show the floor and general direction
-		// Or integrate with your QR code scanning flow
-	}
-
-	function handleAction(event: CustomEvent<{ pointId: string; actionType: string }>) {
-		console.log('Action:', event.detail.actionType, 'on point:', event.detail.pointId);
-		// TODO: Implement action logic
-		// This should redirect to the game/action page or open action modal
-		// You might want to check if user is at the point via QR scan first
-		goto(`/game?action=${event.detail.actionType}&point=${event.detail.pointId}`);
+		myPointOverlay?.close();
 	}
 </script>
 
@@ -58,10 +46,10 @@
 
 		{#if selectedPoint}
 			<PointInfoPanel
+				id="point-panel"
+				bind:this={myPointOverlay}
 				point={selectedPoint}
-				on:close={handleClosePanel}
-				on:navigate={handleNavigate}
-				on:action={handleAction}
+				onClose={handleClosePanel}
 			/>
 		{/if}
 	{:else}
