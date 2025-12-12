@@ -5,6 +5,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import '../app.css';
 	import Dock from '$lib/components/dock/dock.svelte';
+	import { page } from '$app/stores';
 
 	let { children } = $props();
 
@@ -18,6 +19,9 @@
 	// Optionally: initialize on load
 	document.documentElement.classList.toggle('dark', darkMode);
 
+	// Check if current route is the map page
+	let isMapPage = $derived($page.url.pathname === '/game/map');
+
 	onMount(async () => {});
 
 	onDestroy(() => {
@@ -28,11 +32,17 @@
 
 <Header class="hidden md:block"></Header>
 
-<div class="main-content">
-	<div class="container mx-auto max-w-full p-6">
-		{@render children()}
+{#if isMapPage}
+	<!-- Map page: no wrapper, let it handle its own layout -->
+	{@render children()}
+{:else}
+	<!-- Regular pages: scrollable wrapper -->
+	<div class="main-content">
+		<div class="container mx-auto max-w-full p-6">
+			{@render children()}
+		</div>
 	</div>
-</div>
+{/if}
 
 <Dock class="md:hidden" />
 

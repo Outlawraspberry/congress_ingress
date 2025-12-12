@@ -75,9 +75,8 @@
 		right: 0;
 		bottom: 0;
 		background: #f5f5f5;
-		touch-action: none; /* Prevent default touch behaviors */
-
-		z-index: -1;
+		touch-action: pan-x pan-y pinch-zoom; /* Allow map pan and zoom interactions */
+		z-index: 0;
 	}
 
 	.auth-required {

@@ -2,21 +2,31 @@
 	import UserApInformation from '$lib/components/user-ap-information.svelte';
 	import { destroySelectedPoint } from '$lib/point/selected-point.svelte';
 	import { onDestroy } from 'svelte';
+	import { page } from '$app/stores';
 
 	const { children } = $props();
+
+	// Check if current route is the map page
+	let isMapPage = $derived($page.url.pathname === '/game/map');
 
 	onDestroy(() => {
 		destroySelectedPoint();
 	});
 </script>
 
-<div class="game-layout">
-	<a href="/user">
-		<UserApInformation class="mb-5 md:hidden" />
-	</a>
-
+{#if isMapPage}
+	<!-- Map page: no wrapper, preserve touch interactions -->
 	{@render children()}
-</div>
+{:else}
+	<!-- Regular game pages: scrollable wrapper -->
+	<div class="game-layout">
+		<a href="/user">
+			<UserApInformation class="mb-5 md:hidden" />
+		</a>
+
+		{@render children()}
+	</div>
+{/if}
 
 <style>
 	.game-layout {
