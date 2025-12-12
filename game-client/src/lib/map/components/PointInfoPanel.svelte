@@ -63,9 +63,9 @@
 		<!-- Faction Ownership -->
 		{#if point.type === 'claimable'}
 			<div class="info-section">
-				<div class="section-title">Ownership</div>
+				<div class="section-title inline">Ownership</div>
 				<div
-					class="badge badge-lg faction-badge"
+					class="badge badge-lg faction-badge inline"
 					style="background: {getFactionBadgeColor(displayState.factionId)}; color: white;"
 				>
 					{#if displayState.factionId === null}
@@ -94,9 +94,9 @@
 						{displayState.health} / {displayState.maxHealth}
 						<span
 							class="badge badge-sm status-badge"
-							class:badge-success={healthPercent > 75}
-							class:badge-warning={healthPercent <= 75 && healthPercent > 25}
-							class:badge-error={healthPercent <= 25}
+							class:badge-success={healthPercent > 80}
+							class:badge-warning={healthPercent <= 80 && healthPercent > 20}
+							class:badge-error={healthPercent <= 20}
 						>
 							{status}
 						</span>
@@ -107,9 +107,9 @@
 				<div class="health-bar-container">
 					<progress
 						class="progress w-full"
-						class:progress-success={healthPercent > 75}
-						class:progress-warning={healthPercent <= 75 && healthPercent > 25}
-						class:progress-error={healthPercent <= 25}
+						class:progress-success={healthPercent > 80}
+						class:progress-warning={healthPercent <= 80 && healthPercent > 20}
+						class:progress-error={healthPercent <= 20}
 						value={healthPercent}
 						max="100"
 					></progress>
@@ -128,11 +128,6 @@
 						</div>
 					</div>
 				</div>
-			{:else if visibility.showRealTime}
-				<div class="alert alert-success realtime-indicator">
-					<span class="pulse"></span>
-					<span>Real-time updates</span>
-				</div>
 			{/if}
 		{/if}
 
@@ -145,35 +140,28 @@
 				</span>
 			</div>
 		{/if}
-
-		<!-- Position Info -->
-		<div class="info-row small">
-			<span class="label">Position:</span>
-			<span class="value">
-				({Math.round(point.position.x)}, {Math.round(point.position.y)})
-			</span>
-		</div>
 	{:else}
 		<!-- Point not discovered -->
 		<div class="undiscovered-message">
-			<span class="icon">🔒</span>
-			<p>Visit this point to reveal its details</p>
+			<span class="icon inline">🔒</span>
+			<p class="inline">Visit this point to reveal its details</p>
 		</div>
 	{/if}{/snippet}
 
 {#snippet contentHeader(point: MapPoint, visibility: PointVisibilityInfo)}
-	<h2 class="point-name">
+	<h2 class="inline text-2xl">
 		{#if visibility.showName}
 			{point.name}
 		{:else}
 			<span class="unknown">Unknown Point</span>
 		{/if}
 	</h2>
-	<div class="point-type-badge" class:mini-game={point.type === 'mini_game'}>
+	<div class="inline">
 		{point.type === 'claimable' ? '🎯 Claimable' : ''}
 		{point.type === 'mini_game' ? '🎮 Mini-game' : ''}
 		{point.type === 'not_claimable' ? '🚫 Not Claimable' : ''}
-	</div>{/snippet}
+	</div>
+{/snippet}
 
 <dialog bind:this={dialog} {id} class="modal">
 	<div class="modal-box">

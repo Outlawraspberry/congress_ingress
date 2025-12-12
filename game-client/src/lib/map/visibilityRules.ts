@@ -1,15 +1,6 @@
-import type {
-	MapPoint,
-	PointVisibilityInfo,
-	CachedPointState
-} from './map.types';
+import type { MapPoint, PointVisibilityInfo, CachedPointState } from './map.types';
 import { VisibilityReason } from './map.types';
-import {
-	isOwnFactionPoint,
-	isEnemyPoint,
-	isMiniGamePoint,
-	isNeutralPoint
-} from './map.types';
+import { isOwnFactionPoint, isEnemyPoint, isMiniGamePoint, isNeutralPoint } from './map.types';
 
 // =====================================================
 // Visibility Rules Engine
@@ -31,11 +22,11 @@ export function determinePointVisibility(
 	isDiscovered: boolean,
 	cache: CachedPointState | null
 ): PointVisibilityInfo {
-	// Mini-game points: Hidden until discovered
+	// Mini-game points: Always show location, but details only after discovery
 	if (isMiniGamePoint(point)) {
 		if (!isDiscovered) {
 			return {
-				showLocation: false,
+				showLocation: true,
 				showName: false,
 				showDetails: false,
 				showRealTime: false,
@@ -148,10 +139,7 @@ export function shouldShowDetails(
 /**
  * Check if point should show real-time updates
  */
-export function shouldShowRealTime(
-	point: MapPoint,
-	userFactionId: string
-): boolean {
+export function shouldShowRealTime(point: MapPoint, userFactionId: string): boolean {
 	const visibility = determinePointVisibility(point, userFactionId, false, null);
 	return visibility.showRealTime;
 }
@@ -280,7 +268,7 @@ export function getMarkerOpacity(
 
 	// Health-based opacity for discovered points
 	const healthPercent = point.maxHealth > 0 ? point.health / point.maxHealth : 1;
-	return 0.7 + (healthPercent * 0.3); // Range: 0.7 to 1.0
+	return 0.7 + healthPercent * 0.3; // Range: 0.7 to 1.0
 }
 
 /**
@@ -290,7 +278,7 @@ export function getMarkerSize(level: number): number {
 	const baseSize = 20; // pixels
 	const sizePerLevel = 8; // pixels per level
 
-	return baseSize + (level * sizePerLevel);
+	return baseSize + level * sizePerLevel;
 }
 
 // =====================================================
@@ -319,8 +307,8 @@ export function filterPoints(
 		// Mini-game filter
 		if (isMiniGamePoint(point)) {
 			if (!filters.showMiniGames) return false;
-			// Mini-games only visible if discovered
-			return isDiscovered;
+			// Mini-games are always visible
+			return true;
 		}
 
 		// Own faction filter
@@ -350,10 +338,7 @@ export function filterPoints(
 /**
  * Get contested points (points with low health that could change hands soon)
  */
-export function getContestedPoints(
-	points: MapPoint[],
-	healthThreshold: number = 50
-): MapPoint[] {
+export function getContestedPoints(points: MapPoint[], healthThreshold: number = 50): MapPoint[] {
 	return points.filter((point) => {
 		if (point.factionId === null) return false; // Unclaimed points aren't "contested"
 		const healthPercent = point.maxHealth > 0 ? (point.health / point.maxHealth) * 100 : 100;
@@ -369,22 +354,14 @@ export function getContestedPoints(
  * Get all points that should be automatically discovered
  * (e.g., own faction points are always "discovered")
  */
-export function getAutoDiscoveredPoints(
-	points: MapPoint[],
-	userFactionId: string
-): string[] {
-	return points
-		.filter((point) => isOwnFactionPoint(point, userFactionId))
-		.map((point) => point.id);
+export function getAutoDiscoveredPoints(points: MapPoint[], userFactionId: string): string[] {
+	return points.filter((point) => isOwnFactionPoint(point, userFactionId)).map((point) => point.id);
 }
 
 /**
  * Calculate exploration progress percentage
  */
-export function calculateExplorationProgress(
-	totalPoints: number,
-	discoveredCount: number
-): number {
+export function calculateExplorationProgress(totalPoints: number, discoveredCount: number): number {
 	if (totalPoints === 0) return 0;
 	return Math.round((discoveredCount / totalPoints) * 100);
 }
