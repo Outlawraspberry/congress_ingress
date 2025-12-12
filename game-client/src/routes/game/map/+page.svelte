@@ -79,6 +79,15 @@
 		z-index: 0;
 	}
 
+	/* On desktop, account for header height */
+	@media (min-width: 768px) {
+		.map-page {
+			top: 4rem; /* Adjust based on your header height */
+			height: calc(100vh - 4rem);
+			height: calc(100dvh - 4rem);
+		}
+	}
+
 	.auth-required {
 		width: 100%;
 		height: 100%;

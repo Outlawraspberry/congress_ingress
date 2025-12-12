@@ -32,11 +32,11 @@
 
 <Header class="hidden md:block"></Header>
 
+<!-- Map page: no scrollable wrapper, let map handle its own layout -->
+<!-- Regular pages: wrap in scrollable container -->
 {#if isMapPage}
-	<!-- Map page: no wrapper, let it handle its own layout -->
 	{@render children()}
 {:else}
-	<!-- Regular pages: scrollable wrapper -->
 	<div class="main-content">
 		<div class="container mx-auto max-w-full p-6">
 			{@render children()}
