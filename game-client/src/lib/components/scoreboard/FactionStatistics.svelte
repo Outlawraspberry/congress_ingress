@@ -51,7 +51,7 @@
 	<div class="card-body">
 		<h2 class="card-title mb-4 text-2xl">
 			🏴 Faction Statistics
-			<div class="badge badge-accent">Dominance</div>
+			<div class="badge badge-accent text-nowrap">Dominance</div>
 		</h2>
 
 		{#if loading}

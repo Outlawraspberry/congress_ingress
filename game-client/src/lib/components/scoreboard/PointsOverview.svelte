@@ -122,7 +122,7 @@
 	<div class="card-body">
 		<h2 class="card-title mb-4 text-2xl">
 			🏭 Points Overview
-			<div class="badge badge-secondary">Control Status</div>
+			<div class="badge badge-secondary text-nowrap">Control Status</div>
 		</h2>
 
 		{#if loading}
@@ -187,7 +187,7 @@
 								</td>
 								<td>
 									{#if point.current_faction_name}
-										<div class="badge badge-outline">
+										<div class="badge badge-outline text-nowrap">
 											{point.current_faction_name}
 										</div>
 									{:else}
@@ -252,7 +252,7 @@
 										{new Date(entry.created_at).toLocaleString()}
 									</td>
 									<td>
-										<div class="badge badge-outline">
+										<div class="badge badge-outline text-nowrap">
 											{entry.faction_name}
 										</div>
 									</td>

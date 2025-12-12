@@ -65,7 +65,7 @@
 	<div class="card-body">
 		<h2 class="card-title mb-4 text-2xl">
 			🏆 Global Scoreboard
-			<div class="badge badge-primary">Top 10</div>
+			<div class="badge badge-primary text-nowrap">Top 10</div>
 		</h2>
 
 		{#if loading}
@@ -119,7 +119,7 @@
 								</td>
 								<td>
 									{#if user.faction_name}
-										<div class="badge badge-outline">
+										<div class="badge badge-outline text-nowrap">
 											{user.faction_name}
 										</div>
 									{:else}
