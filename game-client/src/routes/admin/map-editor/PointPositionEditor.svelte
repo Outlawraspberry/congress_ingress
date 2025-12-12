@@ -554,17 +554,18 @@
 						class="absolute inset-0 flex items-center justify-center"
 						style="transform: translate({panX}px, {panY}px) scale({scale}); transform-origin: center center;"
 					>
-						<div class="relative" style="width: 100%; height: 100%;">
+						<div class="relative inline-block">
 							<img
 								bind:this={imageElement}
 								src={floor.map_image_url}
 								alt={floor.name}
-								class="h-full w-full object-contain select-none"
+								class="block select-none"
+								style="max-width: 100%; max-height: 100%; width: auto; height: auto;"
 								draggable="false"
 								onload={handleImageLoad}
 							/>
 
-							<!-- Render positioned points -->
+							<!-- Render positioned points - now positioned relative to the image itself -->
 							{#each points.filter((p) => p.x_coordinate !== null && p.y_coordinate !== null) as point (point.id)}
 								<button
 									class="absolute -translate-x-1/2 -translate-y-1/2 rounded-full {getPointColor(
