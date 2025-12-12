@@ -21,6 +21,8 @@
 	let imageFile: File | null = $state(null);
 	let imagePreview: string | null = $state(floor?.map_image_url || null);
 	let isUploading = $state(false);
+	let imageWidth: number | null = $state(floor?.image_width || null);
+	let imageHeight: number | null = $state(floor?.image_height || null);
 
 	function handleFileChange(event: Event) {
 		const target = event.target as HTMLInputElement;
@@ -40,10 +42,19 @@
 			imageFile = file;
 			error = null;
 
-			// Create preview
+			// Create preview and extract dimensions
 			const reader = new FileReader();
 			reader.onload = (e) => {
-				imagePreview = e.target?.result as string;
+				const result = e.target?.result as string;
+				imagePreview = result;
+
+				// Load image to get dimensions
+				const img = new Image();
+				img.onload = () => {
+					imageWidth = img.width;
+					imageHeight = img.height;
+				};
+				img.src = result;
 			};
 			reader.readAsDataURL(file);
 		}
@@ -101,7 +112,9 @@
 				building_name: buildingName.trim() || null,
 				display_order: displayOrder,
 				is_active: isActive,
-				map_image_url: finalImageUrl
+				map_image_url: finalImageUrl,
+				image_width: imageWidth,
+				image_height: imageHeight
 			};
 
 			if (floor) {
@@ -236,6 +249,11 @@
 				<div class="border-base-300 relative aspect-video overflow-hidden rounded-lg border">
 					<img src={imagePreview} alt="Floor plan preview" class="h-full w-full object-contain" />
 				</div>
+				{#if imageWidth && imageHeight}
+					<label class="label">
+						<span class="label-text-alt">Dimensions: {imageWidth} × {imageHeight} pixels</span>
+					</label>
+				{/if}
 			</div>
 		{/if}
 
