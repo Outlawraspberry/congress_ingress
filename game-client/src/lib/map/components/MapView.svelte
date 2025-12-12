@@ -77,14 +77,14 @@
 			// Initialize Leaflet map with custom CRS for image coordinates
 			map = L.map(mapContainer, {
 				crs: L.CRS.Simple,
-				minZoom: -2,
-				maxZoom: 2,
+				minZoom: -5, // Allow more zoom out for large images
+				maxZoom: 3,
 				zoomControl: true,
 				attributionControl: false,
 				doubleClickZoom: false,
 				scrollWheelZoom: true,
 				dragging: true,
-				zoomSnap: 0.5,
+				zoomSnap: 0.25,
 				zoomDelta: 0.5,
 				wheelPxPerZoomLevel: 60,
 				// Mobile optimizations
@@ -92,8 +92,11 @@
 				tapTolerance: 15
 			} as L.MapOptions);
 
-			// Set initial view
-			map.fitBounds(currentBounds);
+			// Set initial view - fit to fill viewport nicely
+			// Don't set maxZoom here to let it zoom out as needed
+			map.fitBounds(currentBounds, {
+				padding: [20, 20] // Small padding for better appearance
+			});
 
 			// Ensure proper z-index hierarchy for panes
 			const overlayPane = map.getPane('overlayPane');
@@ -224,8 +227,13 @@
 
 		requestAnimationFrame(fadeIn);
 
-		// Fit bounds to show the entire image
-		map.fitBounds(currentBounds);
+		// Fit bounds to show the entire image - fill viewport nicely
+		// Let it zoom out as needed for large images
+		map.fitBounds(currentBounds, {
+			padding: [20, 20], // Small padding for better appearance
+			animate: true,
+			duration: 0.5
+		});
 
 		// Don't clear markers here - updateMarkers will handle it
 		// Markers are managed by the reactive statement below
