@@ -1,9 +1,0 @@
-{
-  "version": "1",
-  "name": "congress_quest_requests",
-  "type": "collection",
-  "ignore": [
-    "node_modules",
-    ".git"
-  ]
-}
