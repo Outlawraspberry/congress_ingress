@@ -1,24 +1,29 @@
-# Congress Ingress
+# Congress Quest 🗺
 
-## Initial Setup
+Congress quest (CQ) is a capture the flag like game / prototype inspired by Ingress. 
+The game is running a limited time and is playable in a specific location.
 
-### Cron Jobs
+The initial idea is, to play the game on the chaos communication congress (C3). 
+The C3 is happening in the CCH (Congress Center Hamburg) between Christmas and new year. 
+In the building and surrounding area, congress quest will be playable. 
+If you are an explorer, you'll find a lot of nice and funny stuff on the congress. 
+Especially in the corners and some non main stream spots. 
+To encourage visitors to explore more, congress quest was invented.
 
-To run the cron jobs correctly, you have to update the secrets
-`run_game_tick_url` and `service_role_jwt`.
+The base idea of CQ is to place points, like a stronghold or a portal like in ingress, everywhere on the area. 
+These points can be placed at specific sights or points of interest, like the main hall or something else.
 
-You can do this by using the UI. Go to integrations to the vault extension.
-There you can change the secrets.
+The points are visible through the CQ client and users can interact by the client with the points. 
+Points are claimed or unclaimed by faction and depending if the user is part of a faction or not, he can claim, attack or repair one of the points.
 
-## Generate new database types
+In CQ, there are factions and a user is part of a faction.
+In name of a faction a users can interact with the points in the world.
+A point which is not claimed, can be claimed by any faction
+A point that is claimed by an opponent faction can be attack and claimed at the end
+A point owned by the own faction can be repaired.
 
-`supabase gen types typescript --local --schema game --schema public > types/database.types.ts`
+But what's the goal of the game? The goal is to claim as much points for the user's faction and of course have fun!
 
+---
 
-## Running edge functions locally
-
-When you're local supabase functions is not capable of fetching things from the outside, then use another network.
-
-- `docker networks ls` search for the host network
-`supabase start --network-id <host network id>`
-`supabase functions serve --network-id <host network id>`
+If you have questions, found a bug (I guess there are some) or want to give feedback, feel free to [write an issue](https://github.com/Outlawraspberry/congress_ingress/issues) or [start a discussion](https://github.com/Outlawraspberry/congress_ingress/discussions).
