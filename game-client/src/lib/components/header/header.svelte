@@ -49,6 +49,9 @@
 					{/if}
 
 					<LiActiveUrl href="/legal" {activeUrl}>Legal</LiActiveUrl>
+					<LiActiveUrl href="https://github.com/Outlawraspberry/congress_ingress" {activeUrl}
+						>GitHub</LiActiveUrl
+					>
 
 					<li><a href="/logout" data-sveltekit-preload-data="off">Logout</a></li>
 				{/if}

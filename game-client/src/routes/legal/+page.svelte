@@ -23,6 +23,8 @@
 			{@render card('Impress', '', '/legal/impress')}
 
 			{@render card('Data-Privacy', '', '/legal/data-privacy')}
+
+			{@render card('GitHub', '', 'https://github.com/Outlawraspberry/congress_ingress')}
 		</div>
 	</div>
 </section>

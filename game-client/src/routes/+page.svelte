@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { user } from '$lib/supabase/user/user.svelte';
+	import { Github } from '@lucide/svelte';
 </script>
 
 <div class="hero mt-8">
@@ -26,6 +27,12 @@
 					<a href="/register" class="btn btn-primary btn-xl">Register</a>
 				</div>
 			{/if}
+			<div class="mt-8 flex max-w-md items-baseline justify-center gap-5">
+				<p>Or checkout the project's source</p>
+				<a href="https://github.com/Outlawraspberry/congress_ingress" class="btn btn-xl mt-4"
+					>GitHub <Github /></a
+				>
+			</div>
 		</div>
 	</div>
 </div>
