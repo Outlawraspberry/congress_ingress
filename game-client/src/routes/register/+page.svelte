@@ -14,7 +14,6 @@
 						When you register anonymously, you will be only referenced by your browser session. If
 						it is gone, you have to create a new account.
 					</p>
-					<p>No worries, you can transform your anonymous account into a persistend one later.</p>
 				</Card>
 			</a>
 

@@ -60,12 +60,6 @@
 				<input type="submit" class="btn btn-primary mt-4" value="Login" />
 
 				<p class="mt-3">
-					Have you forget your password. <a href="/" class="text-primary font-bold"
-						>No problem, just reset it?</a
-					>
-				</p>
-
-				<p class="mt-3">
 					Don’t have an account yet? <a href="/register" class="text-primary font-bold">
 						Sign up
 					</a>
