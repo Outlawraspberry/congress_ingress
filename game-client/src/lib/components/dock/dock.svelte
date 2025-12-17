@@ -9,6 +9,7 @@
 		LogOut,
 		Map,
 		Medal,
+		Section,
 		User,
 		UserStar
 	} from '@lucide/svelte';
@@ -66,4 +67,8 @@
 			<BookUser /> <span class="dock-label">Register</span>
 		</AActiveUrl>
 	{/if}
+	<AActiveUrl href="/legal" {activeUrl}>
+		<Section />
+		<span class="dock-label">Legal</span>
+	</AActiveUrl>
 </div>

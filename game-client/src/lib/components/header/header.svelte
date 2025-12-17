@@ -48,6 +48,8 @@
 						</li>
 					{/if}
 
+					<LiActiveUrl href="/legal" {activeUrl}>Legal</LiActiveUrl>
+
 					<li><a href="/logout" data-sveltekit-preload-data="off">Logout</a></li>
 				{/if}
 			</ul>
