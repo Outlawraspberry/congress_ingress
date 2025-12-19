@@ -17,6 +17,11 @@
 
 	export let selectedPointId: string | null = null;
 
+	// Tileserver configuration
+	// Set useTileServer to true and provide tileServerUrl to use tiles instead of image overlay
+	export let useTileServer: boolean = false;
+	export let tileServerUrl: string = '';
+
 	const dispatch = createEventDispatcher<{
 		pointClick: { point: MapPoint };
 		mapReady: { map: L.Map };
@@ -176,56 +181,89 @@
 			[imageHeight, imageWidth]
 		];
 
-		// Preload the new image
-		const img = new Image();
-
-		await new Promise<void>((resolve, reject) => {
-			img.onload = () => resolve();
-			img.onerror = () => reject(new Error('Failed to load floor image'));
-			img.src = floor.map_image_url;
-		}).catch((err) => {
-			console.error('Error preloading floor image:', err);
-			// Continue anyway to show something
-		});
-
-		// Store reference to old overlay
-		if (imageOverlay) {
-			oldImageOverlay = imageOverlay;
-		}
-
-		// Create new overlay with opacity 0
-		// Explicitly set pane to overlayPane to ensure markers (in markerPane) are above it
-		const newOverlay = L.imageOverlay(floor.map_image_url, currentBounds, {
-			opacity: 0,
-			pane: 'overlayPane'
-		});
-
-		newOverlay.addTo(map);
-		imageOverlay = newOverlay;
-
-		// Wait a frame for the overlay to be added
-		await new Promise((resolve) => requestAnimationFrame(resolve));
-
-		// Fade in the new overlay
-		let opacity = 0;
-		const fadeIn = () => {
-			opacity += 0.1;
-			if (opacity >= 1) {
-				opacity = 1;
-				newOverlay.setOpacity(opacity);
-
-				// Remove old overlay after fade completes
-				if (oldImageOverlay) {
-					oldImageOverlay.remove();
-					oldImageOverlay = null;
-				}
-			} else {
-				newOverlay.setOpacity(opacity);
-				requestAnimationFrame(fadeIn);
+		if (useTileServer && tileServerUrl) {
+			// Use tileserver mode
+			// Remove old image overlay if it exists
+			if (imageOverlay) {
+				imageOverlay.remove();
+				imageOverlay = null;
 			}
-		};
+			if (oldImageOverlay) {
+				oldImageOverlay.remove();
+				oldImageOverlay = null;
+			}
 
-		requestAnimationFrame(fadeIn);
+			// Create tile layer for this floor
+			// Expected URL format: http://localhost:8080/tiles/{floorId}/{z}/{x}/{y}.png
+			const tileUrl = `${tileServerUrl}/${floor.id}/{z}/{x}/{y}.png`;
+
+			const tileLayer = L.tileLayer(tileUrl, {
+				tileSize: 256,
+				noWrap: true,
+				bounds: currentBounds,
+				minZoom: -5,
+				maxZoom: 3,
+				// @ts-ignore - L.CRS.Simple doesn't have all standard options
+				tms: false
+			});
+
+			tileLayer.addTo(map);
+
+			// Store reference (reuse imageOverlay variable for cleanup)
+			imageOverlay = tileLayer as any;
+		} else {
+			// Use image overlay mode (default)
+			// Preload the new image
+			const img = new Image();
+
+			await new Promise<void>((resolve, reject) => {
+				img.onload = () => resolve();
+				img.onerror = () => reject(new Error('Failed to load floor image'));
+				img.src = floor.map_image_url;
+			}).catch((err) => {
+				console.error('Error preloading floor image:', err);
+				// Continue anyway to show something
+			});
+
+			// Store reference to old overlay
+			if (imageOverlay) {
+				oldImageOverlay = imageOverlay;
+			}
+
+			// Create new overlay with opacity 0
+			// Explicitly set pane to overlayPane to ensure markers (in markerPane) are above it
+			const newOverlay = L.imageOverlay(floor.map_image_url, currentBounds, {
+				opacity: 0,
+				pane: 'overlayPane'
+			});
+
+			newOverlay.addTo(map);
+			imageOverlay = newOverlay;
+
+			// Wait a frame for the overlay to be added
+			await new Promise((resolve) => requestAnimationFrame(resolve));
+
+			// Fade in the new overlay
+			let opacity = 0;
+			const fadeIn = () => {
+				opacity += 0.1;
+				if (opacity >= 1) {
+					opacity = 1;
+					newOverlay.setOpacity(opacity);
+
+					// Remove old overlay after fade completes
+					if (oldImageOverlay) {
+						oldImageOverlay.remove();
+						oldImageOverlay = null;
+					}
+				} else {
+					newOverlay.setOpacity(opacity);
+					requestAnimationFrame(fadeIn);
+				}
+			};
+
+			requestAnimationFrame(fadeIn);
+		}
 
 		// Fit bounds to show the entire image - fill viewport nicely
 		// Let it zoom out as needed for large images

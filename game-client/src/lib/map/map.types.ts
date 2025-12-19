@@ -113,6 +113,9 @@ export interface MapConfig {
 	cacheExpirationHours: number;
 	showPlayerPresence: boolean;
 	enableMiniMap: boolean;
+	// Tileserver configuration (optional)
+	useTileServer?: boolean;
+	tileServerUrl?: string;
 }
 
 // =====================================================

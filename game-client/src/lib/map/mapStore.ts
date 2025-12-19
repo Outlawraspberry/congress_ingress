@@ -14,6 +14,7 @@ import {
 } from './mapApi';
 import { determinePointVisibility, filterPoints } from './visibilityRules';
 import { user } from '../supabase/user/user.svelte';
+import { PUBLIC_TILE_SERVER_URL } from '$env/static/public';
 
 // =====================================================
 // Configuration Store
@@ -24,7 +25,10 @@ export const mapConfig = writable<MapConfig>({
 	enableEnemyCache: true,
 	cacheExpirationHours: 24,
 	showPlayerPresence: true,
-	enableMiniMap: true
+	enableMiniMap: true,
+	// Tileserver configuration (disabled by default - use image overlay mode)
+	useTileServer: true,
+	tileServerUrl: PUBLIC_TILE_SERVER_URL // e.g., 'http://localhost:8080/tiles'
 });
 
 // =====================================================

@@ -5,6 +5,7 @@
 	import MapView from '$lib/map/components/MapView.svelte';
 	import PointInfoPanel from '$lib/map/components/PointInfoPanel.svelte';
 	import type { MapPoint } from '$lib/map/map.types';
+	import { mapConfig } from '$lib/map/mapStore';
 	import { user } from '$lib/supabase/user/user.svelte';
 	import { onMount } from 'svelte';
 
@@ -40,7 +41,12 @@
 
 <div class="map-page">
 	{#if user.user}
-		<MapView selectedPointId={selectedPoint?.id || null} on:pointClick={handlePointClick} />
+		<MapView
+			selectedPointId={selectedPoint?.id || null}
+			useTileServer={$mapConfig.useTileServer || false}
+			tileServerUrl={$mapConfig.tileServerUrl || ''}
+			on:pointClick={handlePointClick}
+		/>
 		<FloorSwitcher />
 		<MapLegend />
 
