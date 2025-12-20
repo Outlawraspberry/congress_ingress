@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { C3NavService } from '$lib/c3-nav/c3-nav-servier';
 	import FloorSwitcher from '$lib/map/components/FloorSwitcher.svelte';
 	import MapLegend from '$lib/map/components/MapLegend.svelte';
 	import MapView from '$lib/map/components/MapView.svelte';
@@ -44,7 +45,9 @@
 		<MapView
 			selectedPointId={selectedPoint?.id || null}
 			useTileServer={$mapConfig.useTileServer || false}
-			tileServerUrl={$mapConfig.tileServerUrl || ''}
+			tileServerUrl={C3NavService.instance.mapSettings?.tile_server ||
+				$mapConfig.tileServerUrl ||
+				''}
 			on:pointClick={handlePointClick}
 		/>
 		<FloorSwitcher />
