@@ -40,6 +40,8 @@ jobs:
           echo "PUBLIC_SUPABASE_URL=${{ secrets.PUBLIC_SUPABASE_URL }}" >> game-client/.env
           echo "PUBLIC_SUPABASE_ANON_KEY=${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}" >> game-client/.env
           echo "PUBLIC_VALID_REDIRECT_URL=${{ secrets.PUBLIC_VALID_REDIRECT_URL }}" >> game-client/.env
+          echo "PUBLIC_C3_NAV_URL=${{ secrets.PUBLIC_C3_NAV_URL }}" >> game-client/.env
+          echo "PUBLIC_TILE_SERVER_URL=${{ secrets.PUBLIC_TILE_SERVER_URL }}" >> game-client/.env
 
       - name: Run install
         uses: borales/actions-yarn@v4
