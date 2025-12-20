@@ -10,5 +10,10 @@ export const load: LayoutLoad = async () => {
 	await supabaseInit();
 	await gameInit();
 	await userInit();
-	await C3NavService.instance.init();
+
+	try {
+		await C3NavService.instance.init();
+	} catch (e) {
+		console.log('Failed to initialize C3NavService', e);
+	}
 };
