@@ -18,7 +18,7 @@ export class C3NavService {
 
 		await this.getMapSettings();
 
-		this.updateInterval = setInterval(this.fetchUpdate, 10000) as unknown as number;
+		// this.updateInterval = setInterval(this.fetchUpdate, 10000) as unknown as number;
 	}
 
 	async destruct(): Promise<void> {

@@ -15,12 +15,17 @@
 	import { createEventDispatcher } from 'svelte';
 	import { user } from '../../supabase/user/user.svelte';
 
-	export let selectedPointId: string | null = null;
+	let {
+		selectedPointId,
+		tileServerUrl,
+		initialBounds
+	}: {
+		selectedPointId: string | null;
+		tileServerUrl: string;
+		initialBounds: [[number, number], [number, number]] | null;
+	} = $props();
 
-	// Tileserver configuration
-	// Set useTileServer to true and provide tileServerUrl to use tiles instead of image overlay
-	export let useTileServer: boolean = false;
-	export let tileServerUrl: string = '';
+	console.log('Init', tileServerUrl, initialBounds);
 
 	const dispatch = createEventDispatcher<{
 		pointClick: { point: MapPoint };
@@ -32,15 +37,18 @@
 	let imageOverlay: L.ImageOverlay | null = null;
 	let oldImageOverlay: L.ImageOverlay | null = null;
 	let markers: Map<string, L.CircleMarker> = new Map();
-	let currentBounds: L.LatLngBoundsExpression = [
-		[0, 0],
-		[1000, 1000]
-	];
+	let currentBounds = $derived<L.LatLngBoundsExpression>(
+		initialBounds ?? [
+			[0, 0],
+			[1000, 1000]
+		]
+	);
 	let lastFloorId: number | null = null;
-	let isDarkMode =
+	let isDarkMode = $state(
 		typeof window !== 'undefined'
 			? window.matchMedia('(prefers-color-scheme: dark)').matches
-			: false;
+			: false
+	);
 	let themeMediaQuery: MediaQueryList | null = null;
 
 	// Detect theme changes
@@ -103,6 +111,9 @@
 				padding: [20, 20] // Small padding for better appearance
 			});
 
+			// Constrain map to bounds to prevent requesting tiles with negative coordinates
+			map.setMaxBounds(currentBounds);
+
 			// Ensure proper z-index hierarchy for panes
 			const overlayPane = map.getPane('overlayPane');
 			const markerPane = map.getPane('markerPane');
@@ -137,6 +148,8 @@
 
 			// Dispatch map ready event
 			dispatch('mapReady', { map });
+
+			updateFloorImage($currentFloor?.id || 0);
 		}
 	});
 
@@ -161,114 +174,60 @@
 		await destroyMap();
 	});
 
-	// Update floor plan image when floor changes with smooth transition
-	$: if (map && $currentFloor && $currentFloor.id !== lastFloorId) {
-		updateFloorImage($currentFloor);
-	}
-
-	async function updateFloorImage(floor: typeof $currentFloor) {
-		if (!map || !floor || floor.id === lastFloorId) return;
-
-		lastFloorId = floor.id;
-
-		// Calculate bounds based on image dimensions
-		const imageWidth = floor.image_width || 1000;
-		const imageHeight = floor.image_height || 1000;
-
-		// Set bounds with proper aspect ratio
-		currentBounds = [
-			[0, 0],
-			[imageHeight, imageWidth]
-		];
-
-		if (useTileServer && tileServerUrl) {
-			// Use tileserver mode
-			// Remove old image overlay if it exists
-			if (imageOverlay) {
-				imageOverlay.remove();
-				imageOverlay = null;
-			}
-			if (oldImageOverlay) {
-				oldImageOverlay.remove();
-				oldImageOverlay = null;
-			}
-
-			// Create tile layer for this floor
-			// Expected URL format: http://localhost:8080/tiles/{floorId}/{z}/{x}/{y}.png
-			const tileUrl = `${tileServerUrl}/${floor.id}/{z}/{x}/{y}.png`;
-
-			const tileLayer = L.tileLayer(tileUrl, {
-				tileSize: 256,
-				noWrap: true,
-				bounds: currentBounds,
-				minZoom: -5,
-				maxZoom: 3,
-				// @ts-ignore - L.CRS.Simple doesn't have all standard options
-				tms: false
-			});
-
-			tileLayer.addTo(map);
-
-			// Store reference (reuse imageOverlay variable for cleanup)
-			imageOverlay = tileLayer as any;
-		} else {
-			// Use image overlay mode (default)
-			// Preload the new image
-			const img = new Image();
-
-			await new Promise<void>((resolve, reject) => {
-				img.onload = () => resolve();
-				img.onerror = () => reject(new Error('Failed to load floor image'));
-				img.src = floor.map_image_url;
-			}).catch((err) => {
-				console.error('Error preloading floor image:', err);
-				// Continue anyway to show something
-			});
-
-			// Store reference to old overlay
-			if (imageOverlay) {
-				oldImageOverlay = imageOverlay;
-			}
-
-			// Create new overlay with opacity 0
-			// Explicitly set pane to overlayPane to ensure markers (in markerPane) are above it
-			const newOverlay = L.imageOverlay(floor.map_image_url, currentBounds, {
-				opacity: 0,
-				pane: 'overlayPane'
-			});
-
-			newOverlay.addTo(map);
-			imageOverlay = newOverlay;
-
-			// Wait a frame for the overlay to be added
-			await new Promise((resolve) => requestAnimationFrame(resolve));
-
-			// Fade in the new overlay
-			let opacity = 0;
-			const fadeIn = () => {
-				opacity += 0.1;
-				if (opacity >= 1) {
-					opacity = 1;
-					newOverlay.setOpacity(opacity);
-
-					// Remove old overlay after fade completes
-					if (oldImageOverlay) {
-						oldImageOverlay.remove();
-						oldImageOverlay = null;
-					}
-				} else {
-					newOverlay.setOpacity(opacity);
-					requestAnimationFrame(fadeIn);
-				}
-			};
-
-			requestAnimationFrame(fadeIn);
+	// Update map bounds when currentBounds changes
+	$effect(() => {
+		if (map && currentBounds) {
+			map.setMaxBounds(currentBounds);
+			map.fitBounds(currentBounds, { padding: [20, 20] });
 		}
+	});
+
+	// Update floor plan image when floor changes with smooth transition
+	$effect(() => {
+		if ($currentFloor && $currentFloor.id !== lastFloorId) {
+			updateFloorImage($currentFloor.id);
+		}
+	});
+
+	async function updateFloorImage(floorId: number) {
+		if (!map || floorId === lastFloorId) return;
+
+		lastFloorId = floorId;
+
+		// Use tileserver mode
+		// Remove old image overlay if it exists
+		if (imageOverlay) {
+			imageOverlay.remove();
+			imageOverlay = null;
+		}
+		if (oldImageOverlay) {
+			oldImageOverlay.remove();
+			oldImageOverlay = null;
+		}
+
+		// Create tile layer for this floor
+		// Expected URL format: http://localhost:8080/tiles/{floorId}/{z}/{x}/{y}.png
+		const tileUrl = `${tileServerUrl}/${floorId}/{z}/{x}/{y}.png`;
+
+		const tileLayer = L.tileLayer(tileUrl, {
+			tileSize: 256,
+			noWrap: true,
+			bounds: currentBounds,
+			minZoom: -5,
+			maxZoom: 3,
+			// @ts-ignore - L.CRS.Simple doesn't have all standard options
+			tms: false
+		});
+
+		tileLayer.addTo(map);
+
+		// Store reference (reuse imageOverlay variable for cleanup)
+		imageOverlay = tileLayer as any;
 
 		// Fit bounds to show the entire image - fill viewport nicely
 		// Let it zoom out as needed for large images
 		map.fitBounds(currentBounds, {
-			padding: [20, 20], // Small padding for better appearance
+			padding: [0, 0], // Small padding for better appearance
 			animate: true,
 			duration: 0.5
 		});
@@ -279,10 +238,12 @@
 	}
 
 	// Update markers when visible points change
-	$: if (map && $visiblePoints) {
-		console.log('Updating markers, count:', $visiblePoints.length);
-		updateMarkers($visiblePoints);
-	}
+	$effect(() => {
+		if (map && $visiblePoints) {
+			console.log('Updating markers, count:', $visiblePoints.length);
+			updateMarkers($visiblePoints);
+		}
+	});
 
 	function updateMarkers(points: MapPoint[]) {
 		if (!map || !$currentFloor) return;

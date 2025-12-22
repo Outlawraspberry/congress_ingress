@@ -44,10 +44,8 @@
 	{#if user.user}
 		<MapView
 			selectedPointId={selectedPoint?.id || null}
-			useTileServer={$mapConfig.useTileServer || false}
-			tileServerUrl={C3NavService.instance.mapSettings?.tile_server ||
-				$mapConfig.tileServerUrl ||
-				''}
+			tileServerUrl={C3NavService.instance.mapSettings?.tile_server || ''}
+			initialBounds={C3NavService.instance.mapSettings?.initial_bounds || null}
 			on:pointClick={handlePointClick}
 		/>
 		<FloorSwitcher />

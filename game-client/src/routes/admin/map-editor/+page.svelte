@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { C3NavService } from '$lib/c3-nav/c3-nav-servier';
 	import Breadcrump from '$lib/components/breadcrump/breadcrump.svelte';
-	import FloorEditor from './FloorEditor.svelte';
-	import PointPositionEditor from './PointPositionEditor.svelte';
+	import MapView from '$lib/map/components/MapView.svelte';
 	import type { Floor } from '$lib/map/map.types';
 	import { supabase } from '$lib/supabase/db.svelte';
+	import { onMount } from 'svelte';
+	import FloorEditor from './FloorEditor.svelte';
+	import { FloorSwitcher, initializeMap, switchFloor } from '$lib/map';
 
 	let floors: Floor[] = $state([]);
 	let selectedFloor: Floor | null = $state(null);
@@ -15,7 +17,7 @@
 	let view: 'floors' | 'points' = $state('floors');
 
 	onMount(async () => {
-		await loadFloorsData();
+		await Promise.all([loadFloorsData(), initializeMap()]);
 	});
 
 	async function loadFloorsData() {
@@ -78,9 +80,11 @@
 		editingFloor = null;
 	}
 
-	function selectFloorForPointEditing(floor: Floor) {
+	async function selectFloorForPointEditing(floor: Floor) {
 		selectedFloor = floor;
 		view = 'points';
+		// Switch to the selected floor in the map store before MapView mounts
+		await switchFloor(floor.id);
 	}
 
 	function backToFloors() {
@@ -219,8 +223,12 @@
 				</div>
 			{/if}
 		{/if}
-	{:else if view === 'points' && selectedFloor}
-		<div class="mb-4">
+	{/if}
+</div>
+
+{#if view === 'points' && selectedFloor}
+	<div class="map-fullscreen">
+		<div class="back-button-container">
 			<button class="btn btn-ghost btn-sm" onclick={backToFloors}>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -240,6 +248,39 @@
 			</button>
 		</div>
 
-		<PointPositionEditor floor={selectedFloor} />
-	{/if}
-</div>
+		<MapView
+			selectedPointId={null}
+			tileServerUrl={C3NavService.instance.mapSettings?.tile_server || ''}
+			initialBounds={C3NavService.instance.mapSettings?.initial_bounds || null}
+		/>
+		<FloorSwitcher />
+	</div>
+{/if}
+
+<style>
+	.map-fullscreen {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		width: 100vw;
+		height: 100vh;
+		z-index: 1000;
+		background: #f5f5f5;
+	}
+
+	@media (min-width: 768px) {
+		.map-fullscreen {
+			top: 4rem;
+			height: calc(100vh - 4rem);
+		}
+	}
+
+	.back-button-container {
+		position: absolute;
+		top: 1rem;
+		left: 1rem;
+		z-index: 1001;
+	}
+</style>
