@@ -253,7 +253,6 @@
 			tileServerUrl={C3NavService.instance.mapSettings?.tile_server || ''}
 			initialBounds={C3NavService.instance.mapSettings?.initial_bounds || null}
 		/>
-		<FloorSwitcher />
 	</div>
 {/if}
 

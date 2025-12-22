@@ -111,9 +111,6 @@
 				padding: [20, 20] // Small padding for better appearance
 			});
 
-			// Constrain map to bounds to prevent requesting tiles with negative coordinates
-			map.setMaxBounds(currentBounds);
-
 			// Ensure proper z-index hierarchy for panes
 			const overlayPane = map.getPane('overlayPane');
 			const markerPane = map.getPane('markerPane');
@@ -172,14 +169,6 @@
 
 		// Destroy map system
 		await destroyMap();
-	});
-
-	// Update map bounds when currentBounds changes
-	$effect(() => {
-		if (map && currentBounds) {
-			map.setMaxBounds(currentBounds);
-			map.fitBounds(currentBounds, { padding: [20, 20] });
-		}
 	});
 
 	// Update floor plan image when floor changes with smooth transition
