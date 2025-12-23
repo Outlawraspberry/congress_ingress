@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { supabase } from '$lib/supabase/db.svelte';
-	import type { Floor, MapPoint, MapPointPosition, PointPosition } from '$lib/map/map.types';
-	import MapView from '$lib/map/components/MapView.svelte';
 	import { C3NavService } from '$lib/c3-nav/c3-nav-servier';
+	import MapView from '$lib/map/components/MapView.svelte';
+	import type { Floor, MapPoint, MapPointPosition, PointPosition } from '$lib/map/map.types';
+	import { supabase } from '$lib/supabase/db.svelte';
+	import { CircleAlert, CircleCheckBig, CircleX, XIcon } from '@lucide/svelte';
+	import { onMount } from 'svelte';
 	import { derived, writable, type Writable } from 'svelte/store';
-	import { currentFloorId } from '$lib/map';
 
 	interface Props {
 		floor: Floor;
@@ -70,8 +70,8 @@
 					position: mapPosition,
 					factionId: null,
 					health: 0,
-					isDiscovered: false,
-					isVisible: false
+					isDiscovered: true,
+					isVisible: true
 				};
 			});
 		} catch (e) {
@@ -244,20 +244,7 @@
 												removePosition(point.id);
 											}}
 										>
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												class="h-4 w-4"
-												fill="none"
-												viewBox="0 0 24 24"
-												stroke="currentColor"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M6 18L18 6M6 6l12 12"
-												/>
-											</svg>
+											<XIcon />
 										</button>
 									{/if}
 								</div>
@@ -299,10 +286,37 @@
 				</div>
 			{/if}
 		</div>
+
+		{#if error}
+			<div class="alert alert-error">
+				<CircleX />
+				<span>{error}</span>
+			</div>
+		{/if}
+
+		{#if successMessage}
+			<div class="alert alert-success">
+				<CircleCheckBig />
+				<span>{successMessage}</span>
+			</div>
+		{/if}
+
+		<div class="alert alert-info">
+			<CircleAlert />
+			<div class="text-sm">
+				<p class="font-semibold">Instructions:</p>
+				<ul class="list-inside list-disc space-y-1">
+					<li>Select a point from the list on the left</li>
+					<li>Click/tap on the map to position the point</li>
+					<li>Desktop: Scroll to zoom, Shift+drag to pan</li>
+					<li>Mobile: Pinch to zoom, drag with one finger to pan</li>
+					<li>Click "Save All Positions" when done</li>
+				</ul>
+			</div>
+		</div>
 	</div>
 
-	<!-- Map View -->
-	<div class="card bg-base-100 shadow-xl lg:col-span-2">
+	<div class="card shadow-xl lg:col-span-2">
 		<div class="card-body">
 			<div class="flex items-center justify-between">
 				<h3 class="card-title">
@@ -313,76 +327,15 @@
 				</h3>
 			</div>
 
-			{#if error}
-				<div class="alert alert-error">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-6 w-6 shrink-0 stroke-current"
-						fill="none"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-						/>
-					</svg>
-					<span>{error}</span>
-				</div>
-			{/if}
-
-			{#if successMessage}
-				<div class="alert alert-success">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-6 w-6 shrink-0 stroke-current"
-						fill="none"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-						/>
-					</svg>
-					<span>{successMessage}</span>
-				</div>
-			{/if}
-
-			<div class="alert alert-info">
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					fill="none"
-					viewBox="0 0 24 24"
-					class="h-6 w-6 shrink-0 stroke-current"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-					></path>
-				</svg>
-				<div class="text-sm">
-					<p class="font-semibold">Instructions:</p>
-					<ul class="list-inside list-disc space-y-1">
-						<li>Select a point from the list on the left</li>
-						<li>Click/tap on the map to position the point</li>
-						<li>Desktop: Scroll to zoom, Shift+drag to pan</li>
-						<li>Mobile: Pinch to zoom, drag with one finger to pan</li>
-						<li>Click "Save All Positions" when done</li>
-					</ul>
-				</div>
-			</div>
-
 			<MapView
-				selectedPointId={null}
+				{selectedPointId}
 				tileServerUrl={C3NavService.instance.mapSettings?.tile_server || ''}
 				initialBounds={C3NavService.instance.mapSettings?.initial_bounds || null}
 				on:mapClickPosition={(event) => {
 					handleMapClick(event.detail.position.lat, event.detail.position.lng);
+				}}
+				on:pointClick={(event) => {
+					selectedPointId = event.detail.point.id;
 				}}
 				points={derived([points], (points) => {
 					return points[0].filter((point) => point.position != null) as MapPoint[];

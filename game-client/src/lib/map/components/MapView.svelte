@@ -15,7 +15,7 @@
 	} from '../mapStore';
 
 	let {
-		selectedPointId,
+		selectedPointId = $bindable(),
 		tileServerUrl,
 		initialBounds,
 		points = $bindable()
@@ -102,12 +102,6 @@
 				touchZoom: true,
 				tapTolerance: 15
 			} as L.MapOptions);
-
-			// Set initial view - fit to fill viewport nicely
-			// Don't set maxZoom here to let it zoom out as needed
-			map.fitBounds(currentBounds, {
-				padding: [20, 20] // Small padding for better appearance
-			});
 
 			// Ensure proper z-index hierarchy for panes
 			const overlayPane = map.getPane('overlayPane');
@@ -218,7 +212,8 @@
 	// Update markers when visible points change
 	$effect(() => {
 		const currentPoints = $points;
-		if (map && currentPoints) {
+
+		if ((map && currentPoints && selectedPointId == null) || selectedPointId != null) {
 			updateMarkers(currentPoints);
 		}
 	});
