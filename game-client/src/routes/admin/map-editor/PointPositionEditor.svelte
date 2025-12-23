@@ -331,6 +331,7 @@
 				{selectedPointId}
 				tileServerUrl={C3NavService.instance.mapSettings?.tile_server || ''}
 				initialBounds={C3NavService.instance.mapSettings?.initial_bounds || null}
+				overallBounds={C3NavService.instance.bounds || null}
 				on:mapClickPosition={(event) => {
 					handleMapClick(event.detail.position.lat, event.detail.position.lng);
 				}}

@@ -13,17 +13,20 @@
 		isSwitchingFloor,
 		error as mapError
 	} from '../mapStore';
+	import type { Bounds } from '$lib/c3-nav/bounds';
 
 	let {
 		selectedPointId = $bindable(),
 		tileServerUrl,
 		initialBounds,
 		points = $bindable(),
-		controls
+		controls,
+		overallBounds
 	}: {
 		selectedPointId: string | null;
 		tileServerUrl: string;
-		initialBounds: [[number, number], [number, number]] | null;
+		initialBounds: Bounds | null;
+		overallBounds: Bounds | null;
 		points: Readable<MapPoint[]>;
 		controls?: Snippet;
 	} = $props();
@@ -188,7 +191,10 @@
 		const tileLayer = L.tileLayer(tileUrl, {
 			tileSize: 256,
 			noWrap: true,
-			bounds: currentBounds,
+			bounds: overallBounds || [
+				[0, 0],
+				[1000, 1000]
+			],
 			minZoom: -5,
 			maxZoom: 3,
 			tms: false

@@ -50,6 +50,7 @@
 			selectedPointId={selectedPoint?.id || null}
 			tileServerUrl={C3NavService.instance.mapSettings?.tile_server || ''}
 			initialBounds={C3NavService.instance.mapSettings?.initial_bounds || null}
+			overallBounds={C3NavService.instance.bounds || null}
 			on:pointClick={handlePointClick}
 			points={visiblePoints}
 			{controls}
