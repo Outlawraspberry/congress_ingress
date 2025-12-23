@@ -1,7 +1,9 @@
 import { goto } from '$app/navigation';
-import { signOut } from '$lib/supabase/db.svelte';
+import { signOut, userStore } from '$lib/supabase/db.svelte';
 
 export const load = () => {
-	signOut();
-	goto('/');
+	if (!userStore.user?.is_anonymous) {
+		signOut();
+		goto('/');
+	}
 };
