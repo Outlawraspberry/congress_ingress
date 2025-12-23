@@ -317,7 +317,7 @@
 	</div>
 
 	<div class="card shadow-xl lg:col-span-2">
-		<div class="card-body">
+		<div class="card-body h-screen">
 			<div class="flex items-center justify-between">
 				<h3 class="card-title">
 					{floor.name}

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import L from 'leaflet';
 	import 'leaflet/dist/leaflet.css';
-	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
+	import { createEventDispatcher, onDestroy, onMount, type Snippet } from 'svelte';
 	import type { Readable } from 'svelte/store';
 	import { user } from '../../supabase/user/user.svelte';
 	import type { MapPoint } from '../map.types';
@@ -18,12 +18,14 @@
 		selectedPointId = $bindable(),
 		tileServerUrl,
 		initialBounds,
-		points = $bindable()
+		points = $bindable(),
+		controls
 	}: {
 		selectedPointId: string | null;
 		tileServerUrl: string;
 		initialBounds: [[number, number], [number, number]] | null;
 		points: Readable<MapPoint[]>;
+		controls?: Snippet;
 	} = $props();
 
 	const dispatch = createEventDispatcher<{
@@ -90,7 +92,7 @@
 				crs: L.CRS.Simple,
 				minZoom: -5, // Allow more zoom out for large images
 				maxZoom: 3,
-				zoomControl: true,
+				zoomControl: false,
 				attributionControl: false,
 				doubleClickZoom: false,
 				scrollWheelZoom: true,
@@ -213,7 +215,7 @@
 	$effect(() => {
 		const currentPoints = $points;
 
-		if ((map && currentPoints && selectedPointId == null) || selectedPointId != null) {
+		if (map && currentPoints && (selectedPointId == null || selectedPointId != null)) {
 			updateMarkers(currentPoints);
 		}
 	});
@@ -340,7 +342,7 @@
 	}
 </script>
 
-<div class="map-view" style="background: {isDarkMode ? '#1f2937' : '#f5f5f5'}">
+<div class="map-view relative" style="background: {isDarkMode ? '#1f2937' : '#f5f5f5'}">
 	{#if $isLoading}
 		<div class="loading-overlay">
 			<div class="spinner"></div>
@@ -361,6 +363,26 @@
 	{/if}
 
 	<div bind:this={mapContainer} class="leaflet-map"></div>
+
+	<div class="pointer-events-none absolute right-0 bottom-0 flex h-full w-full">
+		<div class="pointer-events-none relative h-full w-full">
+			<div class="pointer-events-auto absolute right-3 bottom-3 flex flex-col gap-1">
+				{#if controls != null}
+					<div>
+						{@render controls()}
+					</div>
+				{/if}
+				<div class="flex flex-col gap-1">
+					<button class="btn btn-sm btn-secondary h-10 w-10 text-2xl" onclick={() => map?.zoomIn()}
+						>+</button
+					>
+					<button class="btn btn-sm btn-secondary h-10 w-10 text-2xl" onclick={() => map?.zoomOut()}
+						>-</button
+					>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <style>

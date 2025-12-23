@@ -40,6 +40,10 @@
 	/>
 </svelte:head>
 
+{#snippet controls()}
+	<FloorSwitcher />
+{/snippet}
+
 <div class="map-page">
 	{#if user.user}
 		<MapView
@@ -48,9 +52,8 @@
 			initialBounds={C3NavService.instance.mapSettings?.initial_bounds || null}
 			on:pointClick={handlePointClick}
 			points={visiblePoints}
+			{controls}
 		/>
-		<FloorSwitcher />
-		<MapLegend />
 
 		{#if selectedPoint}
 			<PointInfoPanel
