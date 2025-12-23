@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Claimable from '../../../routes/game/point/components/claimable.svelte';
+	import Minigame from '../../../routes/game/point/components/minigame.svelte';
 	import { user } from '../../supabase/user/user.svelte';
 	import type { MapPoint, PointVisibilityInfo } from '../map.types';
 	import { getHealthPercentage, getPointStatus, VisibilityReason } from '../map.types';
@@ -58,95 +60,13 @@
 	}
 </script>
 
-{#snippet content(point: MapPoint, visibility: PointVisibilityInfo)}
-	{#if visibility.showDetails && displayState}
-		<!-- Faction Ownership -->
-		{#if point.type === 'claimable'}
-			<div class="info-section">
-				<div class="section-title inline">Ownership</div>
-				<div
-					class="badge badge-lg faction-badge inline"
-					style="background: {getFactionBadgeColor(displayState.factionId)}; color: white;"
-				>
-					{#if displayState.factionId === null}
-						Neutral
-					{:else if displayState.factionId === (user.user?.faction || '')}
-						Your Faction
-					{:else}
-						Enemy Faction
-					{/if}
-				</div>
-			</div>
-
-			<!-- Level -->
-			<div class="info-row">
-				<span class="label">Level:</span>
-				<span class="value">
-					<span class="badge badge-primary level-badge">Lv. {displayState.level}</span>
-				</span>
-			</div>
-
-			<!-- Health -->
-			<div class="info-section">
-				<div class="info-row">
-					<span class="label">Health:</span>
-					<span class="value">
-						{displayState.health} / {displayState.maxHealth}
-						<span
-							class="badge badge-sm status-badge"
-							class:badge-success={healthPercent > 80}
-							class:badge-warning={healthPercent <= 80 && healthPercent > 20}
-							class:badge-error={healthPercent <= 20}
-						>
-							{status}
-						</span>
-					</span>
-				</div>
-
-				<!-- Health Bar -->
-				<div class="health-bar-container">
-					<progress
-						class="progress w-full"
-						class:progress-success={healthPercent > 80}
-						class:progress-warning={healthPercent <= 80 && healthPercent > 20}
-						class:progress-error={healthPercent <= 20}
-						value={healthPercent}
-						max="100"
-					></progress>
-					<span class="health-percent">{Math.round(healthPercent)}%</span>
-				</div>
-			</div>
-
-			<!-- Cache Status / Real-time Indicator -->
-			{#if displayState.isCached && displayState.lastUpdated}
-				<div class="alert alert-warning cache-warning">
-					<span class="icon">⚠️</span>
-					<div class="warning-content">
-						<div class="warning-title">Cached Information</div>
-						<div class="warning-text">
-							Last updated: {formatTimeSinceUpdate(displayState.lastUpdated)}
-						</div>
-					</div>
-				</div>
-			{/if}
-		{/if}
-
-		<!-- Player Presence -->
-		{#if presenceCount > 0}
-			<div class="presence-section">
-				<span class="presence-icon">👥</span>
-				<span class="presence-text">
-					{presenceCount} faction {presenceCount === 1 ? 'member' : 'members'} present
-				</span>
-			</div>
-		{/if}
-	{:else}
-		<!-- Point not discovered -->
-		<div class="undiscovered-message">
-			<span class="icon inline">🔒</span>
-			<p class="inline">Visit this point to reveal its details</p>
-		</div>
-	{/if}{/snippet}
+{#snippet content(point: MapPoint)}
+	{#if point.type === 'claimable'}
+		<Claimable />
+	{:else if point.type === 'mini_game'}
+		<Minigame />
+	{/if}
+{/snippet}
 
 {#snippet contentHeader(point: MapPoint, visibility: PointVisibilityInfo)}
 	<h2 class="inline text-2xl">
@@ -167,7 +87,7 @@
 	<div class="modal-box">
 		{@render contentHeader(point, visibility)}
 
-		{@render content(point, visibility)}
+		{@render content(point)}
 
 		<!-- Modal actions -->
 		<div class="modal-action">
