@@ -370,9 +370,9 @@
 
 	<div bind:this={mapContainer} class="leaflet-map"></div>
 
-	<div class="pointer-events-none absolute right-0 bottom-0 flex h-full w-full">
+	<div class="pointer-events-none absolute right-0 bottom-4 flex h-full w-full">
 		<div class="pointer-events-none relative h-full w-full">
-			<div class="pointer-events-auto absolute right-3 bottom-3 flex flex-col gap-1">
+			<div class="pointer-events-auto absolute right-3 bottom-4 flex flex-col gap-1">
 				{#if controls != null}
 					<div>
 						{@render controls()}
@@ -389,6 +389,10 @@
 			</div>
 		</div>
 	</div>
+
+	<p class="absolute right-3 bottom-1 p-1 text-black">
+		Map powered by <a target="_blank" class="link" href="https://github.com/c3nav/c3nav">c3nav</a>
+	</p>
 </div>
 
 <style>
