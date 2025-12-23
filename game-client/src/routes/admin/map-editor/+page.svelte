@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { C3NavService } from '$lib/c3-nav/c3-nav-servier';
 	import Breadcrump from '$lib/components/breadcrump/breadcrump.svelte';
-	import MapView from '$lib/map/components/MapView.svelte';
+	import { initializeMap, switchFloor } from '$lib/map';
 	import type { Floor } from '$lib/map/map.types';
 	import { supabase } from '$lib/supabase/db.svelte';
 	import { onMount } from 'svelte';
 	import FloorEditor from './FloorEditor.svelte';
-	import { FloorSwitcher, initializeMap, switchFloor } from '$lib/map';
+	import PointPositionEditor from './PointPositionEditor.svelte';
 
 	let floors: Floor[] = $state([]);
 	let selectedFloor: Floor | null = $state(null);
@@ -248,11 +247,7 @@
 			</button>
 		</div>
 
-		<MapView
-			selectedPointId={null}
-			tileServerUrl={C3NavService.instance.mapSettings?.tile_server || ''}
-			initialBounds={C3NavService.instance.mapSettings?.initial_bounds || null}
-		/>
+		<PointPositionEditor floor={selectedFloor} />
 	</div>
 {/if}
 

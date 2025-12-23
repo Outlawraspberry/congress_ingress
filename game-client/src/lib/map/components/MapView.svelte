@@ -1,41 +1,39 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
 	import L from 'leaflet';
 	import 'leaflet/dist/leaflet.css';
+	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
+	import type { Readable } from 'svelte/store';
+	import { user } from '../../supabase/user/user.svelte';
+	import type { MapPoint } from '../map.types';
 	import {
 		currentFloor,
-		visiblePoints,
-		initializeMap,
 		destroyMap,
+		initializeMap,
 		isLoading,
 		isSwitchingFloor,
 		error as mapError
 	} from '../mapStore';
-	import type { MapPoint } from '../map.types';
-	import { createEventDispatcher } from 'svelte';
-	import { user } from '../../supabase/user/user.svelte';
 
 	let {
 		selectedPointId,
 		tileServerUrl,
-		initialBounds
+		initialBounds,
+		points = $bindable()
 	}: {
 		selectedPointId: string | null;
 		tileServerUrl: string;
 		initialBounds: [[number, number], [number, number]] | null;
+		points: Readable<MapPoint[]>;
 	} = $props();
-
-	console.log('Init', tileServerUrl, initialBounds);
 
 	const dispatch = createEventDispatcher<{
 		pointClick: { point: MapPoint };
 		mapReady: { map: L.Map };
+		mapClickPosition: { position: L.LatLng };
 	}>();
 
 	let mapContainer: HTMLDivElement;
 	let map: L.Map | null = null;
-	let imageOverlay: L.ImageOverlay | null = null;
-	let oldImageOverlay: L.ImageOverlay | null = null;
 	let markers: Map<string, L.CircleMarker> = new Map();
 	let currentBounds = $derived<L.LatLngBoundsExpression>(
 		initialBounds ?? [
@@ -147,6 +145,10 @@
 			dispatch('mapReady', { map });
 
 			updateFloorImage($currentFloor?.id || 0);
+
+			if ($points) {
+				updateMarkers($points);
+			}
 		}
 	});
 
@@ -179,20 +181,9 @@
 	});
 
 	async function updateFloorImage(floorId: number) {
-		if (!map || floorId === lastFloorId) return;
+		if (map == null || floorId === lastFloorId) return;
 
 		lastFloorId = floorId;
-
-		// Use tileserver mode
-		// Remove old image overlay if it exists
-		if (imageOverlay) {
-			imageOverlay.remove();
-			imageOverlay = null;
-		}
-		if (oldImageOverlay) {
-			oldImageOverlay.remove();
-			oldImageOverlay = null;
-		}
 
 		// Create tile layer for this floor
 		// Expected URL format: http://localhost:8080/tiles/{floorId}/{z}/{x}/{y}.png
@@ -204,14 +195,10 @@
 			bounds: currentBounds,
 			minZoom: -5,
 			maxZoom: 3,
-			// @ts-ignore - L.CRS.Simple doesn't have all standard options
 			tms: false
 		});
 
 		tileLayer.addTo(map);
-
-		// Store reference (reuse imageOverlay variable for cleanup)
-		imageOverlay = tileLayer as any;
 
 		// Fit bounds to show the entire image - fill viewport nicely
 		// Let it zoom out as needed for large images
@@ -221,16 +208,18 @@
 			duration: 0.5
 		});
 
-		// Don't clear markers here - updateMarkers will handle it
-		// Markers are managed by the reactive statement below
-		console.log('Floor image updated, waiting for markers to refresh');
+		map.on('click', (event) => {
+			dispatch('mapClickPosition', {
+				position: event.latlng
+			});
+		});
 	}
 
 	// Update markers when visible points change
 	$effect(() => {
-		if (map && $visiblePoints) {
-			console.log('Updating markers, count:', $visiblePoints.length);
-			updateMarkers($visiblePoints);
+		const currentPoints = $points;
+		if (map && currentPoints) {
+			updateMarkers(currentPoints);
 		}
 	});
 
@@ -248,10 +237,6 @@
 			}
 		});
 
-		// Get image dimensions for coordinate conversion
-		const imageWidth = $currentFloor.image_width || 1000;
-		const imageHeight = $currentFloor.image_height || 1000;
-
 		// Add or update markers
 		points.forEach((point) => {
 			let marker = markers.get(point.id);
@@ -262,9 +247,7 @@
 			// NOTE: Y coordinate is inverted because:
 			// - Editor uses DOM coordinates (Y=0 at top, Y=100 at bottom)
 			// - Leaflet uses geographic coordinates (Y=0 at bottom, Y increases upward)
-			const absoluteY = ((100 - point.position.y) / 100) * imageHeight;
-			const absoluteX = (point.position.x / 100) * imageWidth;
-			const latLng: L.LatLngExpression = [absoluteY, absoluteX];
+			const latLng: L.LatLngExpression = [point.position.x, point.position.y];
 
 			if (!marker) {
 				// Create new marker

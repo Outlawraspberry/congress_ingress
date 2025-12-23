@@ -6,7 +6,7 @@
 	import MapView from '$lib/map/components/MapView.svelte';
 	import PointInfoPanel from '$lib/map/components/PointInfoPanel.svelte';
 	import type { MapPoint } from '$lib/map/map.types';
-	import { mapConfig } from '$lib/map/mapStore';
+	import { visiblePoints } from '$lib/map/mapStore';
 	import { user } from '$lib/supabase/user/user.svelte';
 	import { onMount } from 'svelte';
 
@@ -47,6 +47,7 @@
 			tileServerUrl={C3NavService.instance.mapSettings?.tile_server || ''}
 			initialBounds={C3NavService.instance.mapSettings?.initial_bounds || null}
 			on:pointClick={handlePointClick}
+			points={visiblePoints}
 		/>
 		<FloorSwitcher />
 		<MapLegend />

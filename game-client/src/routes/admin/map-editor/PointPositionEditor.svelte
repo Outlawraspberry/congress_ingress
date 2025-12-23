@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { supabase } from '$lib/supabase/db.svelte';
-	import type { Floor, PointPosition } from '$lib/map/map.types';
+	import type { Floor, MapPoint, PointPosition } from '$lib/map/map.types';
+	import MapView from '$lib/map/components/MapView.svelte';
+	import { C3NavService } from '$lib/c3-nav/c3-nav-servier';
+	import { writable, type Writable } from 'svelte/store';
 
 	interface Props {
 		floor: Floor;
@@ -9,34 +12,13 @@
 
 	let { floor }: Props = $props();
 
-	interface PointWithPosition {
-		id: string;
-		name: string;
-		type: string;
-		x_coordinate: number | null;
-		y_coordinate: number | null;
-	}
-
-	let points: PointWithPosition[] = $state([]);
+	let points: Writable<MapPoint[]> = writable([]);
 	let positions: PointPosition[] = $state([]);
 	let selectedPointId: string | null = $state(null);
 	let isLoading = $state(true);
 	let isSaving = $state(false);
 	let error: string | null = $state(null);
 	let successMessage: string | null = $state(null);
-	let mapContainer: HTMLDivElement | null = $state(null);
-	let imageElement: HTMLImageElement | null = $state(null);
-
-	let scale = $state(1);
-	let panX = $state(0);
-	let panY = $state(0);
-	let isPanning = $state(false);
-	let lastPanX = $state(0);
-	let lastPanY = $state(0);
-	let touchStartDistance = $state(0);
-	let lastTouchX = $state(0);
-	let lastTouchY = $state(0);
-	let isTouchPanning = $state(false);
 
 	onMount(async () => {
 		await loadData();
@@ -66,14 +48,24 @@
 			positions = positionsData || [];
 
 			// Merge points with their positions
-			points = (pointsData || []).map((point) => {
-				const position = positions.find((p) => p.point_id === point.id);
+			$points = (pointsData || []).map((point) => {
+				const position: PointPosition | undefined = positions.find((p) => p.point_id === point.id);
+
 				return {
 					id: point.id,
 					name: point.name,
 					type: point.type,
-					x_coordinate: position ? Number(position.x_coordinate) : null,
-					y_coordinate: position ? Number(position.y_coordinate) : null
+					level: 0,
+					maxHealth: 0,
+					position: {
+						floorId: position?.floor_id || 0,
+						x: position?.x_coordinate || 0,
+						y: position?.y_coordinate || 0
+					},
+					factionId: null,
+					health: 0,
+					isDiscovered: false,
+					isVisible: false
 				};
 			});
 		} catch (e) {
@@ -84,47 +76,15 @@
 		}
 	}
 
-	function handleMapClick(event: MouseEvent) {
-		if (!selectedPointId || !mapContainer || !imageElement || isPanning) return;
-
-		const imgRect = imageElement.getBoundingClientRect();
-
-		// Get click position relative to the actual displayed image
-		const clickX = event.clientX - imgRect.left;
-		const clickY = event.clientY - imgRect.top;
-
-		// Convert to percentage (0-100) relative to the displayed image dimensions
-		const xPercent = (clickX / imgRect.width) * 100;
-		const yPercent = (clickY / imgRect.height) * 100;
+	function handleMapClick(lat: number, lng: number) {
+		if (!selectedPointId) return;
 
 		// Update point position
-		const point = points.find((p) => p.id === selectedPointId);
+		const point = $points.find((p) => p.id === selectedPointId);
 		if (point) {
-			point.x_coordinate = Math.max(0, Math.min(100, xPercent));
-			point.y_coordinate = Math.max(0, Math.min(100, yPercent));
-			points = [...points];
-		}
-	}
-
-	function placePointAtPosition(clientX: number, clientY: number) {
-		if (!selectedPointId || !imageElement) return;
-
-		const imgRect = imageElement.getBoundingClientRect();
-
-		// Get position relative to the actual displayed image
-		const posX = clientX - imgRect.left;
-		const posY = clientY - imgRect.top;
-
-		// Convert to percentage (0-100) relative to the displayed image dimensions
-		const xPercent = (posX / imgRect.width) * 100;
-		const yPercent = (posY / imgRect.height) * 100;
-
-		// Update point position
-		const point = points.find((p) => p.id === selectedPointId);
-		if (point) {
-			point.x_coordinate = Math.max(0, Math.min(100, xPercent));
-			point.y_coordinate = Math.max(0, Math.min(100, yPercent));
-			points = [...points];
+			point.position.x = lat;
+			point.position.y = lng;
+			$points = [...$points];
 		}
 	}
 
@@ -138,13 +98,13 @@
 			error = null;
 			successMessage = null;
 
-			const positionsToSave = points
-				.filter((p) => p.x_coordinate !== null && p.y_coordinate !== null)
+			const positionsToSave = $points
+				.filter((p) => p.position.x !== null && p.position.y !== null)
 				.map((p) => ({
 					point_id: p.id,
 					floor_id: floor.id,
-					x_coordinate: p.x_coordinate!,
-					y_coordinate: p.y_coordinate!
+					x_coordinate: p.position.x!,
+					y_coordinate: p.position.y!
 				}));
 
 			if (positionsToSave.length === 0) {
@@ -181,11 +141,11 @@
 
 			if (deleteError) throw deleteError;
 
-			const point = points.find((p) => p.id === pointId);
+			const point = $points.find((p) => p.id === pointId);
 			if (point) {
-				point.x_coordinate = null;
-				point.y_coordinate = null;
-				points = [...points];
+				point.position.x = 0;
+				point.position.y = 0;
+				$points = [...$points];
 			}
 
 			successMessage = 'Position removed successfully!';
@@ -195,102 +155,6 @@
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to remove position';
 			console.error('Error removing position:', e);
-		}
-	}
-
-	function handleWheel(event: WheelEvent) {
-		event.preventDefault();
-		const delta = event.deltaY > 0 ? 0.9 : 1.1;
-		scale = Math.max(0.5, Math.min(3, scale * delta));
-	}
-
-	function handleMouseDown(event: MouseEvent) {
-		if (event.button === 1 || event.shiftKey) {
-			// Middle mouse button or Shift+click
-			isPanning = true;
-			lastPanX = event.clientX;
-			lastPanY = event.clientY;
-			event.preventDefault();
-		}
-	}
-
-	function handleMouseMove(event: MouseEvent) {
-		if (isPanning) {
-			const deltaX = event.clientX - lastPanX;
-			const deltaY = event.clientY - lastPanY;
-			panX += deltaX;
-			panY += deltaY;
-			lastPanX = event.clientX;
-			lastPanY = event.clientY;
-		}
-	}
-
-	function handleMouseUp() {
-		isPanning = false;
-	}
-
-	function resetView() {
-		scale = 1;
-		panX = 0;
-		panY = 0;
-	}
-
-	function getTouchDistance(touch1: Touch, touch2: Touch): number {
-		const dx = touch1.clientX - touch2.clientX;
-		const dy = touch1.clientY - touch2.clientY;
-		return Math.sqrt(dx * dx + dy * dy);
-	}
-
-	function handleTouchStart(event: TouchEvent) {
-		if (event.touches.length === 1) {
-			if (selectedPointId) {
-				// Single touch to place point when point is selected
-				const touch = event.touches[0];
-				placePointAtPosition(touch.clientX, touch.clientY);
-				event.preventDefault();
-			} else {
-				// Single touch pan when no point selected
-				isTouchPanning = true;
-				lastTouchX = event.touches[0].clientX;
-				lastTouchY = event.touches[0].clientY;
-				event.preventDefault();
-			}
-		} else if (event.touches.length === 2) {
-			// Two finger pinch/zoom
-			isTouchPanning = false;
-			touchStartDistance = getTouchDistance(event.touches[0], event.touches[1]);
-			event.preventDefault();
-		}
-	}
-
-	function handleTouchMove(event: TouchEvent) {
-		if (event.touches.length === 1 && isTouchPanning && !selectedPointId) {
-			// Pan
-			const touch = event.touches[0];
-			const deltaX = touch.clientX - lastTouchX;
-			const deltaY = touch.clientY - lastTouchY;
-			panX += deltaX;
-			panY += deltaY;
-			lastTouchX = touch.clientX;
-			lastTouchY = touch.clientY;
-			event.preventDefault();
-		} else if (event.touches.length === 2) {
-			// Pinch zoom
-			const currentDistance = getTouchDistance(event.touches[0], event.touches[1]);
-			const delta = currentDistance / touchStartDistance;
-			scale = Math.max(0.5, Math.min(3, scale * delta));
-			touchStartDistance = currentDistance;
-			event.preventDefault();
-		}
-	}
-
-	function handleTouchEnd(event: TouchEvent) {
-		if (event.touches.length === 0) {
-			isTouchPanning = false;
-		} else if (event.touches.length === 1) {
-			// Reset for single touch after pinch
-			lastTouchX = event.touches[0].clientX;
-			lastTouchY = event.touches[0].clientY;
 		}
 	}
 
@@ -306,22 +170,9 @@
 				return 'bg-neutral';
 		}
 	}
-
-	function handleImageLoad(event: Event) {
-		const img = event.target as HTMLImageElement;
-		imageElement = img;
-	}
-
-	$effect(() => {
-		if (mapContainer) {
-			mapContainer.addEventListener('wheel', handleWheel, { passive: false });
-		}
-	});
 </script>
 
-<svelte:window onmouseup={handleMouseUp} onmousemove={handleMouseMove} />
-
-<div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+<div class="grid h-full grid-cols-1 gap-4 lg:grid-cols-3">
 	<!-- Point List -->
 	<div class="card bg-base-100 shadow-xl lg:col-span-1">
 		<div class="card-body">
@@ -338,7 +189,7 @@
 							type="checkbox"
 							class="checkbox checkbox-sm"
 							checked={selectedPointId !== null}
-							onchange={() => (selectedPointId = selectedPointId ? null : points[0]?.id || null)}
+							onchange={() => (selectedPointId = selectedPointId ? null : $points[0]?.id || null)}
 						/>
 						<span class="label-text text-sm">Enable point placement mode</span>
 					</label>
@@ -347,7 +198,7 @@
 				<div class="divider my-1"></div>
 
 				<div class="max-h-[500px] space-y-2 overflow-y-auto">
-					{#each points as point (point.id)}
+					{#each $points as point (point.id)}
 						<div
 							class="card bg-base-200 hover:bg-base-300 w-full cursor-pointer border-2 text-left transition-all {selectedPointId ===
 							point.id
@@ -371,17 +222,15 @@
 											<h4 class="text-sm font-semibold">{point.name}</h4>
 										</div>
 										<p class="text-xs opacity-60">{point.type}</p>
-										{#if point.x_coordinate !== null && point.y_coordinate !== null}
+										{#if point.position.x !== null && point.position.y !== null}
 											<p class="text-xs opacity-60">
-												Position: ({point.x_coordinate.toFixed(1)}%, {point.y_coordinate.toFixed(
-													1
-												)}%)
+												Position: ({point.position.x.toFixed(1)}%, {point.position.y.toFixed(1)}%)
 											</p>
 										{:else}
 											<p class="text-warning text-xs">Not positioned</p>
 										{/if}
 									</div>
-									{#if point.x_coordinate !== null && point.y_coordinate !== null}
+									{#if point.position.x !== null && point.position.y !== null}
 										<button
 											class="btn btn-ghost btn-xs"
 											aria-label="Remove position"
@@ -439,8 +288,8 @@
 					</button>
 
 					<div class="text-xs opacity-60">
-						{points.filter((p) => p.x_coordinate !== null && p.y_coordinate !== null).length} /
-						{points.length} points positioned
+						{$points.filter((p) => p.position.x !== null && p.position.y !== null).length} /
+						{$points.length} points positioned
 					</div>
 				</div>
 			{/if}
@@ -457,12 +306,6 @@
 						<span class="badge badge-ghost">{floor.building_name}</span>
 					{/if}
 				</h3>
-				<div class="flex gap-2">
-					<div class="badge badge-sm">
-						Zoom: {(scale * 100).toFixed(0)}%
-					</div>
-					<button class="btn btn-ghost btn-xs" onclick={resetView}>Reset View</button>
-				</div>
 			</div>
 
 			{#if error}
@@ -529,90 +372,15 @@
 				</div>
 			</div>
 
-			<div
-				bind:this={mapContainer}
-				role="button"
-				tabindex="0"
-				class="bg-base-300 relative overflow-hidden rounded-lg border-2 {selectedPointId
-					? 'border-primary cursor-crosshair'
-					: 'border-base-300'}"
-				style="min-height: 500px; touch-action: none;"
-				onclick={handleMapClick}
-				onkeydown={(e) => {
-					if (e.key === 'Enter' || e.key === ' ') {
-						e.preventDefault();
-						// Can't use handleMapClick with keyboard event, would need separate handler
-					}
+			<MapView
+				selectedPointId={null}
+				tileServerUrl={C3NavService.instance.mapSettings?.tile_server || ''}
+				initialBounds={C3NavService.instance.mapSettings?.initial_bounds || null}
+				on:mapClickPosition={(event) => {
+					handleMapClick(event.detail.position.lat, event.detail.position.lng);
 				}}
-				onmousedown={handleMouseDown}
-				ontouchstart={handleTouchStart}
-				ontouchmove={handleTouchMove}
-				ontouchend={handleTouchEnd}
-			>
-				{#if floor.map_image_url}
-					<div
-						class="absolute inset-0 flex items-center justify-center"
-						style="transform: translate({panX}px, {panY}px) scale({scale}); transform-origin: center center;"
-					>
-						<div class="relative inline-block">
-							<img
-								bind:this={imageElement}
-								src={floor.map_image_url}
-								alt={floor.name}
-								class="block select-none"
-								style="max-width: 100%; max-height: 100%; width: auto; height: auto;"
-								draggable="false"
-								onload={handleImageLoad}
-							/>
-
-							<!-- Render positioned points - now positioned relative to the image itself -->
-							{#each points.filter((p) => p.x_coordinate !== null && p.y_coordinate !== null) as point (point.id)}
-								<button
-									class="absolute -translate-x-1/2 -translate-y-1/2 rounded-full {getPointColor(
-										point.type
-									)} {selectedPointId === point.id
-										? 'ring-primary h-8 w-8 ring-4 ring-offset-2'
-										: 'hover:ring-primary h-6 w-6 hover:ring-2'} shadow-lg transition-all"
-									style="left: {point.x_coordinate}%; top: {point.y_coordinate}%;"
-									onclick={(e) => {
-										e.stopPropagation();
-										handlePointSelect(point.id);
-									}}
-									title={point.name}
-								>
-									<span class="sr-only">{point.name}</span>
-								</button>
-							{/each}
-
-							{#if selectedPointId}
-								<div class="badge badge-primary absolute top-4 left-4 shadow-lg">
-									Click on map to position point
-								</div>
-							{/if}
-						</div>
-					</div>
-				{:else}
-					<div class="flex h-full min-h-[500px] items-center justify-center">
-						<div class="text-center">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								class="mx-auto h-16 w-16 opacity-20"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-								/>
-							</svg>
-							<p class="mt-4 opacity-60">No floor plan image uploaded</p>
-						</div>
-					</div>
-				{/if}
-			</div>
+				{points}
+			/>
 
 			<!-- Legend -->
 			<div class="mt-4 flex flex-wrap gap-4">
