@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { supabase } from '$lib/supabase/db.svelte';
-	import type { Floor, MapPoint, PointPosition } from '$lib/map/map.types';
+	import type { Floor, MapPoint, MapPointPosition, PointPosition } from '$lib/map/map.types';
 	import MapView from '$lib/map/components/MapView.svelte';
 	import { C3NavService } from '$lib/c3-nav/c3-nav-servier';
-	import { writable, type Writable } from 'svelte/store';
+	import { derived, writable, type Writable } from 'svelte/store';
+	import { currentFloorId } from '$lib/map';
 
 	interface Props {
 		floor: Floor;
@@ -12,7 +13,7 @@
 
 	let { floor }: Props = $props();
 
-	let points: Writable<MapPoint[]> = writable([]);
+	let points: Writable<MapPoint<MapPointPosition | null>[]> = writable([]);
 	let positions: PointPosition[] = $state([]);
 	let selectedPointId: string | null = $state(null);
 	let isLoading = $state(true);
@@ -50,6 +51,15 @@
 			// Merge points with their positions
 			$points = (pointsData || []).map((point) => {
 				const position: PointPosition | undefined = positions.find((p) => p.point_id === point.id);
+				let mapPosition: MapPointPosition | null = null;
+
+				if (position) {
+					mapPosition = {
+						floorId: position.floor_id,
+						x: position.x_coordinate,
+						y: position.y_coordinate
+					};
+				}
 
 				return {
 					id: point.id,
@@ -57,11 +67,7 @@
 					type: point.type,
 					level: 0,
 					maxHealth: 0,
-					position: {
-						floorId: position?.floor_id || 0,
-						x: position?.x_coordinate || 0,
-						y: position?.y_coordinate || 0
-					},
+					position: mapPosition,
 					factionId: null,
 					health: 0,
 					isDiscovered: false,
@@ -82,8 +88,7 @@
 		// Update point position
 		const point = $points.find((p) => p.id === selectedPointId);
 		if (point) {
-			point.position.x = lat;
-			point.position.y = lng;
+			point.position = { floorId: floor.id, x: lat, y: lng };
 			$points = [...$points];
 		}
 	}
@@ -98,14 +103,15 @@
 			error = null;
 			successMessage = null;
 
-			const positionsToSave = $points
-				.filter((p) => p.position.x !== null && p.position.y !== null)
-				.map((p) => ({
-					point_id: p.id,
-					floor_id: floor.id,
-					x_coordinate: p.position.x!,
-					y_coordinate: p.position.y!
-				}));
+			const pointsWithPosition: MapPoint[] = $points.filter(
+				(p) => p.position != null && p.position?.x != null && p.position?.y != null
+			) as MapPoint[];
+			const positionsToSave = pointsWithPosition.map((p) => ({
+				point_id: p.id,
+				floor_id: floor.id,
+				x_coordinate: p.position.x,
+				y_coordinate: p.position.y
+			}));
 
 			if (positionsToSave.length === 0) {
 				error = 'No positions to save';
@@ -142,9 +148,8 @@
 			if (deleteError) throw deleteError;
 
 			const point = $points.find((p) => p.id === pointId);
-			if (point) {
-				point.position.x = 0;
-				point.position.y = 0;
+			if (point?.position) {
+				point.position = null;
 				$points = [...$points];
 			}
 
@@ -222,15 +227,15 @@
 											<h4 class="text-sm font-semibold">{point.name}</h4>
 										</div>
 										<p class="text-xs opacity-60">{point.type}</p>
-										{#if point.position.x !== null && point.position.y !== null}
+										{#if point.position != null && point.position?.x !== null && point.position?.y !== null}
 											<p class="text-xs opacity-60">
-												Position: ({point.position.x.toFixed(1)}%, {point.position.y.toFixed(1)}%)
+												Position: ({point.position?.x.toFixed(1)}%, {point.position?.y.toFixed(1)}%)
 											</p>
 										{:else}
 											<p class="text-warning text-xs">Not positioned</p>
 										{/if}
 									</div>
-									{#if point.position.x !== null && point.position.y !== null}
+									{#if point.position?.x !== null && point.position?.y !== null}
 										<button
 											class="btn btn-ghost btn-xs"
 											aria-label="Remove position"
@@ -288,7 +293,7 @@
 					</button>
 
 					<div class="text-xs opacity-60">
-						{$points.filter((p) => p.position.x !== null && p.position.y !== null).length} /
+						{$points.filter((p) => p.position?.x !== null && p.position?.y !== null).length} /
 						{$points.length} points positioned
 					</div>
 				</div>
@@ -379,7 +384,9 @@
 				on:mapClickPosition={(event) => {
 					handleMapClick(event.detail.position.lat, event.detail.position.lng);
 				}}
-				{points}
+				points={derived([points], (points) => {
+					return points[0].filter((point) => point.position != null) as MapPoint[];
+				})}
 			/>
 
 			<!-- Legend -->

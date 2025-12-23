@@ -13,10 +13,16 @@ export type Point = Tables<'point'>;
 // Map Display Types
 // =====================================================
 
+export interface MapPointPosition {
+	x: number;
+	y: number;
+	floorId: number;
+}
+
 /**
  * Point with its position and discovery status
  */
-export interface MapPoint {
+export interface MapPoint<POSITION extends MapPointPosition | null = MapPointPosition> {
 	id: string;
 	name: string;
 	type: 'claimable' | 'not_claimable' | 'mini_game';
@@ -24,11 +30,7 @@ export interface MapPoint {
 	health: number;
 	maxHealth: number;
 	factionId: string | null;
-	position: {
-		x: number;
-		y: number;
-		floorId: number;
-	};
+	position: POSITION;
 	isDiscovered: boolean;
 	isVisible: boolean; // Based on fog-of-war rules
 }
