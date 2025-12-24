@@ -10,20 +10,23 @@ import {
   PDFFont,
   PDFPage,
   StandardFonts,
+  degrees,
 } from "https://esm.sh/pdf-lib@1.17.1";
 import { corsHeaders } from "@cors";
 import QRCode from "qrcode";
 
-const BASE_URL = Deno.env.get("QR_CODE_BASE_URL") ??
+const BASE_URL =
+  Deno.env.get("QR_CODE_BASE_URL") ??
   "https://congressquest.outlawraspberry.de";
 const LOGO_URL = "https://outlawraspberry.de/Outlawraspberry_Logo_v4.png";
-const QR_CODE_WIDTH_MULTIPLIER = .666;
+const QR_CODE_WIDTH_MULTIPLIER = 0.666;
 const LOGO_SIZE = 50;
 const LOGO_SIZE_HALF = LOGO_SIZE / 2;
 const TEXT_SIZE = 16;
 const HEADLINE_1_SIZE = 48;
 const HEADLINE_2_SIZE = 32;
 const REM = TEXT_SIZE;
+const BASE_ROTATION = degrees(90);
 
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -32,7 +35,10 @@ serve(async (req: Request) => {
 
   const supabaseClient = getSupabaseClient(req);
 
-  const { pointId, mappingId }: {
+  const {
+    pointId,
+    mappingId,
+  }: {
     pointId: string;
     mappingId: string;
   } = await req.json();
@@ -42,6 +48,7 @@ serve(async (req: Request) => {
   try {
     const pdfDoc = await PDFDocument.create();
     const page = pdfDoc.addPage();
+    page.setRotation(degrees(90));
 
     const pageSize = page.getSize();
 
@@ -56,6 +63,7 @@ serve(async (req: Request) => {
         y: pageSize.height - REM - HEADLINE_1_SIZE,
         size: HEADLINE_1_SIZE,
         text: "Congress Quest 2025",
+        rotation: BASE_ROTATION,
       }),
       drawTextCenter({
         font: helveticaFont,
@@ -63,12 +71,14 @@ serve(async (req: Request) => {
         y: pageSize.height - 2 * REM - HEADLINE_2_SIZE - HEADLINE_1_SIZE,
         size: HEADLINE_2_SIZE,
         text: await getPointName(supabaseClient, pointId),
+        rotation: BASE_ROTATION,
       }),
       drawQRCode({
         doc: pdfDoc,
         page,
         pageSize,
         url,
+        rotation: BASE_ROTATION,
       }),
     ]);
 
@@ -96,18 +106,26 @@ function getPointURL(pointId: string): string {
   return `${BASE_URL}/game/point/${pointId}`;
 }
 
-function drawTextCenter({ font, size, page, y, text }: {
+function drawTextCenter({
+  font,
+  size,
+  page,
+  y,
+  text,
+  rotation,
+}: {
   y: number;
   size: number;
   text: string;
   page: PDFPage;
   font: PDFFont;
+  rotation: degrees;
 }): Promise<void> {
   const textWidth = font.widthOfTextAtSize(text, size);
   const pageWidth = page.getWidth();
   const x = (pageWidth - textWidth) / 2;
 
-  return page.drawText(text, { size: size, x, y });
+  return page.drawText(text, { size: size, x, y, rotate: rotation });
 }
 
 async function fetchImageAsUint8Array(url: string): Promise<Uint8Array> {
@@ -136,11 +154,10 @@ async function getPointName(
   supabase: SupabaseClient<Database>,
   pointId: string,
 ): Promise<string> {
-  const { error, data } = await supabase.from("point").select("name").filter(
-    "id",
-    "eq",
-    pointId,
-  );
+  const { error, data } = await supabase
+    .from("point")
+    .select("name")
+    .filter("id", "eq", pointId);
   if (error) throw error;
   if (data.length == 0) throw new Error("Point not found");
 
@@ -152,26 +169,25 @@ async function drawQRCode({
   doc,
   url,
   pageSize,
+  rotation,
 }: {
   pageSize: { width: number; height: number };
   url: string;
   page: PDFPage;
   doc: PDFDocument;
+  rotation: degrees;
 }): Promise<void> {
   const qrCodeSize = pageSize.width * QR_CODE_WIDTH_MULTIPLIER;
   const qrCodeSizeHalf = qrCodeSize / 2;
   const pageWidthHalf = pageSize.width / 2;
   const pageHeightHalf = pageSize.height / 2;
 
-  const qrDataUrl = await QRCode.toDataURL(
-    url,
-    {
-      errorCorrectionLevel: "H",
-      width: qrCodeSize,
-      margin: 2,
-      color: { dark: "#000", light: "#FFF" },
-    },
-  );
+  const qrDataUrl = await QRCode.toDataURL(url, {
+    errorCorrectionLevel: "H",
+    width: qrCodeSize,
+    margin: 2,
+    color: { dark: "#000", light: "#FFF" },
+  });
 
   const qrImageBytes = await fetchImageAsUint8Array(qrDataUrl);
   await drawImage({
@@ -182,21 +198,32 @@ async function drawQRCode({
     width: qrCodeSize,
     height: qrCodeSize,
     imageBytes: qrImageBytes,
+    rotation,
   });
 
-  const logoBytes = await fetchImageAsUint8Array(LOGO_URL);
-  await drawImage({
-    imageBytes: logoBytes,
-    doc,
-    page,
-    x: pageWidthHalf - LOGO_SIZE_HALF,
-    y: pageHeightHalf - LOGO_SIZE_HALF,
-    width: LOGO_SIZE,
-    height: LOGO_SIZE,
-  });
+  // const logoBytes = await fetchImageAsUint8Array(LOGO_URL);
+  // await drawImage({
+  //   imageBytes: logoBytes,
+  //   doc,
+  //   page,
+  //   x: pageWidthHalf - LOGO_SIZE_HALF,
+  //   y: pageHeightHalf - LOGO_SIZE_HALF,
+  //   width: LOGO_SIZE,
+  //   height: LOGO_SIZE,
+  //   rotation,
+  // });
 }
 
-async function drawImage({ imageBytes, x, y, height, width, doc, page }: {
+async function drawImage({
+  imageBytes,
+  x,
+  y,
+  height,
+  width,
+  doc,
+  page,
+  rotation,
+}: {
   imageBytes: Uint8Array;
   x: number;
   y: number;
@@ -204,6 +231,7 @@ async function drawImage({ imageBytes, x, y, height, width, doc, page }: {
   height: number;
   doc: PDFDocument;
   page: PDFPage;
+  rotation: degrees;
 }): Promise<void> {
   const logoImage = await doc.embedPng(imageBytes);
 
@@ -212,6 +240,7 @@ async function drawImage({ imageBytes, x, y, height, width, doc, page }: {
     y,
     width,
     height,
+    rotate: rotation,
   });
 }
 
