@@ -11,6 +11,8 @@ import {
   PDFPage,
   StandardFonts,
   degrees,
+  rgb,
+  Font,
 } from "https://esm.sh/pdf-lib@1.17.1";
 import { corsHeaders } from "@cors";
 import QRCode from "qrcode";
@@ -23,8 +25,8 @@ const QR_CODE_WIDTH_MULTIPLIER = 0.666;
 const LOGO_SIZE = 50;
 const LOGO_SIZE_HALF = LOGO_SIZE / 2;
 const TEXT_SIZE = 16;
-const HEADLINE_1_SIZE = 48;
-const HEADLINE_2_SIZE = 32;
+const HEADLINE_1_SIZE = 32;
+const HEADLINE_2_SIZE = 24;
 const REM = TEXT_SIZE;
 const BASE_ROTATION = degrees(90);
 
@@ -48,35 +50,96 @@ serve(async (req: Request) => {
   try {
     const pdfDoc = await PDFDocument.create();
     const page = pdfDoc.addPage();
-    page.setRotation(degrees(90));
+    page.setRotation(BASE_ROTATION);
 
     const pageSize = page.getSize();
+    const pageHeightHalf = pageSize.height / 2;
+    const pageHeightQuarter = pageHeightHalf / 2;
+    const pageWidthHalf = pageSize.width / 2;
+    const pageWidthQuarter = pageWidthHalf / 2;
 
     const helveticaFont: PDFFont = await pdfDoc.embedFont(
       StandardFonts.HelveticaBold,
     );
 
+    page.drawLine({
+      start: { x: 0, y: pageSize.height / 2 },
+      end: { x: pageSize.width, y: pageSize.height / 2 },
+      thickness: 2,
+      color: rgb(0.75, 0.2, 0.2),
+      opacity: 0.75,
+    });
+
+    const congressQuestText = "Congress Quest 2025";
+    const congressQuestTextPosHalfY = centerText({
+      font: helveticaFont,
+      lengthToCenterOn: pageHeightHalf,
+      text: "Congress Quest 2025",
+      textSize: HEADLINE_1_SIZE,
+    });
+
+    const pointName = await getPointName(supabaseClient, pointId);
+    const pointNamePosHalfY = centerText({
+      font: helveticaFont,
+      lengthToCenterOn: pageHeightHalf,
+      text: pointName,
+      textSize: HEADLINE_2_SIZE,
+    });
+
     await Promise.all([
       drawTextCenter({
         font: helveticaFont,
         page,
-        y: pageSize.height - REM - HEADLINE_1_SIZE,
+        y: congressQuestTextPosHalfY,
+        x: REM + HEADLINE_1_SIZE,
         size: HEADLINE_1_SIZE,
-        text: "Congress Quest 2025",
+        text: congressQuestText,
         rotation: BASE_ROTATION,
       }),
       drawTextCenter({
         font: helveticaFont,
         page,
-        y: pageSize.height - 2 * REM - HEADLINE_2_SIZE - HEADLINE_1_SIZE,
+        y: pageHeightHalf + congressQuestTextPosHalfY,
+        x: REM + HEADLINE_1_SIZE,
+        size: HEADLINE_1_SIZE,
+        text: congressQuestText,
+        rotation: BASE_ROTATION,
+      }),
+      drawTextCenter({
+        font: helveticaFont,
+        page,
+        y: pointNamePosHalfY,
+        x: 2 * REM + HEADLINE_2_SIZE + HEADLINE_1_SIZE,
         size: HEADLINE_2_SIZE,
-        text: await getPointName(supabaseClient, pointId),
+        text: pointName,
+        rotation: BASE_ROTATION,
+      }),
+      drawTextCenter({
+        font: helveticaFont,
+        page,
+        y: pageHeightHalf + pointNamePosHalfY,
+        x: 2 * REM + HEADLINE_2_SIZE + HEADLINE_1_SIZE,
+        size: HEADLINE_2_SIZE,
+        text: pointName,
         rotation: BASE_ROTATION,
       }),
       drawQRCode({
         doc: pdfDoc,
         page,
-        pageSize,
+        x: REM * 3 + pageWidthHalf + pageWidthQuarter,
+        y: pageHeightQuarter - pageWidthQuarter,
+        width: pageWidthHalf,
+        height: pageWidthHalf,
+        url,
+        rotation: BASE_ROTATION,
+      }),
+      drawQRCode({
+        doc: pdfDoc,
+        page,
+        x: REM * 3 + pageWidthHalf + pageWidthQuarter,
+        y: pageHeightHalf + pageHeightQuarter - pageWidthQuarter,
+        width: pageWidthHalf,
+        height: pageWidthHalf,
         url,
         rotation: BASE_ROTATION,
       }),
@@ -102,29 +165,49 @@ serve(async (req: Request) => {
   }
 });
 
+function centerText({
+  font,
+  text,
+  textSize,
+  lengthToCenterOn,
+}: {
+  text: string;
+  font: Font;
+  textSize: number;
+  lengthToCenterOn: number;
+}): number {
+  const textWidth = font.widthOfTextAtSize(text, textSize);
+
+  const centerPos = (lengthToCenterOn - textWidth) / 2;
+
+  if (centerPos < 0)
+    throw new Error(
+      `Text ${textWidth} is too long to be centered your desired length ${lengthToCenterOn}`,
+    );
+
+  return centerPos;
+}
+
 function getPointURL(pointId: string): string {
   return `${BASE_URL}/game/point/${pointId}`;
 }
 
 function drawTextCenter({
-  font,
   size,
   page,
   y,
+  x,
   text,
   rotation,
 }: {
   y: number;
+  x: number;
   size: number;
   text: string;
   page: PDFPage;
   font: PDFFont;
   rotation: degrees;
 }): Promise<void> {
-  const textWidth = font.widthOfTextAtSize(text, size);
-  const pageWidth = page.getWidth();
-  const x = (pageWidth - textWidth) / 2;
-
   return page.drawText(text, { size: size, x, y, rotate: rotation });
 }
 
@@ -168,23 +251,24 @@ async function drawQRCode({
   page,
   doc,
   url,
-  pageSize,
   rotation,
+  x,
+  y,
+  width,
+  height,
 }: {
-  pageSize: { width: number; height: number };
+  x: number;
+  y: number;
+  height: number;
+  width: number;
   url: string;
   page: PDFPage;
   doc: PDFDocument;
   rotation: degrees;
 }): Promise<void> {
-  const qrCodeSize = pageSize.width * QR_CODE_WIDTH_MULTIPLIER;
-  const qrCodeSizeHalf = qrCodeSize / 2;
-  const pageWidthHalf = pageSize.width / 2;
-  const pageHeightHalf = pageSize.height / 2;
-
   const qrDataUrl = await QRCode.toDataURL(url, {
     errorCorrectionLevel: "H",
-    width: qrCodeSize,
+    width,
     margin: 2,
     color: { dark: "#000", light: "#FFF" },
   });
@@ -193,10 +277,10 @@ async function drawQRCode({
   await drawImage({
     doc,
     page,
-    x: pageWidthHalf - qrCodeSizeHalf,
-    y: pageHeightHalf - qrCodeSizeHalf,
-    width: qrCodeSize,
-    height: qrCodeSize,
+    x,
+    y,
+    width,
+    height,
     imageBytes: qrImageBytes,
     rotation,
   });
