@@ -9,10 +9,11 @@
 		and all your progress!
 	</div>
 
-	<div>
-		<a class="btn btn-primary" href="/">Stay logged in</a>
+	<div class="flex flex-col gap-6 md:flex-row md:gap-2">
+		<a class="btn btn-primary" href="/user">Convert to a registered account</a>
+		<a class="btn btn-secondary" href="/">Stay logged in</a>
 		<button
-			class="btn btn-secondary"
+			class="btn btn-ghost"
 			onclick={() => {
 				signOut();
 				goto('/');
