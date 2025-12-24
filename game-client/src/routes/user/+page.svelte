@@ -4,32 +4,55 @@
 	import Fieldset from '$lib/components/form/fieldset.svelte';
 	import { supabase, userStore } from '$lib/supabase/db.svelte';
 	import { user } from '$lib/supabase/user/user.svelte';
-	import type { AuthError } from '@supabase/supabase-js';
+	import type { AuthError, UserAttributes } from '@supabase/supabase-js';
 
 	let email: string = $state('');
 	let password: string = $state('');
+	let successFullMessage: string = $state('');
 	let wasSusccessfull: boolean | null = $state(null);
 	let error: AuthError | undefined = $state(undefined);
 
-	async function submit(event: SubmitEvent) {
-		event.preventDefault();
-
+	async function changeuserData(
+		data: UserAttributes,
+		newSuccessFullMessage: string
+	): Promise<void> {
 		try {
 			error = undefined;
+			wasSusccessfull = null;
+			successFullMessage = newSuccessFullMessage;
 
-			const { data: updateEmailData, error: updateEmailError } = await supabase.auth.updateUser({
-				email,
-				password
-			});
+			const { data: updateData, error: updateError } = await supabase.auth.updateUser(data);
 
-			if (updateEmailError) throw updateEmailError;
+			if (updateError) throw updateError;
 
 			wasSusccessfull = true;
 
-			userStore.user = updateEmailData.user;
+			userStore.user = updateData.user;
 		} catch (err) {
+			wasSusccessfull = false;
 			error = err as AuthError;
+		} finally {
+			setTimeout(() => {
+				wasSusccessfull = null;
+			}, 2000);
 		}
+	}
+
+	async function submitConvertAccount(event: SubmitEvent) {
+		event.preventDefault();
+		await changeuserData(
+			{ email, password },
+			'You have converted you anonymous account into a real one.'
+		);
+		email = '';
+		password = '';
+	}
+
+	async function submitChangePassword(event: SubmitEvent) {
+		event.preventDefault();
+
+		await changeuserData({ password }, 'You have changed your password.');
+		password = '';
 	}
 </script>
 
@@ -70,7 +93,7 @@
 	<section class="mt-4 max-w-96">
 		<h2 class="text-2xl">Convert to a registered user</h2>
 
-		<form onsubmit={submit}>
+		<form onsubmit={submitConvertAccount}>
 			<Fieldset>
 				<label for="input-email" class="label">Email</label>
 				<input
@@ -102,6 +125,31 @@
 	</section>
 {/if}
 
+{#if !userStore.user?.is_anonymous}
+	<section class="mt-4 max-w-96">
+		<h2 class="text-2xl">Change password</h2>
+
+		<form onsubmit={submitChangePassword}>
+			<Fieldset>
+				<label for="input-password" class="label">Password</label>
+				<input
+					id="input-password"
+					type="password"
+					class="input w-full"
+					placeholder="Password"
+					bind:value={password}
+					required
+				/>
+
+				<input type="submit" class="btn btn-primary mt-4" value="Connect" />
+			</Fieldset>
+			{#if error}
+				<div role="alert" class="alert alert-error">{error.message}</div>
+			{/if}
+		</form>
+	</section>
+{/if}
+
 {#if wasSusccessfull}
-	<div class="alert alert-info mt-4">You have converted you anonymous account into a real one.</div>
+	<div class="alert alert-info mt-4">{successFullMessage}</div>
 {/if}
