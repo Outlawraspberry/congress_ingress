@@ -13,6 +13,7 @@ import {
   degrees,
   rgb,
   Font,
+  PDFPageDrawLineOptions,
 } from "https://esm.sh/pdf-lib@1.17.1";
 import { corsHeaders } from "@cors";
 import QRCode from "qrcode";
@@ -62,12 +63,23 @@ serve(async (req: Request) => {
       StandardFonts.HelveticaBold,
     );
 
-    page.drawLine({
-      start: { x: 0, y: pageSize.height / 2 },
-      end: { x: pageSize.width, y: pageSize.height / 2 },
+    const drawLineOptions: PDFPageDrawLineOptions = {
       thickness: 2,
-      color: rgb(0.75, 0.2, 0.2),
+      color: rgb(0, 0, 0),
       opacity: 0.75,
+    };
+    page.drawLine({
+      ...drawLineOptions,
+      start: { x: 0, y: pageSize.height / 2 },
+      end: { x: pageSize.width * 0.01, y: pageSize.height / 2 },
+    });
+    page.drawLine({
+      ...drawLineOptions,
+      start: {
+        x: pageSize.width - pageSize.width * 0.01,
+        y: pageSize.height / 2,
+      },
+      end: { x: pageSize.width, y: pageSize.height / 2 },
     });
 
     const congressQuestText = "Congress Quest 2025";
