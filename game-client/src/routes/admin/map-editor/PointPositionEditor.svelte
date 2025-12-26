@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { C3NavService } from '$lib/c3-nav/c3-nav-servier';
+	import { currentFloorId, mapStorage } from '$lib/map';
 	import MapView from '$lib/map/components/MapView.svelte';
 	import type { Floor, MapPoint, MapPointPosition, PointPosition } from '$lib/map/map.types';
 	import { supabase } from '$lib/supabase/db.svelte';
@@ -29,6 +30,12 @@
 		try {
 			isLoading = true;
 			error = null;
+
+			$currentFloorId = floor.id;
+
+			mapStorage.saveMapData({
+				lastFloorId: floor.id
+			});
 
 			// Load all points
 			const { data: pointsData, error: pointsError } = await supabase
