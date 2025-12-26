@@ -46,8 +46,8 @@
 
 <Breadcrump />
 
-<section class="hero">
-	<div class="hero-content w-full flex-col gap-0 md:flex-row md:gap-10">
+<section class="flex flex-col items-center">
+	<section class="w-full max-w-md flex-col items-center justify-center gap-0 md:flex-row md:gap-10">
 		{#if selectedPoint.selectedPoint}
 			<div class="max-w-80">
 				<a href="/user"><UserApInformation class="mb-5 hidden md:block" /></a>
@@ -101,15 +101,25 @@
 			</div>
 		{:else}
 			<div>
-				<p class="mb-6 text-3xl font-bold">Okay, how do I play now?</p>
+				<p class=" text-3xl font-bold">Okay, how do I play now?</p>
 
-				<p class="mb-6 w-sm">
-					It's very easy. All over the place, you'll find QRCodes on the wall. Scan them, and you
-					can play!
+				<p class="mt-6 w-sm">
+					It's very easy. All over the congress, you'll find QR-Codes on the wall, tables or
+					similar. Scan them, and you can play!
+				</p>
+
+				<p class="mt-6">
+					To perform actions, you need action points (AP). To get AP, you have to play minigames at
+					special points on the C3. You can spot these mini game points on the
+					<a href="/game/map" class="link"> map</a> easially.
+				</p>
+
+				<p class="mt-6">
+					A small hint, when you play as a group, your actions will get stronger. 😉
 				</p>
 
 				<QrCodeScanner {onTextFound} />
 			</div>
 		{/if}
-	</div>
+	</section>
 </section>

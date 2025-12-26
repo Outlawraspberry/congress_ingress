@@ -370,7 +370,7 @@
 
 	<div bind:this={mapContainer} class="leaflet-map"></div>
 
-	<div class="pointer-events-none absolute right-0 bottom-4 flex h-full w-full">
+	<div class="pointer-events-none absolute right-0 bottom-16 flex h-full w-full md:bottom-4">
 		<div class="pointer-events-none relative h-full w-full">
 			<div class="pointer-events-auto absolute right-3 bottom-4 flex flex-col gap-1">
 				{#if controls != null}

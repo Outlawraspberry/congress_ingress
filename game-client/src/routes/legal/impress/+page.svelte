@@ -25,6 +25,7 @@
 
 	<h2>Kontakt</h2>
 	<p>E-Mail: benjamin.krause@outlawraspberry.de</p>
+	<p>Mastodon: @weltii@norden.social</p>
 
 	<h2>Verbraucher&shy;streit&shy;beilegung/Universal&shy;schlichtungs&shy;stelle</h2>
 	<p>

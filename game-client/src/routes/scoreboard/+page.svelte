@@ -5,6 +5,7 @@
 	import UserScoreboard from '$lib/components/scoreboard/UserScoreboard.svelte';
 	import PointsOverview from '$lib/components/scoreboard/PointsOverview.svelte';
 	import FactionStatistics from '$lib/components/scoreboard/FactionStatistics.svelte';
+	import Breadcrump from '$lib/components/breadcrump/breadcrump.svelte';
 
 	onMount(() => {
 		// Redirect to login if not authenticated
@@ -23,12 +24,12 @@
 </svelte:head>
 
 <div class="container mx-auto px-4 py-6">
-	<div class="mb-8">
-		<h1 class="mb-2 text-center text-4xl font-bold">📊 Global Dashboard</h1>
-		<p class="text-base-content/70 text-center">
-			Track player rankings, point control, and faction dominance in real-time
-		</p>
-	</div>
+	<h1 class="text-3xl">📊 Scoreboard</h1>
+	<h2 class="text-left">
+		Track player rankings, point control, and faction dominance in real-time
+	</h2>
+
+	<Breadcrump />
 
 	<div class="flex flex-col gap-6 xl:flex-row">
 		<!-- User Scoreboard Section -->

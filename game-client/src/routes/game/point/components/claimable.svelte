@@ -8,6 +8,14 @@
 		<Info class="mr-2 inline" /> What are claimable points?
 	</div>
 	<div class="collapse-content text-sm">
-		Click the "Sign Up" button in the top right corner and follow the registration process.
+		As the name suggests, the claimable points can be claimed for a faction. With AP, you can:
+		<div class="prose">
+			<ul class="text-sm">
+				<li>attack points to reduce the health</li>
+				<li>claim them for your faction when they don't have health anymore</li>
+				<li>repair damaged points</li>
+				<li>level up points to make them stronger</li>
+			</ul>
+		</div>
 	</div>
 </div>

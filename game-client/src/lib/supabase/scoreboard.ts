@@ -24,6 +24,7 @@ export interface PointOverview {
 export interface PointHistory {
 	created_at: string;
 	faction_id: string | null;
+	fk;
 	faction_name: string;
 	health: number;
 	duration_held: unknown;

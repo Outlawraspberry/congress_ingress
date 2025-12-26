@@ -21,12 +21,12 @@
 </script>
 
 <div class={`dock ${klass ? klass : ''}`}>
-	{#if user.user != null}
-		<AActiveUrl {activeUrl} href="/">
-			<Building />
-			<span class="dock-label">Home</span>
-		</AActiveUrl>
+	<AActiveUrl {activeUrl} href="/">
+		<Building />
+		<span class="dock-label">Home</span>
+	</AActiveUrl>
 
+	{#if user.user != null}
 		<AActiveUrl {activeUrl} href="/game/point">
 			<Gamepad />
 			<span class="dock-label">Game</span>

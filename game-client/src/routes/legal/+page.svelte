@@ -19,12 +19,18 @@
 
 <section class="hero">
 	<div class="hero-content flex-col justify-center pt-10">
-		<div class="flex flex-col flex-wrap gap-5">
+		<div class="flex flex-wrap gap-5">
 			{@render card('Impress', '', '/legal/impress')}
 
 			{@render card('Data-Privacy', '', '/legal/data-privacy')}
 
 			{@render card('GitHub', '', 'https://github.com/Outlawraspberry/congress_ingress')}
+
+			{@render card(
+				'c3nav',
+				'Special thanks to the c3nav team, becaue Congress Quest is allowed to use their API and tileserver. 🗺',
+				'https://github.com/Outlawraspberry/congress_ingress'
+			)}
 		</div>
 	</div>
 </section>
