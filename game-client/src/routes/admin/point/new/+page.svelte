@@ -8,9 +8,9 @@
 
 	let formName = $state('');
 	let formType = $state<'claimable' | 'mini_game' | 'not_claimable'>('claimable');
-	let formLevel = $state(1);
-	let formHealth = $state(100);
-	let formMaxHealth = $state(100);
+	let formLevel = $state(0);
+	let formHealth = $state(0);
+	let formMaxHealth = $state(255);
 	let formAcquiredBy = $state<string | null>(null);
 	let isSaving = $state(false);
 	let formError = $state('');
@@ -123,7 +123,7 @@
 						<input
 							id="point-level"
 							type="number"
-							min="1"
+							min="0"
 							max="10"
 							class="input input-bordered w-full"
 							bind:value={formLevel}
