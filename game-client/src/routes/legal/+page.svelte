@@ -29,7 +29,7 @@
 			{@render card(
 				'c3nav',
 				'Special thanks to the c3nav team, becaue Congress Quest is allowed to use their API and tileserver. 🗺',
-				'https://github.com/Outlawraspberry/congress_ingress'
+				'https://39c3.c3nav.de/'
 			)}
 		</div>
 	</div>
