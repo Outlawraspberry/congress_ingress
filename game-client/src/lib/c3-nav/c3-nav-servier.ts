@@ -1,4 +1,4 @@
-import { PUBLIC_C3_NAV_URL } from '$env/static/public';
+import { PUBLIC_C3_NAV_URL, PUBLIC_TILE_SERVER_URL } from '$env/static/public';
 import type { Bounds } from './bounds';
 import type { MapSettings } from './map-settings';
 
@@ -15,9 +15,45 @@ export class C3NavService {
 	private sessionKey: string | null = null;
 
 	async init(): Promise<void> {
+		if (PUBLIC_TILE_SERVER_URL != null && PUBLIC_TILE_SERVER_URL.length > 0) {
+			this.mapSettings = {
+				initial_bounds: [
+					[30.0, 85.0],
+					[330.0, 260.0]
+				],
+				initial_level: 1,
+				tile_server: PUBLIC_TILE_SERVER_URL
+			};
+			this.bounds = [
+				[-25.52, -14.87],
+				[1133.87, 1133.87]
+			];
+			return;
+		}
+
 		await this.getSession();
 
 		await Promise.all([this.getMapSettings(), this.getBoundsOverall()]);
+	}
+
+	private static parseManualSettings(input: string): [MapSettings, Bounds] | null {
+		if (input.length <= 0) return null;
+
+		try {
+			const parsed = JSON.parse(input);
+
+			return [
+				{
+					initial_bounds: parsed.inital_bounds as unknown as Bounds,
+					initial_level: parsed.initial_level as unknown as number,
+					tile_server: parsed.tile_server as unknown as string
+				},
+				parsed.global_bounds as unknown as Bounds
+			];
+		} catch (e) {
+			console.log('Cannot parse manual settings', e);
+			return null;
+		}
 	}
 
 	async destruct(): Promise<void> {
