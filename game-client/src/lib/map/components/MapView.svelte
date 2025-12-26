@@ -1,8 +1,10 @@
 <script lang="ts">
+	import type { Bounds } from '$lib/c3-nav/bounds';
 	import L from 'leaflet';
 	import 'leaflet/dist/leaflet.css';
 	import { createEventDispatcher, onDestroy, onMount, type Snippet } from 'svelte';
 	import type { Readable } from 'svelte/store';
+	import DicesIconURL from '$lib/assets/dices.png';
 	import { user } from '../../supabase/user/user.svelte';
 	import type { MapPoint } from '../map.types';
 	import {
@@ -13,7 +15,6 @@
 		isSwitchingFloor,
 		error as mapError
 	} from '../mapStore';
-	import type { Bounds } from '$lib/c3-nav/bounds';
 
 	let {
 		selectedPointId = $bindable(),
@@ -39,7 +40,7 @@
 
 	let mapContainer: HTMLDivElement;
 	let map: L.Map | null = null;
-	let markers: Map<string, L.CircleMarker> = new Map();
+	let markers: Map<string, L.Marker | L.CircleMarker> = new Map();
 	let currentBounds = $derived<L.LatLngBoundsExpression>(
 		initialBounds ?? [
 			[0, 0],
@@ -253,14 +254,27 @@
 			const latLng: L.LatLngExpression = [point.position.x, point.position.y];
 
 			if (!marker) {
-				// Create new marker
-				marker = L.circleMarker(latLng, {
-					radius: getMarkerRadius(point.level),
-					fillColor: getMarkerColor(point),
-					fillOpacity: getMarkerOpacity(point),
-					color: getMarkerBorderColor(point),
-					weight: point.id === selectedPointId ? 4 : 2
-				});
+				if (point.type == 'claimable') {
+					marker = L.circleMarker(latLng, {
+						radius: getMarkerRadius(point.level),
+						fillColor: getMarkerColor(point),
+						fillOpacity: getMarkerOpacity(point),
+						color: getMarkerBorderColor(point),
+						weight: point.id === selectedPointId ? 4 : 2
+					});
+				} else {
+					console.log(DicesIconURL);
+					const gameIcon = L.icon({
+						iconUrl: DicesIconURL,
+						iconSize: [25, 25],
+						iconAnchor: [25 / 2, 25 / 2],
+						popupAnchor: [0, 0]
+					});
+					marker = L.marker(latLng, {
+						icon: gameIcon
+					});
+					console.log('marker');
+				}
 
 				// Add click handler
 				marker.on('click', () => {
