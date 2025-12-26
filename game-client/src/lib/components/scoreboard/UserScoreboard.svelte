@@ -1,22 +1,49 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { ScoreboardService, type ScoreboardUser } from '$lib/supabase/scoreboard';
+	import { ArrowLeft, ArrowRight } from '@lucide/svelte';
 
 	let users: ScoreboardUser[] = [];
 	let loading = true;
 	let error: string | null = null;
 	let subscription: { unsubscribe: () => void } | null = null;
 
+	// Pagination state
+	let currentPage = 1;
+	let itemsPerPage = 10;
+	let totalUsers = 0;
+
+	$: totalPages = Math.ceil(totalUsers / itemsPerPage);
+	$: startIndex = (currentPage - 1) * itemsPerPage;
+	$: endIndex = Math.min(startIndex + itemsPerPage, totalUsers);
+	$: canGoPrevious = currentPage > 1;
+	$: canGoNext = currentPage < totalPages;
+
 	async function loadScoreboard() {
 		try {
 			loading = true;
 			error = null;
-			users = await ScoreboardService.getTopUsersByExperience(10);
+			// Load more users to support pagination
+			const allUsers = await ScoreboardService.getTopUsersByExperience(100);
+			users = allUsers;
+			totalUsers = allUsers.length;
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to load scoreboard';
 			console.error('Scoreboard error:', err);
 		} finally {
 			loading = false;
+		}
+	}
+
+	function previousPage() {
+		if (canGoPrevious) {
+			currentPage--;
+		}
+	}
+
+	function nextPage() {
+		if (canGoNext) {
+			currentPage++;
 		}
 	}
 
@@ -38,12 +65,14 @@
 	}
 
 	function getRankDisplay(index: number): string {
-		const rank = index + 1;
+		const rank = startIndex + index + 1;
 		if (rank === 1) return '🥇';
 		if (rank === 2) return '🥈';
 		if (rank === 3) return '🥉';
 		return `#${rank}`;
 	}
+
+	$: paginatedUsers = users.slice(startIndex, endIndex);
 
 	onMount(async () => {
 		await loadScoreboard();
@@ -65,7 +94,7 @@
 	<div class="card-body">
 		<h2 class="card-title mb-4 text-2xl">
 			🏆 Global Scoreboard
-			<div class="badge badge-primary text-nowrap">Top 10</div>
+			<div class="badge badge-primary text-nowrap">Top {totalUsers}</div>
 		</h2>
 
 		{#if loading}
@@ -109,7 +138,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each users as user, index (user.user_id)}
+						{#each paginatedUsers as user, index (user.user_id)}
 							<tr class="hover">
 								<td class="text-center text-lg font-bold">
 									{getRankDisplay(index)}
@@ -140,9 +169,29 @@
 
 			<div class="divider"></div>
 
-			<div class="text-base-content/70 flex justify-between text-sm">
-				<span>Updated in real-time</span>
-				<button class="btn btn-sm btn-ghost" on:click={loadScoreboard}> 🔄 Refresh </button>
+			<!-- Pagination Controls -->
+			<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+				<div class="text-base-content/70 text-sm">
+					Showing {startIndex + 1}-{endIndex} of {totalUsers} players
+				</div>
+
+				<div class="flex items-center gap-2">
+					<button class="btn btn-sm btn-ghost" on:click={loadScoreboard} disabled={loading}>
+						🔄 Refresh
+					</button>
+
+					<div class="join">
+						<button class="btn btn-sm join-item" on:click={previousPage} disabled={!canGoPrevious}>
+							<ArrowLeft />
+						</button>
+						<button class="btn btn-sm join-item">
+							Page {currentPage} of {totalPages}
+						</button>
+						<button class="btn btn-sm join-item" on:click={nextPage} disabled={!canGoNext}>
+							<ArrowRight />
+						</button>
+					</div>
+				</div>
 			</div>
 		{/if}
 	</div>

@@ -5,6 +5,7 @@
 		type PointOverview,
 		type PointHistory
 	} from '$lib/supabase/scoreboard';
+	import { ArrowLeft, ArrowRight } from '@lucide/svelte';
 
 	let points: PointOverview[] = [];
 	let loading = true;
@@ -13,6 +14,17 @@
 	let selectedPointId: string | null = null;
 	let pointHistory: PointHistory[] = [];
 	let historyLoading = false;
+
+	// Pagination state
+	let currentPage = 1;
+	let itemsPerPage = 10;
+
+	$: totalPages = Math.ceil(points.length / itemsPerPage);
+	$: startIndex = (currentPage - 1) * itemsPerPage;
+	$: endIndex = Math.min(startIndex + itemsPerPage, points.length);
+	$: canGoPrevious = currentPage > 1;
+	$: canGoNext = currentPage < totalPages;
+	$: paginatedPoints = points.slice(startIndex, endIndex);
 
 	async function loadPointsOverview() {
 		try {
@@ -37,6 +49,18 @@
 			pointHistory = [];
 		} finally {
 			historyLoading = false;
+		}
+	}
+
+	function previousPage() {
+		if (canGoPrevious) {
+			currentPage--;
+		}
+	}
+
+	function nextPage() {
+		if (canGoNext) {
+			currentPage++;
 		}
 	}
 
@@ -166,7 +190,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each points as point (point.point_id)}
+						{#each paginatedPoints as point (point.point_id)}
 							<tr class="hover">
 								<td>
 									<div class="font-semibold">{point.point_name}</div>
@@ -213,9 +237,29 @@
 
 			<div class="divider"></div>
 
-			<div class="text-base-content/70 flex justify-between text-sm">
-				<span>Updated in real-time</span>
-				<button class="btn btn-sm btn-ghost" on:click={loadPointsOverview}> 🔄 Refresh </button>
+			<!-- Pagination Controls -->
+			<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+				<div class="text-base-content/70 text-sm">
+					Showing {startIndex + 1}-{endIndex} of {points.length} points
+				</div>
+
+				<div class="flex items-center gap-2">
+					<button class="btn btn-sm btn-ghost" on:click={loadPointsOverview} disabled={loading}>
+						🔄 Refresh
+					</button>
+
+					<div class="join">
+						<button class="btn btn-sm join-item" on:click={previousPage} disabled={!canGoPrevious}>
+							<ArrowLeft />
+						</button>
+						<button class="btn btn-sm join-item">
+							Page {currentPage} of {totalPages}
+						</button>
+						<button class="btn btn-sm join-item" on:click={nextPage} disabled={!canGoNext}>
+							<ArrowRight />
+						</button>
+					</div>
+				</div>
 			</div>
 		{/if}
 	</div>
