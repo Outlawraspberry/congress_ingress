@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { changes } from '$lib/changelog/changelog';
+	import ChangelogSet from '$lib/changelog/changelog-set.svelte';
 	import { user } from '$lib/supabase/user/user.svelte';
 	import { Github } from '@lucide/svelte';
 </script>
@@ -29,6 +31,13 @@
 					<a href="/register" class="btn btn-primary btn-xl">Register</a>
 				</div>
 			{/if}
+
+			<div class="flex, mt-8 max-w-md items-baseline justify-center gap-5">
+				<h2 class="mb-4 text-2xl">Changelog</h2>
+				<ChangelogSet changes={changes.slice(0, 5)} />
+
+				<a class="btn btn-link btn-xl" href="/changelog">Read all</a>
+			</div>
 
 			<div class="mt-8 flex max-w-md items-baseline justify-center gap-5">
 				<p>Or checkout the project's source</p>
