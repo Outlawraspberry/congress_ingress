@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import Breadcrump from '$lib/components/breadcrump/breadcrump.svelte';
 	import { supabase } from '$lib/supabase/db.svelte';
+	import { Eye, EyeClosed } from '@lucide/svelte';
+	import { onMount } from 'svelte';
 	import type { Point } from '../../../types/alias';
 
 	interface PointWithPosition extends Point {
@@ -12,20 +13,13 @@
 	let points: PointWithPosition[] = $state([]);
 	let isLoading = $state(true);
 	let error: string | null = $state(null);
-	let showEditor = $state(false);
 	let editingPoint: Point | null = $state(null);
 	let searchQuery = $state('');
 	let filterType: 'all' | 'claimable' | 'not_claimable' | 'mini_game' = $state('all');
 
 	// Form state
-	let formName = $state('');
-	let formType: 'claimable' | 'not_claimable' | 'mini_game' = $state('claimable');
-	let formLevel = $state(1);
 	let formHealth = $state(100);
 	let formMaxHealth = $state(100);
-	let formAcquiredBy: string | null = $state(null);
-	let isSaving = $state(false);
-	let formError: string | null = $state(null);
 
 	// Faction list for dropdown
 	let factions: Array<{ id: string; name: string }> = $state([]);
@@ -81,30 +75,6 @@
 		}
 	}
 
-	function handleAddPoint() {
-		editingPoint = null;
-		formName = '';
-		formType = 'claimable';
-		formLevel = 1;
-		formHealth = 100;
-		formMaxHealth = 100;
-		formAcquiredBy = null;
-		formError = null;
-		showEditor = true;
-	}
-
-	function handleEditPoint(point: Point) {
-		editingPoint = point;
-		formName = point.name;
-		formType = point.type;
-		formLevel = point.level;
-		formHealth = point.health;
-		formMaxHealth = point.max_health;
-		formAcquiredBy = point.acquired_by;
-		formError = null;
-		showEditor = true;
-	}
-
 	function handleDeletePoint(point: Point) {
 		if (
 			confirm(
@@ -123,62 +93,6 @@
 		} catch (e) {
 			alert(`Failed to delete point: ${e instanceof Error ? e.message : 'Unknown error'}`);
 		}
-	}
-
-	async function handleSave() {
-		if (!formName.trim()) {
-			formError = 'Point name is required';
-			return;
-		}
-
-		if (formMaxHealth < formHealth) {
-			formError = 'Health cannot exceed max health';
-			return;
-		}
-
-		try {
-			isSaving = true;
-			formError = null;
-
-			const pointData = {
-				name: formName.trim(),
-				type: formType,
-				level: formLevel,
-				health: formHealth,
-				max_health: formMaxHealth,
-				acquired_by: formAcquiredBy
-			};
-
-			if (editingPoint) {
-				// Update existing point
-				const { error: updateError } = await supabase
-					.from('point')
-					.update(pointData)
-					.eq('id', editingPoint.id);
-
-				if (updateError) throw updateError;
-			} else {
-				// Create new point
-				const { error: insertError } = await supabase.from('point').insert(pointData);
-
-				if (insertError) throw insertError;
-			}
-
-			showEditor = false;
-			editingPoint = null;
-			await loadData();
-		} catch (e) {
-			formError = e instanceof Error ? e.message : 'Failed to save point';
-			console.error('Error saving point:', e);
-		} finally {
-			isSaving = false;
-		}
-	}
-
-	function handleCancel() {
-		showEditor = false;
-		editingPoint = null;
-		formError = null;
 	}
 
 	function getTypeColor(type: string) {
@@ -289,150 +203,6 @@
 			</a>
 		</div>
 
-		<!-- Point Editor Modal -->
-		{#if showEditor}
-			<div class="card bg-base-100 mb-6 shadow-xl">
-				<div class="card-body">
-					<h2 class="card-title">{editingPoint ? 'Edit Point' : 'Create New Point'}</h2>
-
-					{#if formError}
-						<div class="alert alert-error">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								class="h-6 w-6 shrink-0 stroke-current"
-								fill="none"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-								/>
-							</svg>
-							<span>{formError}</span>
-						</div>
-					{/if}
-
-					<div class="grid gap-4 md:grid-cols-2">
-						<!-- Name -->
-						<div class="form-control w-full md:col-span-2">
-							<label class="label" for="point-name">
-								<span class="label-text">Point Name *</span>
-							</label>
-							<input
-								id="point-name"
-								type="text"
-								placeholder="e.g., Library Entrance"
-								class="input input-bordered w-full"
-								bind:value={formName}
-								disabled={isSaving}
-							/>
-						</div>
-
-						<!-- Type -->
-						<div class="form-control w-full">
-							<label class="label" for="point-type">
-								<span class="label-text">Type *</span>
-							</label>
-							<select
-								id="point-type"
-								class="select select-bordered"
-								bind:value={formType}
-								disabled={isSaving}
-							>
-								<option value="claimable">Claimable</option>
-								<option value="mini_game">Mini Game</option>
-								<option value="not_claimable">Not Claimable</option>
-							</select>
-						</div>
-
-						<!-- Level -->
-						<div class="form-control w-full">
-							<label class="label" for="point-level">
-								<span class="label-text">Level</span>
-							</label>
-							<input
-								id="point-level"
-								type="number"
-								min="1"
-								max="10"
-								class="input input-bordered w-full"
-								bind:value={formLevel}
-								disabled={isSaving}
-							/>
-						</div>
-
-						<!-- Health -->
-						<div class="form-control w-full">
-							<label class="label" for="point-health">
-								<span class="label-text">Health</span>
-							</label>
-							<input
-								id="point-health"
-								type="number"
-								min="0"
-								class="input input-bordered w-full"
-								bind:value={formHealth}
-								disabled={isSaving}
-							/>
-						</div>
-
-						<!-- Max Health -->
-						<div class="form-control w-full">
-							<label class="label" for="point-max-health">
-								<span class="label-text">Max Health</span>
-							</label>
-							<input
-								id="point-max-health"
-								type="number"
-								min="1"
-								class="input input-bordered w-full"
-								bind:value={formMaxHealth}
-								disabled={isSaving}
-							/>
-						</div>
-
-						<!-- Acquired By (Faction) -->
-						<div class="form-control w-full md:col-span-2">
-							<label class="label" for="point-faction">
-								<span class="label-text">Acquired By (Faction)</span>
-							</label>
-							<select
-								id="point-faction"
-								class="select select-bordered"
-								bind:value={formAcquiredBy}
-								disabled={isSaving}
-							>
-								<option value={null}>None (Neutral)</option>
-								{#each factions as faction (faction.id)}
-									<option value={faction.id}>{faction.name}</option>
-								{/each}
-							</select>
-						</div>
-					</div>
-
-					<div class="card-actions justify-end gap-2">
-						<button class="btn btn-ghost" onclick={handleCancel} disabled={isSaving}>
-							Cancel
-						</button>
-						<button
-							class="btn btn-primary"
-							onclick={handleSave}
-							disabled={isSaving || !formName.trim()}
-						>
-							{#if isSaving}
-								<span class="loading loading-spinner"></span>
-								Saving...
-							{:else}
-								{editingPoint ? 'Update Point' : 'Create Point'}
-							{/if}
-						</button>
-					</div>
-				</div>
-			</div>
-		{/if}
-
 		<!-- Statistics -->
 		<div class="stats mb-6 shadow">
 			<div class="stat">
@@ -463,6 +233,7 @@
 						<th>Level</th>
 						<th>Health</th>
 						<th>Faction</th>
+						<th>Visible</th>
 						<th>Position</th>
 						<th>Actions</th>
 					</tr>
@@ -509,6 +280,15 @@
 								{:else}
 									<span class="badge badge-ghost">Neutral</span>
 								{/if}
+							</td>
+							<td>
+								<span class="badge"
+									>{#if point.visible}
+										<Eye />
+									{:else}
+										<EyeClosed />
+									{/if}</span
+								>
 							</td>
 							<td>
 								{#if point.hasPosition}
