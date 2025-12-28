@@ -124,7 +124,7 @@
 						<input
 							id="point-level"
 							type="number"
-							min="1"
+							min="0"
 							max="10"
 							class="input input-bordered w-full"
 							bind:value={formLevel}
