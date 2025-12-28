@@ -47,6 +47,9 @@
 		<p class="mb-2 text-lg">
 			<strong>Type:</strong> <span class="badge badge-info">{data.pointData.type}</span>
 		</p>
+		<p class="mb-2 text-lg">
+			<strong>Visible:</strong> <span class="badge badge-info">{data.pointData.visible}</span>
+		</p>
 	</section>
 
 	<div class="mt-4 flex gap-2">
