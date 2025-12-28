@@ -12,6 +12,7 @@
 	let formHealth = $state(data.point.health);
 	let formMaxHealth = $state(data.point.max_health);
 	let formAcquiredBy = $state<string | null>(data.point.acquired_by);
+	let formVisible = $state<boolean | null>(data.point.visible);
 	let isSaving = $state(false);
 	let formError = $state('');
 
@@ -33,7 +34,8 @@
 				level: formLevel,
 				health: formHealth,
 				max_health: formMaxHealth,
-				acquired_by: formAcquiredBy || null
+				acquired_by: formAcquiredBy || null,
+				visible: formVisible || false
 			};
 
 			const { error: updateError } = await supabase
@@ -173,6 +175,19 @@
 								<option value={faction.id}>{faction.name}</option>
 							{/each}
 						</select>
+					</div>
+
+					<div class="form-control w-full">
+						<label class="label" for="point-max-health">
+							<span class="label-text">Visible</span>
+						</label>
+						<input
+							id="point-max-health"
+							type="checkbox"
+							class="input input-bordered"
+							bind:checked={formVisible}
+							disabled={isSaving}
+						/>
 					</div>
 				</div>
 
