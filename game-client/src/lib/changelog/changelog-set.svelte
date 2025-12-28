@@ -12,13 +12,15 @@
 					{new Date(change.timestamp).toLocaleString()}
 				</h2>
 
-				<ul class="list">
-					{#each change.lineContent as content, index (index)}
-						<li class="list-row">
-							{content}
-						</li>
-					{/each}
-				</ul>
+				<div class="prose text-md text-left">
+					<ul>
+						{#each change.lineContent as content, index (index)}
+							<li class="">
+								{content}
+							</li>
+						{/each}
+					</ul>
+				</div>
 			</div>
 		</section>
 	{/each}
