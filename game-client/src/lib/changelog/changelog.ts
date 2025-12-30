@@ -4,6 +4,10 @@ export interface ChangeSet {
 }
 export const changes: ChangeSet[] = [
 	{
+		timestamp: 1767083923135,
+		lineContent: ['Added a small survey']
+	},
+	{
 		timestamp: 1766906968575,
 		lineContent: [
 			'Introduced changelog ^^',

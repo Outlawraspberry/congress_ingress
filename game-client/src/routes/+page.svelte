@@ -18,6 +18,12 @@
 			The game is running until the end of the congress. You can find the current score on the
 			<a href="/scoreboard" class="link"> scoreboard </a>.
 
+			<div class="my-5">
+				<h2 class=" text-2xl">Time for a small survey?</h2>
+
+				<a class="btn btn-xl btn-primary" href="/survey">Yes!</a>
+			</div>
+
 			{#if user.user != null}
 				<div class="mt-4 flex flex-col gap-4 sm:flex-row sm:justify-center">
 					<a href="/game/point" class="btn btn-primary btn-xl">Get Started</a>
