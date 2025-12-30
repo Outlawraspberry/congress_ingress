@@ -437,6 +437,33 @@ export type Database = {
           },
         ]
       }
+      survey: {
+        Row: {
+          created_at: string
+          enjoyed: number | null
+          free_text: string | null
+          id: string
+          play_again_next_year: boolean | null
+          played_in_team: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          enjoyed?: number | null
+          free_text?: string | null
+          id?: string
+          play_again_next_year?: boolean | null
+          played_in_team?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          enjoyed?: number | null
+          free_text?: string | null
+          id?: string
+          play_again_next_year?: boolean | null
+          played_in_team?: boolean | null
+        }
+        Relationships: []
+      }
       user: {
         Row: {
           id: string
